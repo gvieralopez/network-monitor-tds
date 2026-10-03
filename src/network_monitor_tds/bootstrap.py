@@ -11,7 +11,6 @@ from sqlalchemy.ext.asyncio import AsyncEngine
 from network_monitor_tds.application.monitor import Monitor
 from network_monitor_tds.application.ports import UnitOfWork
 from network_monitor_tds.domain.plugins.models import PluginId
-from network_monitor_tds.domain.presence.policy import DEFAULT_POLICY
 from network_monitor_tds.infrastructure.clock import SystemClock
 from network_monitor_tds.infrastructure.db.engine import create_engine, create_session_factory
 from network_monitor_tds.infrastructure.db.migrator import upgrade_to_head
@@ -60,7 +59,7 @@ def build_container(settings: AppSettings) -> Container:
     unit_of_work = unit_of_work_factory(create_session_factory(engine))
     clock = SystemClock()
     bus = InMemoryEventBus(settings.event_queue_size)
-    monitor = Monitor(unit_of_work, bus, clock, DEFAULT_POLICY, settings.observation_queue_size)
+    monitor = Monitor(unit_of_work, bus, clock, settings.observation_queue_size)
     plugins = discover_plugins()
     host = PluginHost(
         plugins=plugins,
@@ -98,7 +97,8 @@ def create_web_app(container: Container) -> FastAPI:
             unit_of_work=container.unit_of_work,
             events=container.bus,
             clock=container.clock,
-            plugins={plugin_id: plugin.info for plugin_id, plugin in container.plugins.items()},
+            plugins=container.plugins,
+            control=container.host,
             timezone=_local_timezone(),
         )
     )

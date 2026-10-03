@@ -3,7 +3,7 @@ from datetime import timedelta
 from ipaddress import IPv4Network
 from typing import ClassVar
 
-from pydantic import field_validator
+from pydantic import Field, field_validator
 
 from network_monitor_tds.domain.plugins.models import PluginId
 from network_monitor_tds.plugins.builtin.arp.packets import arp_sighting
@@ -26,8 +26,13 @@ class ArpSweepSettings(ScheduledSettings):
     interval: timedelta = timedelta(minutes=5)
     timeout: timedelta = timedelta(minutes=1)
     interface: str = ""
-    subnet: str = ""
-    reply_timeout: timedelta = timedelta(seconds=3)
+    subnet: str = Field(
+        default="",
+        description="Subnet to sweep, e.g. 192.168.1.0/24. Leave empty to use the interface's.",
+    )
+    reply_timeout: timedelta = Field(
+        default=timedelta(seconds=3), description="How long to wait for replies after asking."
+    )
 
     @field_validator("subnet")
     @classmethod
@@ -39,7 +44,10 @@ class ArpSweepSettings(ScheduledSettings):
 
 class ArpListenerSettings(PluginSettings):
     interface: str = ""
-    report_every: timedelta = timedelta(minutes=1)
+    report_every: timedelta = Field(
+        default=timedelta(minutes=1),
+        description="Reports each device at most this often, to keep chatty devices quiet.",
+    )
 
 
 class ArpSweepPlugin(ScheduledPlugin[ArpSweepSettings]):

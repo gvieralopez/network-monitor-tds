@@ -21,18 +21,11 @@ def test_default_policy_timeouts(category: Category, timeout: timedelta) -> None
 
 
 @pytest.mark.parametrize(
-    ("interval", "missed", "mobile_missed", "reason"),
-    [
-        (timedelta(), 2, 3, "sweep_interval"),
-        (timedelta(minutes=-5), 2, 3, "sweep_interval"),
-        (timedelta(minutes=5), 0, 3, "at least 1"),
-        (timedelta(minutes=5), 2, 0, "at least 1"),
-    ],
+    ("offline_after", "mobile_offline_after"),
+    [(timedelta(), timedelta(minutes=5)), (timedelta(minutes=5), timedelta(seconds=-1))],
 )
-def test_policy_validation(
-    interval: timedelta, missed: int, mobile_missed: int, reason: str
+def test_policy_rejects_non_positive_thresholds(
+    offline_after: timedelta, mobile_offline_after: timedelta
 ) -> None:
-    with pytest.raises(InvalidPolicyError, match=reason):
-        PresencePolicy(
-            sweep_interval=interval, missed_sweeps=missed, mobile_missed_sweeps=mobile_missed
-        )
+    with pytest.raises(InvalidPolicyError, match="positive"):
+        PresencePolicy(offline_after=offline_after, mobile_offline_after=mobile_offline_after)

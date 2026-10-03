@@ -5,6 +5,8 @@ from typing import ClassVar
 
 import pytest
 
+from network_monitor_tds.application.errors import UnknownPluginError
+from network_monitor_tds.application.models import PluginState
 from network_monitor_tds.application.plugins import set_plugin_enabled, sync_plugin_configs
 from network_monitor_tds.domain.devices.models import Device
 from network_monitor_tds.domain.events.models import DeviceEvent, EventKind
@@ -173,3 +175,56 @@ async def _store_ticker_settings(database: Database, settings: dict[str, str]) -
 
 async def _discard(_observation: object) -> None:
     return None
+
+
+async def test_reload_restarts_one_plugin_with_new_settings(database: Database) -> None:
+    plugin_host = host(database, InMemoryEventBus(10))
+    task = asyncio.create_task(plugin_host.run())
+    await wait_until(lambda: len(calls["ticker"]) >= 1)
+
+    await _store_ticker_settings(
+        database, {"interval": "PT1S", "timeout": "PT1S", "label": "reloaded"}
+    )
+    await plugin_host.reload(PluginId("ticker"))
+    await wait_until(lambda: "reloaded" in calls["ticker"])
+
+    await set_plugin_enabled(database.unit_of_work(), PluginId("ticker"), False, T0)
+    await plugin_host.reload(PluginId("ticker"))
+    stopped_at = len(calls["ticker"])
+    await asyncio.sleep(0.05)
+    task.cancel()
+
+    assert len(calls["ticker"]) == stopped_at
+    assert plugin_host.status(PluginId("ticker")).state is PluginState.STOPPED
+    assert plugin_host.status(PluginId("listener")).state is PluginState.FAILING
+
+
+async def test_reload_unknown_plugin_fails(database: Database) -> None:
+    with pytest.raises(UnknownPluginError):
+        await host(database, InMemoryEventBus(10)).reload(PluginId("nope"))
+
+
+async def test_reload_before_run_only_reads_config(database: Database) -> None:
+    await sync_plugin_configs(database.unit_of_work(), plugin_defaults(PLUGINS), T0)
+    plugin_host = host(database, InMemoryEventBus(10))
+
+    await plugin_host.reload(PluginId("ticker"))
+
+    assert plugin_host.status(PluginId("ticker")).state is PluginState.STOPPED
+
+
+async def test_invalid_settings_are_reported_as_failing(database: Database) -> None:
+    await sync_plugin_configs(database.unit_of_work(), plugin_defaults(PLUGINS), T0)
+    await _store_ticker_settings(database, {"interval": "soon"})
+    plugin_host = host(database, InMemoryEventBus(10))
+
+    task = asyncio.create_task(plugin_host.run())
+    await wait_until(lambda: len(calls["listener"]) >= 1)
+    task.cancel()
+
+    status = plugin_host.status(PluginId("ticker"))
+    assert status.state is PluginState.FAILING
+    assert status.last_error is not None
+    assert status.last_error.startswith(
+        "Invalid settings: interval: Input should be a valid timedelta"
+    )

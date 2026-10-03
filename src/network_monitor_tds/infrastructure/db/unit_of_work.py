@@ -11,6 +11,7 @@ from network_monitor_tds.infrastructure.db.repositories.facts import SqlFactRepo
 from network_monitor_tds.infrastructure.db.repositories.plugin_configs import (
     SqlPluginConfigRepository,
 )
+from network_monitor_tds.infrastructure.db.repositories.preferences import SqlPreferenceRepository
 from network_monitor_tds.infrastructure.db.repositories.presence import SqlPresenceRepository
 
 
@@ -29,6 +30,7 @@ class SqlUnitOfWork:
         self.presence = SqlPresenceRepository(session)
         self.events = SqlEventRepository(session)
         self.plugin_configs = SqlPluginConfigRepository(session)
+        self.preferences = SqlPreferenceRepository(session)
 
     async def __aenter__(self) -> Self:
         return self

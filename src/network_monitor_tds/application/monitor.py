@@ -5,10 +5,10 @@ from datetime import timedelta
 
 from network_monitor_tds.application.ingestion import ingest
 from network_monitor_tds.application.ports import EventPublisher, UnitOfWork
+from network_monitor_tds.application.preferences import load_presence_policy
 from network_monitor_tds.application.presence import expire_presence
-from network_monitor_tds.application.scheduling import Sleep, run_periodically
+from network_monitor_tds.application.scheduling import SILENT, Sleep, run_periodically
 from network_monitor_tds.domain.observations.models import Observation
-from network_monitor_tds.domain.presence.policy import PresencePolicy
 from network_monitor_tds.domain.time import Clock
 
 logger = logging.getLogger(__name__)
@@ -23,13 +23,11 @@ class Monitor:
         unit_of_work: Callable[[], UnitOfWork],
         publisher: EventPublisher,
         clock: Clock,
-        policy: PresencePolicy,
         queue_size: int,
     ) -> None:
         self._unit_of_work = unit_of_work
         self._publisher = publisher
         self._clock = clock
-        self._policy = policy
         self._queue: asyncio.Queue[Observation] = asyncio.Queue(queue_size)
 
     async def emit(self, observation: Observation) -> None:
@@ -45,7 +43,12 @@ class Monitor:
 
     async def run_presence_checks(self, sleep: Sleep) -> None:
         await run_periodically(
-            self._check_presence, PRESENCE_CHECK_INTERVAL, PRESENCE_CHECK_TIMEOUT, sleep, logger
+            self._check_presence,
+            PRESENCE_CHECK_INTERVAL,
+            PRESENCE_CHECK_TIMEOUT,
+            sleep,
+            logger,
+            SILENT,
         )
 
     async def drain(self) -> None:
@@ -61,6 +64,7 @@ class Monitor:
             self._publisher.publish(event)
 
     async def _check_presence(self) -> None:
-        events = await expire_presence(self._unit_of_work(), self._policy, self._clock.now())
+        policy = await load_presence_policy(self._unit_of_work())
+        events = await expire_presence(self._unit_of_work(), policy, self._clock.now())
         for event in events:
             self._publisher.publish(event)

@@ -33,6 +33,7 @@ TABLES = {
     "presence_intervals",
     "events",
     "plugin_configs",
+    "preferences",
 }
 
 

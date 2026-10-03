@@ -383,8 +383,6 @@ a { color: inherit; }
 fieldset.field { border: 0; margin: 0; padding: 0; min-width: 0; }
 fieldset.field legend { padding: 0; margin-bottom: 6px; }
 .empty .btn { display: inline-flex; align-items: center; margin-top: 10px; text-decoration: none; }
-.plug .state { grid-column: 2; grid-row: 1 / span 2; align-self: center; font-size: 12.5px; font-weight: 600; color: var(--muted); }
-.plug:not(.off) .state { color: var(--on); }
 .settings code { font-family: var(--font-mono); font-size: .92em; background: var(--surface-2); padding: 1px 5px; border-radius: 4px; }
 
 /* Live connection indicator */
@@ -396,3 +394,22 @@ fieldset.field legend { padding: 0; margin-bottom: 6px; }
 
 /* htmx request feedback */
 #board.htmx-request, #filters.htmx-request ~ main #board { opacity: .65; transition: opacity .2s; }
+
+/* Settings */
+.switch-form { grid-column: 2; grid-row: 1 / span 3; align-self: center; margin: 0; }
+.switch-form .switch { display: block; }
+.plug .pm.status-good { color: var(--on); }
+.plug .pm.status-bad { color: var(--new); }
+.cfg-wrap { grid-column: 1 / -1; margin-top: 6px; }
+.cfg-wrap summary { cursor: pointer; font-size: 13px; color: var(--accent); width: max-content; }
+.cfg-wrap[open] summary { margin-bottom: 10px; }
+.cfg { display: flex; flex-direction: column; gap: 12px; padding: 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); }
+.cfg-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px 16px; }
+.field.toggle { justify-content: center; }
+.field .check { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; cursor: pointer; }
+.field .check input { width: 16px; height: 16px; accent-color: var(--accent); }
+.field .error { font-size: 12px; color: var(--new); }
+.field.has-error input { border-color: var(--new); }
+.netgrid .actions, .netgrid .warning { grid-column: 1 / -1; }
+.warning { margin: 0; font-size: 13px; color: var(--new); background: var(--new-soft); border-radius: 8px; padding: 10px 12px; }
+#presence h2 { margin: 0 0 4px; font-size: 20px; font-weight: 600; letter-spacing: -.01em; }

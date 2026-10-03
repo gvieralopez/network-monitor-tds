@@ -105,3 +105,11 @@ class PluginConfigRecord(Base):
     enabled: Mapped[bool]
     settings: Mapped[dict[str, Any]] = mapped_column(JSON)
     updated_at: Mapped[datetime]
+
+
+class PreferenceRecord(Base):
+    __tablename__ = "preferences"
+
+    key: Mapped[str] = mapped_column(String(64), primary_key=True)
+    value: Mapped[dict[str, Any]] = mapped_column(JSON)
+    updated_at: Mapped[datetime]

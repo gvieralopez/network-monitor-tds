@@ -17,9 +17,22 @@ from network_monitor_tds.plugins.sdk.models import PluginInfo, ScheduledSettings
 class TechnitiumSettings(ScheduledSettings):
     interval: timedelta = timedelta(minutes=5)
     timeout: timedelta = timedelta(seconds=30)
-    url: str = ""
-    token: str = Field(default="", repr=False)
-    verify_tls: bool = True
+    url: str = Field(
+        default="",
+        title="Server address",
+        description="Technitium web console, e.g. http://192.168.1.10:5380",
+    )
+    token: str = Field(
+        default="",
+        repr=False,
+        title="API token",
+        description="Create one in Technitium under Administration, Sessions.",
+    )
+    verify_tls: bool = Field(
+        default=True,
+        title="Verify TLS certificate",
+        description="Turn off only for self-signed certificates on HTTPS.",
+    )
 
     @field_validator("url")
     @classmethod

@@ -77,7 +77,7 @@ async def test_card_and_drawer_views(
     assert (offline.status, offline.seen) == ("2 h ago", "seen 2 h ago")
 
     detail = await device_detail(database.unit_of_work(), seen_device, NOW, UTC)
-    drawer = drawer_view(detail, web_context.plugins, NOW)
+    drawer = drawer_view(detail, web_context.plugin_names, NOW)
     assert drawer.first_found_by == DEMO_INFO.name
     assert drawer.discoveries[0].details == "dhcp hostname: esp-31f5e"
     assert (drawer.detected_name, drawer.name_origin, drawer.detected_category) == (

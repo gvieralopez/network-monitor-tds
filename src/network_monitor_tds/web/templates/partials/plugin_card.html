@@ -1,0 +1,19 @@
+<div class="plug{{ '' if card.enabled else ' off' }}" id="plugin-{{ card.plugin_id }}">
+  <div class="pn">{{ card.name }} <span class="kind">{{ card.kind }}</span><span class="code">{{ card.plugin_id }}</span></div>
+  <form class="switch-form" hx-post="/settings/plugins/{{ card.plugin_id }}/enabled" hx-trigger="change" hx-target="#plugin-{{ card.plugin_id }}" hx-swap="outerHTML">
+    <label class="switch" title="{{ 'Turn off' if card.enabled else 'Turn on' }}"><input type="checkbox" name="enabled" value="true" {% if card.enabled %}checked{% endif %} aria-label="Enable {{ card.name }}"><span></span></label>
+  </form>
+  <div class="pd">{{ card.description }}</div>
+  {% with plugin_id=card.plugin_id, status=card.status %}{% include "partials/plugin_status.html" %}{% endwith %}
+  {% if card.fields %}
+  <details class="cfg-wrap"{% if card.expanded %} open{% endif %}>
+    <summary>Settings</summary>
+    <form class="cfg" hx-post="/settings/plugins/{{ card.plugin_id }}" hx-target="#plugin-{{ card.plugin_id }}" hx-swap="outerHTML">
+      <div class="cfg-grid">
+        {% for field in card.fields %}{% with prefix=card.plugin_id %}{% include "partials/form_field.html" %}{% endwith %}{% endfor %}
+      </div>
+      <div class="actions"><button type="submit" class="btn primary">Save</button></div>
+    </form>
+  </details>
+  {% endif %}
+</div>

@@ -8,7 +8,6 @@ from network_monitor_tds.domain.devices.identity import resolve_name
 from network_monitor_tds.domain.devices.models import NO_LABELS, Category, Fallback, Origin
 from network_monitor_tds.domain.observations.models import Fact, KnownField
 from network_monitor_tds.domain.plugins.models import PluginId
-from network_monitor_tds.plugins.sdk.models import PluginInfo
 from network_monitor_tds.web.art import Artwork, artwork
 from network_monitor_tds.web.icons import CATEGORY_COLORS, CATEGORY_ICONS, CATEGORY_LABELS
 from network_monitor_tds.web.pages.board import vendor_label
@@ -165,14 +164,14 @@ def chart_view(series: Sequence[int], ceiling: int) -> ChartView:
 
 
 def drawer_view(
-    detail: DeviceDetail, plugins: Mapping[PluginId, PluginInfo], now: datetime
+    detail: DeviceDetail, plugin_names: Mapping[PluginId, str], now: datetime
 ) -> DrawerView:
     summary, device = detail.summary, detail.summary.device
     card = card_view(summary, now)
     detected_name = resolve_name(device.mac, NO_LABELS, detail.facts)
     discoveries = tuple(
         DiscoveryView(
-            name=_plugin_name(detection.source, plugins),
+            name=plugin_names.get(detection.source, detection.source),
             first=index == 0,
             details=_details(detection.source, detail.facts),
         )
@@ -207,11 +206,6 @@ def percentage(ratio: float) -> str:
 
 def category_choices() -> tuple[tuple[str, str], ...]:
     return tuple((category.value, CATEGORY_LABELS[category]) for category in Category)
-
-
-def _plugin_name(plugin_id: PluginId, plugins: Mapping[PluginId, PluginInfo]) -> str:
-    info = plugins.get(plugin_id)
-    return info.name if info is not None else plugin_id
 
 
 def _details(plugin_id: PluginId, facts: Mapping[str, Fact]) -> str:

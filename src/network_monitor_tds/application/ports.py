@@ -4,11 +4,12 @@ from datetime import datetime
 from types import TracebackType
 from typing import Protocol, Self
 
+from network_monitor_tds.application.models import PluginStatus
 from network_monitor_tds.domain.devices.models import Device
 from network_monitor_tds.domain.events.models import DeviceEvent
 from network_monitor_tds.domain.network.models import MacAddress
 from network_monitor_tds.domain.observations.models import Detection, Fact
-from network_monitor_tds.domain.plugins.models import PluginConfig, PluginId
+from network_monitor_tds.domain.plugins.models import JsonValue, PluginConfig, PluginId
 from network_monitor_tds.domain.presence.models import Presence, PresenceInterval
 
 
@@ -51,6 +52,13 @@ class PluginConfigRepository(Protocol):
     async def save(self, config: PluginConfig) -> None: ...
 
 
+class PreferenceRepository(Protocol):
+    async def get(self, key: str) -> Mapping[str, JsonValue] | None: ...
+    async def save(
+        self, key: str, value: Mapping[str, JsonValue], updated_at: datetime
+    ) -> None: ...
+
+
 class UnitOfWork(Protocol):
     @property
     def devices(self) -> DeviceRepository: ...
@@ -64,6 +72,8 @@ class UnitOfWork(Protocol):
     def events(self) -> EventRepository: ...
     @property
     def plugin_configs(self) -> PluginConfigRepository: ...
+    @property
+    def preferences(self) -> PreferenceRepository: ...
 
     async def __aenter__(self) -> Self: ...
 
@@ -83,3 +93,8 @@ class EventPublisher(Protocol):
 
 class EventSubscriber(Protocol):
     def subscribe(self) -> AbstractAsyncContextManager[AsyncIterator[DeviceEvent]]: ...
+
+
+class PluginControl(Protocol):
+    async def reload(self, plugin_id: PluginId) -> None: ...
+    def status(self, plugin_id: PluginId) -> PluginStatus: ...

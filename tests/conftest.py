@@ -11,6 +11,7 @@ import pytest
 from sqlalchemy.ext.asyncio import AsyncEngine
 
 from network_monitor_tds.application.ingestion import ingest
+from network_monitor_tds.application.models import STOPPED, PluginStatus
 from network_monitor_tds.domain.devices.models import Device
 from network_monitor_tds.domain.network.models import MacAddress
 from network_monitor_tds.domain.observations.models import (
@@ -24,8 +25,8 @@ from network_monitor_tds.infrastructure.db.engine import create_engine, create_s
 from network_monitor_tds.infrastructure.db.migrator import upgrade_to_head
 from network_monitor_tds.infrastructure.db.unit_of_work import SqlUnitOfWork, unit_of_work_factory
 from network_monitor_tds.infrastructure.messaging.bus import InMemoryEventBus
+from network_monitor_tds.plugins.builtin.demo.plugin import DemoPlugin
 from network_monitor_tds.plugins.sdk.base import PluginContext
-from network_monitor_tds.plugins.sdk.models import PluginInfo
 from network_monitor_tds.web.models import WebContext
 
 T0 = datetime(2026, 10, 3, 12, 0, tzinfo=UTC)
@@ -139,7 +140,19 @@ def data_dir(monkeypatch: pytest.MonkeyPatch) -> Iterator[Path]:
         yield path
 
 
-DEMO_INFO = PluginInfo(PluginId("demo"), "Demo network", "Simulated devices", False)
+DEMO_INFO = DemoPlugin.info
+
+
+class FakeControl:
+    def __init__(self) -> None:
+        self.reloaded: list[PluginId] = []
+        self.statuses: dict[PluginId, PluginStatus] = {}
+
+    async def reload(self, plugin_id: PluginId) -> None:
+        self.reloaded.append(plugin_id)
+
+    def status(self, plugin_id: PluginId) -> PluginStatus:
+        return self.statuses.get(plugin_id, STOPPED)
 
 
 @pytest.fixture
@@ -148,7 +161,8 @@ def web_context(database: Database) -> WebContext:
         unit_of_work=database.unit_of_work,
         events=InMemoryEventBus(10),
         clock=FixedClock(T0 + timedelta(minutes=5)),
-        plugins={DEMO_INFO.plugin_id: DEMO_INFO},
+        plugins={DEMO_INFO.plugin_id: DemoPlugin},
+        control=FakeControl(),
         timezone=UTC,
     )
 

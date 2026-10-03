@@ -1,10 +1,12 @@
 from pathlib import Path
 
 import pytest
+from alembic.script import ScriptDirectory
 from typer.testing import CliRunner
 
 from network_monitor_tds import __version__
 from network_monitor_tds.cli.app import app
+from network_monitor_tds.infrastructure.db.migrator import alembic_config
 
 runner = CliRunner()
 
@@ -28,8 +30,9 @@ def test_db_upgrade_then_current(data_dir: Path) -> None:
     upgrade = runner.invoke(app, ["db", "upgrade"])
     current = runner.invoke(app, ["db", "current"])
 
-    assert upgrade.output.strip() == "Database is at revision 0001"
-    assert current.output.strip() == "0001"
+    head = ScriptDirectory.from_config(alembic_config()).get_current_head()
+    assert upgrade.output.strip() == f"Database is at revision {head}"
+    assert current.output.strip() == head
     assert (data_dir / "nmtds.db").exists()
 
 

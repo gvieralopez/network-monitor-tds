@@ -76,7 +76,7 @@ async def _drawer(
     now = context.clock.now()
     detail = await device_detail(context.unit_of_work(), mac, now, context.timezone)
     response = templates.TemplateResponse(
-        request, "partials/drawer.html", {"drawer": drawer_view(detail, context.plugins, now)}
+        request, "partials/drawer.html", {"drawer": drawer_view(detail, context.plugin_names, now)}
     )
     if triggers:
         response.headers["HX-Trigger"] = json.dumps(triggers)

@@ -1,6 +1,6 @@
 from collections.abc import Mapping
 from dataclasses import dataclass
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 from enum import StrEnum
 
 from network_monitor_tds.domain.devices.models import Category, Device, Resolved
@@ -58,3 +58,19 @@ class DeviceDetail:
     detections: tuple[Detection, ...]
     days: tuple[DayPresence, ...]
     uptime_last_7_days: float
+
+
+class PluginState(StrEnum):
+    STOPPED = "stopped"
+    RUNNING = "running"
+    FAILING = "failing"
+
+
+@dataclass(frozen=True, slots=True)
+class PluginStatus:
+    state: PluginState
+    last_success: datetime | None
+    last_error: str | None
+
+
+STOPPED = PluginStatus(state=PluginState.STOPPED, last_success=None, last_error=None)

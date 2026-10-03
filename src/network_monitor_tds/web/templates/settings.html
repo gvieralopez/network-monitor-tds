@@ -6,19 +6,14 @@
   <div class="settings">
     <section>
       <h2>Discovery plugins</h2>
-      <p class="lede">Each plugin finds devices in a different way. Switching them on and off from here arrives in the next release; for now use <code>nmtds plugins enable &lt;id&gt;</code>.</p>
+      <p class="lede">Each plugin finds devices in a different way. Changes apply straight away.</p>
       <div class="plist">
-        {% for info, config in plugins %}
-        <div class="plug{{ '' if config.enabled else ' off' }}">
-          <div class="pn">{{ info.name }} <span class="code">{{ info.plugin_id }}</span></div>
-          <span class="state">{{ "On" if config.enabled else "Off" }}</span>
-          <div class="pd">{{ info.description }}</div>
-        </div>
-        {% else %}
+        {% for card in cards %}{% include "partials/plugin_card.html" %}{% else %}
         <div class="plug"><div class="pd">No plugins installed.</div></div>
         {% endfor %}
       </div>
     </section>
+    {% include "partials/presence.html" %}
   </div>
 </main>
 {% endblock %}
