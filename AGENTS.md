@@ -1,6 +1,6 @@
 # Network Monitor TDS
 
-A network monitor that doesn't sucks
+A network monitor that doesn't suck
 
 Style, conventions and tooling for this project.
 

@@ -1,0 +1,3 @@
+# Names are chosen by what a value means, not by which plugin sent it
+
+A device's displayed name comes from a fixed priority of field meanings: the user's label, then a DHCP lease hostname, a DHCP-request hostname, an mDNS name, a UPnP friendly name, the vendor, and finally the MAC address. Plugins report values under well-known field names (`lease_hostname`, `dhcp_hostname`, `mdns_name` …), so the domain never needs to know plugin ids, and any plugin, including a third-party one, can supply a better name by using the right field. User labels are stored apart from detected values, so detection never overwrites an edit.

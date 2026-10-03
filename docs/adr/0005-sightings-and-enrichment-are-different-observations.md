@@ -1,0 +1,3 @@
+# Sightings and enrichment are different kinds of observation
+
+An observation is either a **sighting** (the device was on the wire just now: ARP reply, DHCP request) or an **enrichment** (information about a device that says nothing about whether it is there: a vendor lookup, a Technitium lease). Only sightings create devices and update presence. Without the split, a lease for a laptop that is switched off would keep it "online", and enrichment for a MAC address nobody has seen would create ghost devices; enrichment for unknown devices is therefore ignored, and is picked up on a later poll once the device has been seen.
