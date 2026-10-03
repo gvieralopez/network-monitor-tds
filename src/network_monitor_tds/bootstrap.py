@@ -45,7 +45,7 @@ async def serve(settings: AppSettings) -> None:
     container = build_container(settings)
     try:
         await prepare_database(container)
-        logger.info("Monitoring with plugins: %s", ", ".join(container.plugins) or "none")
+        logger.info("Installed plugins: %s", ", ".join(container.plugins) or "none")
         async with asyncio.TaskGroup() as group:
             group.create_task(container.monitor.run_ingestion(), name="ingestion")
             group.create_task(container.monitor.run_presence_checks(asyncio.sleep), name="presence")

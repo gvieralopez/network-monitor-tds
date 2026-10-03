@@ -1,4 +1,5 @@
 from collections.abc import AsyncIterator, Mapping, Sequence
+from contextlib import AbstractAsyncContextManager
 from datetime import datetime
 from types import TracebackType
 from typing import Protocol, Self
@@ -81,4 +82,4 @@ class EventPublisher(Protocol):
 
 
 class EventSubscriber(Protocol):
-    def subscribe(self) -> AsyncIterator[DeviceEvent]: ...
+    def subscribe(self) -> AbstractAsyncContextManager[AsyncIterator[DeviceEvent]]: ...

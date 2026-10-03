@@ -6,6 +6,7 @@ import pytest
 
 from network_monitor_tds.application.models import Backoff
 from network_monitor_tds.application.scheduling import run_once, run_periodically, run_with_restarts
+from network_monitor_tds.errors import NetworkMonitorError
 from tests.conftest import Stop
 
 pytestmark = pytest.mark.anyio
@@ -78,3 +79,18 @@ async def test_run_with_restarts_backs_off_on_crashes_and_resets_after_clean_exi
         await run_with_restarts(job, Backoff(SECOND, 3 * SECOND), sleep, LOGGER)
 
     assert sleep.calls == [1.0, 2.0, 3.0, 1.0, 1.0]
+
+
+async def test_known_errors_are_logged_without_traceback(caplog: pytest.LogCaptureFixture) -> None:
+    async def job() -> None:
+        raise NetworkMonitorError("plugin needs configuring")
+
+    await run_once(job, SECOND, LOGGER)
+    with pytest.raises(Stop):
+        await run_with_restarts(job, Backoff(SECOND, SECOND), RecordingSleep(1), LOGGER)
+
+    assert [record.getMessage() for record in caplog.records] == [
+        "Failed: plugin needs configuring",
+        "Crashed: plugin needs configuring; restarting in 0:00:01",
+    ]
+    assert all(record.exc_info is None for record in caplog.records)

@@ -20,10 +20,11 @@ async def events(context: ContextDep) -> EventSourceResponse:
 
 
 async def device_events(context: WebContext) -> AsyncIterator[ServerSentEvent]:
-    async for event in context.events.subscribe():
-        try:
-            name = await describe_device(context.unit_of_work(), event.mac)
-        except DeviceNotFoundError:
-            continue
-        payload = {"kind": event.kind, "mac": str(event.mac), "name": name}
-        yield ServerSentEvent(data=json.dumps(payload, indent=2), event="device")
+    async with context.events.subscribe() as events:
+        async for event in events:
+            try:
+                name = await describe_device(context.unit_of_work(), event.mac)
+            except DeviceNotFoundError:
+                continue
+            payload = {"kind": event.kind, "mac": str(event.mac), "name": name}
+            yield ServerSentEvent(data=json.dumps(payload, indent=2), event="device")

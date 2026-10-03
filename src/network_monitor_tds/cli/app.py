@@ -1,19 +1,23 @@
 import asyncio
 from collections.abc import Awaitable, Callable
+from typing import Annotated
 
 import typer
+from pydantic import ValidationError
 
 from network_monitor_tds import __version__
 from network_monitor_tds.application.errors import UnknownPluginError
 from network_monitor_tds.application.plugins import (
+    get_plugin_config,
     list_plugin_configs,
     set_plugin_enabled,
     sync_plugin_configs,
+    update_plugin_settings,
 )
 from network_monitor_tds.bootstrap import Container, build_container, prepare_database, serve
 from network_monitor_tds.domain.plugins.models import PluginConfig, PluginId
 from network_monitor_tds.infrastructure.db.migrator import current_revision
-from network_monitor_tds.plugins.host.registry import plugin_defaults
+from network_monitor_tds.plugins.host.registry import PluginClass, plugin_defaults
 from network_monitor_tds.settings import AppSettings
 
 app = typer.Typer(
@@ -67,6 +71,35 @@ def plugins_disable_command(plugin_id: str) -> None:
     _report(_update_plugin(PluginId(plugin_id), False))
 
 
+@plugins_app.command("show", help="Show a plugin's settings.")
+def plugins_show_command(plugin_id: str) -> None:
+    async def show(container: Container) -> list[str]:
+        config = await get_plugin_config(container.unit_of_work(), PluginId(plugin_id))
+        return _settings_lines(container.plugins[config.plugin_id], config)
+
+    for line in _guarded(lambda: _with_prepared_database(show)):
+        typer.echo(line)
+
+
+@plugins_app.command(
+    "set", help="Change plugin settings, e.g. nmtds plugins set technitium url=http://dns:5380"
+)
+def plugins_set_command(
+    plugin_id: str, assignments: Annotated[list[str], typer.Argument(help="key=value pairs")]
+) -> None:
+    async def update(container: Container) -> list[str]:
+        unit_of_work, now = container.unit_of_work, container.clock.now()
+        config = await get_plugin_config(unit_of_work(), PluginId(plugin_id))
+        plugin = container.plugins[config.plugin_id]
+        merged = {**config.settings, **_parse_assignments(assignments)}
+        settings = plugin.settings_model.model_validate(merged).model_dump(mode="json")
+        updated = await update_plugin_settings(unit_of_work(), config.plugin_id, settings, now)
+        return [*_settings_lines(plugin, updated), "Restart nmtds serve to apply the changes."]
+
+    for line in _guarded(lambda: _with_prepared_database(update)):
+        typer.echo(line)
+
+
 def _with_prepared_database[T](action: Callable[[Container], Awaitable[T]]) -> T:
     async def prepare_then(container: Container) -> T:
         await prepare_database(container)
@@ -100,14 +133,37 @@ async def _plugin_lines(container: Container) -> list[str]:
     ]
 
 
+def _settings_lines(plugin: PluginClass, config: PluginConfig) -> list[str]:
+    secrets = plugin.settings_model.secret_fields()
+    return [
+        f"{name} = {'********' if name in secrets and value else value}"
+        for name, value in config.settings.items()
+    ]
+
+
+def _parse_assignments(assignments: list[str]) -> dict[str, str]:
+    pairs = [assignment.partition("=") for assignment in assignments]
+    invalid = [
+        assignment for assignment, (_, sign, _) in zip(assignments, pairs, strict=True) if not sign
+    ]
+    if invalid:
+        typer.echo(f"Expected key=value, got: {', '.join(invalid)}", err=True)
+        raise typer.Exit(code=2)
+    return {key.strip(): value for key, _, value in pairs}
+
+
 def _update_plugin(plugin_id: PluginId, enabled: bool) -> PluginConfig:
     async def update(container: Container) -> PluginConfig:
         now = container.clock.now()
         return await set_plugin_enabled(container.unit_of_work(), plugin_id, enabled, now)
 
+    return _guarded(lambda: _with_prepared_database(update))
+
+
+def _guarded[T](action: Callable[[], T]) -> T:
     try:
-        return _with_prepared_database(update)
-    except UnknownPluginError as error:
+        return action()
+    except (UnknownPluginError, ValidationError) as error:
         typer.echo(str(error), err=True)
         raise typer.Exit(code=1) from error
 

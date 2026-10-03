@@ -6,6 +6,7 @@ from typing import ClassVar
 import pytest
 
 from network_monitor_tds.application.plugins import set_plugin_enabled, sync_plugin_configs
+from network_monitor_tds.domain.devices.models import Device
 from network_monitor_tds.domain.events.models import DeviceEvent, EventKind
 from network_monitor_tds.domain.network.models import MacAddress
 from network_monitor_tds.domain.plugins.models import PluginConfig, PluginId
@@ -110,6 +111,15 @@ async def test_runs_enabled_plugins_by_kind(database: Database, mac: MacAddress)
 
     assert set(calls["ticker"]) == {"tick"}
     assert calls["dormant"] == []
+
+
+async def test_enrichment_backfills_known_devices(
+    database: Database, stored_device: Device
+) -> None:
+    task = asyncio.create_task(host(database, InMemoryEventBus(10)).run())
+
+    await wait_until(lambda: calls["enricher"] == [stored_device.mac])
+    task.cancel()
 
 
 async def test_creates_default_configs(database: Database) -> None:

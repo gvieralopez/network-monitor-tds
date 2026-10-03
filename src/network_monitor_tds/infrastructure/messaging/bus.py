@@ -1,6 +1,7 @@
 import asyncio
 import logging
-from collections.abc import AsyncGenerator
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
 
 from network_monitor_tds.domain.events.models import DeviceEvent
 
@@ -23,11 +24,16 @@ class InMemoryEventBus:
             except asyncio.QueueFull:
                 logger.warning("A subscriber is too slow; dropped %s for %s", event.kind, event.mac)
 
-    async def subscribe(self) -> AsyncGenerator[DeviceEvent]:
+    @asynccontextmanager
+    async def subscribe(self) -> AsyncIterator[AsyncIterator[DeviceEvent]]:
         queue: asyncio.Queue[DeviceEvent] = asyncio.Queue(self._capacity)
         self._subscribers.add(queue)
         try:
-            while True:
-                yield await queue.get()
+            yield _events(queue)
         finally:
             self._subscribers.discard(queue)
+
+
+async def _events(queue: asyncio.Queue[DeviceEvent]) -> AsyncIterator[DeviceEvent]:
+    while True:
+        yield await queue.get()

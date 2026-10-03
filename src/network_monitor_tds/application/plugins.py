@@ -4,7 +4,12 @@ from datetime import datetime
 
 from network_monitor_tds.application.errors import UnknownPluginError
 from network_monitor_tds.application.ports import UnitOfWork
-from network_monitor_tds.domain.plugins.models import PluginConfig, PluginDefaults, PluginId
+from network_monitor_tds.domain.plugins.models import (
+    JsonValue,
+    PluginConfig,
+    PluginDefaults,
+    PluginId,
+)
 
 
 async def sync_plugin_configs(
@@ -33,6 +38,27 @@ async def set_plugin_enabled(
         if config is None:
             raise UnknownPluginError(plugin_id)
         updated = replace(config, enabled=enabled, updated_at=now)
+        await uow.plugin_configs.save(updated)
+        await uow.commit()
+    return updated
+
+
+async def get_plugin_config(uow: UnitOfWork, plugin_id: PluginId) -> PluginConfig:
+    async with uow:
+        config = await uow.plugin_configs.get(plugin_id)
+    if config is None:
+        raise UnknownPluginError(plugin_id)
+    return config
+
+
+async def update_plugin_settings(
+    uow: UnitOfWork, plugin_id: PluginId, settings: Mapping[str, JsonValue], now: datetime
+) -> PluginConfig:
+    async with uow:
+        config = await uow.plugin_configs.get(plugin_id)
+        if config is None:
+            raise UnknownPluginError(plugin_id)
+        updated = replace(config, settings=dict(settings), updated_at=now)
         await uow.plugin_configs.save(updated)
         await uow.commit()
     return updated

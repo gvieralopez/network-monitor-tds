@@ -48,6 +48,11 @@ default-groups = ["dev"]
 nmtds = "network_monitor_tds.main:main"
 
 [project.entry-points."network_monitor_tds.plugins"]
+arp-sweep = "network_monitor_tds.plugins.builtin.arp.plugin:ArpSweepPlugin"
+arp-listen = "network_monitor_tds.plugins.builtin.arp.plugin:ArpListenerPlugin"
+dhcp-sniff = "network_monitor_tds.plugins.builtin.dhcp.plugin:DhcpSnifferPlugin"
+oui = "network_monitor_tds.plugins.builtin.oui.plugin:OuiPlugin"
+technitium = "network_monitor_tds.plugins.builtin.technitium.plugin:TechnitiumPlugin"
 demo = "network_monitor_tds.plugins.builtin.demo.plugin:DemoPlugin"
 
 [tool.ruff]
@@ -94,7 +99,7 @@ max-complexity = 10
 max-args = 10
 
 [tool.ruff.lint.per-file-ignores]
-"tests/**" = ["ARG", "S101", "PLR2004", "PLR0913"]
+"tests/**" = ["ARG", "S101", "S104", "S106", "PLR2004", "PLR0913"]
 "scripts/**" = ["T20", "S603"]  # Allow print statements and subprocess calls on the scripts
 
 [tool.ruff.lint.isort]

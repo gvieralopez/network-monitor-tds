@@ -24,6 +24,10 @@ class PluginInfo:
 class PluginSettings(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
 
+    @classmethod
+    def secret_fields(cls) -> frozenset[str]:
+        return frozenset(name for name, field in cls.model_fields.items() if not field.repr)
+
 
 class ScheduledSettings(PluginSettings):
     interval: timedelta

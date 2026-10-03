@@ -17,6 +17,7 @@ from network_monitor_tds.application.scheduling import (
     run_with_restarts,
 )
 from network_monitor_tds.domain.events.models import EventKind
+from network_monitor_tds.domain.network.models import MacAddress
 from network_monitor_tds.domain.plugins.models import PluginConfig, PluginId
 from network_monitor_tds.domain.time import Clock
 from network_monitor_tds.plugins.host.registry import PluginClass, plugin_defaults
@@ -92,7 +93,17 @@ class PluginHost:
                 await self._run_enrichment(plugin, context)
 
     async def _run_enrichment(self, plugin: EnrichmentPlugin[Any], context: PluginContext) -> None:
-        async for event in self._events.subscribe():
-            if event.kind is EventKind.DEVICE_DISCOVERED:
-                job = partial(plugin.enrich, context, event.mac)
-                await run_once(job, ENRICHMENT_TIMEOUT, context.logger)
+        async with self._events.subscribe() as events:
+            for mac in await self._known_devices():
+                await _enrich(plugin, context, mac)
+            async for event in events:
+                if event.kind is EventKind.DEVICE_DISCOVERED:
+                    await _enrich(plugin, context, event.mac)
+
+    async def _known_devices(self) -> list[MacAddress]:
+        async with self._unit_of_work() as uow:
+            return [device.mac for device in await uow.devices.list()]
+
+
+async def _enrich(plugin: EnrichmentPlugin[Any], context: PluginContext, mac: MacAddress) -> None:
+    await run_once(partial(plugin.enrich, context, mac), ENRICHMENT_TIMEOUT, context.logger)

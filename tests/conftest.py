@@ -1,4 +1,5 @@
 import asyncio
+import logging
 from collections.abc import AsyncIterator, Callable, Iterator
 from dataclasses import dataclass, replace
 from datetime import UTC, datetime, timedelta
@@ -23,6 +24,7 @@ from network_monitor_tds.infrastructure.db.engine import create_engine, create_s
 from network_monitor_tds.infrastructure.db.migrator import upgrade_to_head
 from network_monitor_tds.infrastructure.db.unit_of_work import SqlUnitOfWork, unit_of_work_factory
 from network_monitor_tds.infrastructure.messaging.bus import InMemoryEventBus
+from network_monitor_tds.plugins.sdk.base import PluginContext
 from network_monitor_tds.plugins.sdk.models import PluginInfo
 from network_monitor_tds.web.models import WebContext
 
@@ -155,3 +157,17 @@ def web_context(database: Database) -> WebContext:
 async def seen_device(database: Database, observation: Observation) -> MacAddress:
     await ingest(database.unit_of_work(), replace(observation, source=DEMO_INFO.plugin_id))
     return observation.mac
+
+
+class RecordingEmit:
+    def __init__(self) -> None:
+        self.observations: list[Observation] = []
+
+    async def __call__(self, observation: Observation) -> None:
+        self.observations.append(observation)
+
+
+def plugin_context(plugin_id: str, emit: RecordingEmit) -> PluginContext:
+    return PluginContext(
+        PluginId(plugin_id), FixedClock(T0), emit, logging.getLogger(f"tests.{plugin_id}")
+    )
