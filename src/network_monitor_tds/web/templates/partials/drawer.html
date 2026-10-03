@@ -1,0 +1,83 @@
+{% from "macros.html" import artwork, icon %}
+{% set card = drawer.card %}
+<div class="scrim" data-close></div>
+<aside class="drawer" role="dialog" aria-modal="true" aria-labelledby="drawer-name" style="--cat:var(--cat-{{ card.color }})">
+  {% call artwork(card, " d-art" ~ ("" if card.online else " off")) %}
+    <button type="button" class="icon-btn" data-close aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+  {% endcall %}
+  <div class="d-title">
+    <h2 id="drawer-name">{{ card.name }}</h2>
+    <div class="status">{% if card.online %}<i class="dot"></i>{% endif %}{{ "Online" if card.online else "Last seen " ~ card.status }} · <span class="mono">{{ card.ip }}</span></div>
+  </div>
+  <div class="d-body">
+    {% if card.is_new %}
+    <div class="notice"><span>First seen {{ drawer.first_seen }}. Not reviewed yet.</span>
+      <button type="button" class="btn" hx-post="/devices/{{ card.mac }}/acknowledge" hx-target="#drawer">Mark as known</button></div>
+    {% endif %}
+
+    <section class="section">
+      <h3>Presence, last 14 days</h3>
+      <div class="heat-meta"><span>Online <b>{{ drawer.uptime }}%</b> of the last 7 days</span><span>Hourly, today at top</span></div>
+      <div class="heat">
+        <span></span><span class="ax">00</span><span class="ax">06</span><span class="ax">12</span><span class="ax">18</span>
+        {% for row in drawer.rows %}
+        <span class="lbl">{{ row.label }}</span>{% for state in row.hours %}<span class="c {{ 'on' if state == 'online' else ('na' if state == 'unknown') }}" title="{{ row.label }}, {{ '%02d' % loop.index0 }}:00 {{ state }}"></span>{% endfor %}
+        {% endfor %}
+      </div>
+      <div class="legend"><span><i style="background:var(--on)"></i>Online</span><span><i style="background:var(--surface-2)"></i>Offline</span><span><i style="box-shadow:inset 0 0 0 1px var(--surface-2)"></i>No data</span></div>
+    </section>
+
+    <section class="section">
+      <h3>Discovered by</h3>
+      <p class="disc-line">First found by <b>{{ drawer.first_found_by }}</b> <span>· {{ drawer.first_seen }}</span></p>
+      <div class="disc-chips">
+        {% for discovery in drawer.discoveries %}<span class="disc-chip{{ ' first' if discovery.first }}" title="{{ discovery.details }}">{{ discovery.name }}</span>{% endfor %}
+      </div>
+    </section>
+
+    <section class="section">
+      <h3>Details</h3>
+      <dl class="facts">
+        <dt>IP address</dt><dd class="mono">{{ card.ip }}</dd>
+        <dt>MAC address</dt><dd class="mono">{{ card.mac }}</dd>
+        <dt>Vendor</dt><dd>{{ card.vendor }}</dd>
+        <dt>Detected name</dt><dd>{{ drawer.detected_name }}<span class="tag">{{ drawer.name_origin }}</span></dd>
+        <dt>Detected type</dt><dd>{{ drawer.detected_category }}</dd>
+        <dt>First seen</dt><dd>{{ drawer.first_seen }}</dd>
+      </dl>
+    </section>
+
+    <section class="section">
+      <h3>Your labels</h3>
+      <form class="edit" hx-post="/devices/{{ card.mac }}/labels" hx-target="#drawer">
+        <div class="field">
+          <label for="label-name">Name</label>
+          <input id="label-name" name="name" value="{{ drawer.labels_name }}" placeholder="{{ drawer.detected_name }}" maxlength="100">
+          <span class="hint">Leave empty to use the detected name.</span>
+        </div>
+        <div class="field">
+          <label for="label-category">Category</label>
+          <select id="label-category" name="category">
+            <option value="" {% if not drawer.labels_category %}selected{% endif %}>Automatic ({{ drawer.detected_category }})</option>
+            {% for value, label in category_choices %}
+            <option value="{{ value }}" {% if drawer.labels_category == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <fieldset class="field">
+          <legend class="label">Icon</legend>
+          <div class="icons">
+            <label class="auto" title="Automatic"><input type="radio" name="icon" value="" {% if not drawer.labels_icon %}checked{% endif %}>Auto</label>
+            {% for name in icon_paths %}
+            <label title="{{ name }}"><input type="radio" name="icon" value="{{ name }}" {% if name == drawer.labels_icon %}checked{% endif %}>{{ icon(name) }}</label>
+            {% endfor %}
+          </div>
+        </fieldset>
+        <div class="actions">
+          <button type="submit" class="btn primary">Save</button>
+          <button type="submit" class="btn ghost" hx-post="/devices/{{ card.mac }}/labels" hx-vals='{"name": "", "category": "", "icon": ""}'>Reset to detected</button>
+        </div>
+      </form>
+    </section>
+  </div>
+</aside>

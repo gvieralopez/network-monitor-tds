@@ -9,7 +9,21 @@ authors = [
 ]
 license = { text = "MIT" }
 
-dependencies = []
+dependencies = [
+    "aiosqlite>=0.22.1",
+    "alembic>=1.20.0",
+    "fastapi>=0.142.2",
+    "httpx>=0.28.1",
+    "jinja2>=3.1.6",
+    "pydantic>=2.13.5",
+    "pydantic-settings>=2.15.0",
+    "python-multipart>=0.0.32",
+    "scapy>=2.8.0",
+    "sqlalchemy[asyncio]>=2.1.3",
+    "sse-starlette>=3.5.0",
+    "typer>=0.27.2",
+    "uvicorn[standard]>=0.54.0",
+]
 
 [dependency-groups]
 dev = [
@@ -32,6 +46,9 @@ default-groups = ["dev"]
 
 [project.scripts]
 nmtds = "network_monitor_tds.main:main"
+
+[project.entry-points."network_monitor_tds.plugins"]
+demo = "network_monitor_tds.plugins.builtin.demo.plugin:DemoPlugin"
 
 [tool.ruff]
 line-length = 100

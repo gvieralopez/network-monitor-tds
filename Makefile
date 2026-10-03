@@ -52,5 +52,5 @@ clean:
 	find . -type d -name '__pycache__' -exec rm -rf {} +
 
 run:
-	env $$(grep -v '^#' .env | xargs) uv run nmtds
+	env $$(grep -v '^#' .env | xargs) uv run nmtds serve
 

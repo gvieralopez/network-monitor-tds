@@ -1,0 +1,2 @@
+class NetworkMonitorError(Exception):
+    pass

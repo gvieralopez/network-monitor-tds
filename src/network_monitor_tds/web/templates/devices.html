@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% set active = "devices" %}
+{% block content %}
+<div class="wrap">
+  {% include "partials/hero.html" %}
+</div>
+
+<form class="toolbar" id="filters" action="/" method="get"
+      hx-get="/" hx-target="#board" hx-select="#board" hx-swap="outerHTML"
+      hx-select-oob="#chips,#hero" hx-replace-url="true"
+      hx-trigger="change, input changed delay:250ms from:#q, devices-changed from:body, sse:device throttle:2s">
+  <div class="wrap">
+    <div class="row1">
+      <label class="search" for="q">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="q" name="q" type="search" value="{{ query.q }}" placeholder="Search name, IP, MAC or vendor" autocomplete="off">
+      </label>
+      <div class="seg" role="radiogroup" aria-label="Status">
+        {% for value, label in [("all", "All"), ("online", "Online"), ("offline", "Offline")] %}
+        <label><input type="radio" name="status" value="{{ value }}" {% if query.status == value %}checked{% endif %}>{{ label }}</label>
+        {% endfor %}
+      </div>
+      <label class="sort" for="group">Group
+        <select id="group" name="group">
+          {% for value, label in [("none", "None"), ("category", "Category"), ("status", "Status"), ("vendor", "Vendor")] %}
+          <option value="{{ value }}" {% if query.group == value %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label class="sort" for="sort">Sort
+        <select id="sort" name="sort">
+          {% for value, label in [("smart", "New, then online"), ("name", "Name"), ("ip", "IP address"), ("seen", "Last seen")] %}
+          <option value="{{ value }}" {% if query.sort == value %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </label>
+    </div>
+    <div class="chips" id="chips">
+      {% if new_count or query.new %}
+      <label class="chip newchip"><input type="checkbox" name="new" value="true" {% if query.new %}checked{% endif %}>New <span class="n">{{ new_count }}</span></label>
+      {% endif %}
+      {% for category, count in category_counts.items() %}
+      <label class="chip"><input type="checkbox" name="category" value="{{ category }}" {% if category in query.category %}checked{% endif %}>{{ category_labels[category] }} <span class="n">{{ count }}</span></label>
+      {% endfor %}
+      {% if query.is_filtered %}<a class="chip clear" href="/?group={{ query.group }}&amp;sort={{ query.sort }}">Clear filters</a>{% endif %}
+    </div>
+  </div>
+</form>
+
+<main class="wrap">
+  {% include "partials/board.html" %}
+</main>
+{% endblock %}

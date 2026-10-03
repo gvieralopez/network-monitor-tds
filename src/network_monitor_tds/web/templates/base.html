@@ -1,0 +1,42 @@
+{% from "macros.html" import icon %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>{% block title %}Network Monitor TDS{% endblock %}</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%232f5bd3' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='12' cy='12' r='2.5'/%3E%3Cpath d='M5.6 5.6a9 9 0 0 0 0 12.8M18.4 18.4a9 9 0 0 0 0-12.8M8.5 8.5a5 5 0 0 0 0 7M15.5 15.5a5 5 0 0 0 0-7'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="/static/app.css?v={{ version }}">
+  <script src="/static/vendor/htmx-2.0.11.min.js"></script>
+  <script src="/static/vendor/htmx-ext-sse-2.2.4.min.js"></script>
+  <script src="/static/app.js?v={{ version }}" defer></script>
+</head>
+<body hx-ext="sse" sse-connect="/events" class="intro">
+  <div class="wrap">
+    <header class="top">
+      <a class="brand" href="/">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="2.5"/><path d="M5.6 5.6a9 9 0 0 0 0 12.8M18.4 18.4a9 9 0 0 0 0-12.8M8.5 8.5a5 5 0 0 0 0 7M15.5 15.5a5 5 0 0 0 0-7"/></svg>
+        <h1>Network Monitor <span class="tds" title="That Doesn't Suck">TDS</span></h1>
+      </a>
+      <div class="top-right">
+        <span class="live" id="live"><span class="dot"></span><span class="live-label">Connecting</span></span>
+        <nav class="nav" aria-label="Sections">
+          <a href="/" {% if active == "devices" %}aria-current="page"{% endif %}>Devices</a>
+          <a href="/settings" {% if active == "settings" %}aria-current="page"{% endif %}>Settings</a>
+        </nav>
+      </div>
+    </header>
+  </div>
+
+  {% block content %}{% endblock %}
+
+  <div class="wrap">
+    <footer class="foot">
+      <span>Network Monitor TDS <span class="ver">v{{ version }}</span> · Built by <a href="https://github.com/gvieralopez">gvieralopez</a></span>
+      <span>Thanks to <a href="https://github.com/jokob-sk/NetAlertX">NetAlertX</a> for the inspiration.</span>
+    </footer>
+  </div>
+  <div id="drawer"></div>
+  <div class="toast" id="toast" role="status" hidden></div>
+</body>
+</html>
