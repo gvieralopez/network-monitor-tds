@@ -115,7 +115,7 @@ async def test_invalid_plugin_settings_reopen_the_form(
 
     assert "HX-Trigger" not in response.headers
     assert '<details class="cfg-wrap" open' in response.text
-    assert "Use a duration like" in response.text
+    assert "Enter a duration such as" in response.text
     assert control(web_context).reloaded == []
 
 
@@ -142,7 +142,7 @@ async def test_save_presence(client: AsyncClient, web_context: WebContext) -> No
         "/settings/presence", data={"offline_after": "20m", "mobile_offline_after": "30m"}
     )
 
-    assert json.loads(response.headers["HX-Trigger"]) == {"toast": "Saved presence settings"}
+    assert json.loads(response.headers["HX-Trigger"]) == {"toast": "Offline timing saved"}
     policy = await load_presence_policy(web_context.unit_of_work())
     assert (policy.offline_after.total_seconds(), policy.mobile_offline_after.total_seconds()) == (
         1200,
@@ -157,13 +157,13 @@ async def test_invalid_presence_is_rejected(client: AsyncClient, value: str) -> 
     )
 
     assert "HX-Trigger" not in response.headers
-    assert "Use a duration like" in response.text
+    assert "Enter a duration such as" in response.text
 
 
 async def test_save_retention(client: AsyncClient, web_context: WebContext) -> None:
     response = await client.post("/settings/retention", data={"keep_days": " 30 "})
 
-    assert json.loads(response.headers["HX-Trigger"]) == {"toast": "Saved history settings"}
+    assert json.loads(response.headers["HX-Trigger"]) == {"toast": "History settings saved"}
     assert 'name="keep_days" value="30"' in response.text
     assert await load_retention_policy(web_context.unit_of_work()) == RetentionPolicy(30)
 
@@ -175,7 +175,7 @@ async def test_invalid_retention_is_rejected(
     response = await client.post("/settings/retention", data={"keep_days": value})
 
     assert "HX-Trigger" not in response.headers
-    assert "Use a whole number of days from 14 to 3650" in response.text
+    assert "Enter a whole number of days from 14 to 3650." in response.text
     assert await load_retention_policy(web_context.unit_of_work()) == DEFAULT_RETENTION
 
 

@@ -45,7 +45,7 @@ PURPOSE_GROUPS = {
 
 
 DURATION = TypeAdapter(timedelta)
-RETENTION_HINT = f"Use a whole number of days from {MIN_KEEP_DAYS} to {MAX_KEEP_DAYS}"
+RETENTION_HINT = f"Enter a whole number of days from {MIN_KEEP_DAYS} to {MAX_KEEP_DAYS}."
 
 
 class Tone(StrEnum):
@@ -166,9 +166,9 @@ def sweep_warning(policy: PresencePolicy, sweep_interval: timedelta | None) -> s
     if shortest >= sweep_interval * SWEEPS_BEFORE_OFFLINE:
         return ""
     return (
-        f"The ARP sweep runs every {format_duration(sweep_interval)}. Thresholds shorter than "
-        f"{format_duration(sweep_interval * SWEEPS_BEFORE_OFFLINE)} will make quiet devices "
-        "flicker between online and offline."
+        f"The ARP sweep checks quiet devices every {format_duration(sweep_interval)}. A wait "
+        f"shorter than {format_duration(sweep_interval * SWEEPS_BEFORE_OFFLINE)} makes devices "
+        "that only answer the sweep flicker between online and offline."
     )
 
 

@@ -346,6 +346,15 @@ form.edit { display: flex; flex-direction: column; gap: 14px; }
 .field { display: flex; flex-direction: column; gap: 6px; }
 .field label, .field .label { font-size: 13px; font-weight: 500; }
 .field .hint { font-size: 12px; color: var(--muted); }
+.field.wide { grid-column: 1 / -1; }
+.with-unit {
+  display: inline-flex; align-items: center; width: 11rem; max-width: 100%; height: 38px;
+  border: 1px solid var(--line); border-radius: 8px; background: var(--bg);
+}
+.with-unit:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
+.field .with-unit input { flex: 1; height: 100%; border: 0; background: transparent; outline: none; }
+.with-unit span { padding-right: 10px; color: var(--muted); font-size: 13px; }
+.field.has-error .with-unit { border-color: var(--new); }
 .field input, .field select {
   height: 38px; padding: 0 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); min-width: 0;
 }

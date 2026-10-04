@@ -12,7 +12,7 @@ from network_monitor_tds.plugins.sdk.models import PluginSettings
 
 DURATION_PART = re.compile(r"(\d+)\s*([hms])")
 UNIT_SECONDS = {"h": 3600, "m": 60, "s": 1}
-DURATION_HINT = "Use a duration like 30s, 5m or 1h30m"
+DURATION_HINT = "Enter a duration such as 30s, 10m or 1h30m."
 COMMON_HELP = {
     "interval": "How often the plugin runs.",
     "timeout": "Stops a run that takes longer than this.",
