@@ -60,6 +60,11 @@ async def general_settings_page(request: Request, context: ContextDep) -> HTMLRe
     )
 
 
+@router.get("/appearance", response_class=HTMLResponse)
+async def appearance_settings_page(request: Request) -> HTMLResponse:
+    return templates.TemplateResponse(request, "settings.html", {"tab": "appearance"})
+
+
 @router.get("/plugins", response_class=HTMLResponse)
 async def plugin_settings_page(request: Request, context: ContextDep) -> HTMLResponse:
     now = context.clock.now()
@@ -139,7 +144,7 @@ async def save_presence(
     policy = PresencePolicy(offline_after=offline, mobile_offline_after=mobile)
     await save_presence_policy(context.unit_of_work(), policy, context.clock.now())
     view = policy_view(policy, interval)
-    return _presence(request, view, "Saved presence settings")
+    return _presence(request, view, "Offline timing saved")
 
 
 @router.post("/retention", response_class=HTMLResponse)
@@ -150,7 +155,7 @@ async def save_retention(
     if policy is None:
         return _retention(request, RetentionView(keep_days, RETENTION_HINT), None)
     await save_retention_policy(context.unit_of_work(), policy, context.clock.now())
-    return _retention(request, retention_view(policy), "Saved history settings")
+    return _retention(request, retention_view(policy), "History settings saved")
 
 
 def _plugin(context: WebContext, plugin_id: str) -> PluginClass:

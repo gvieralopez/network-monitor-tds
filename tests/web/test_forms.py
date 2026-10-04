@@ -1,3 +1,4 @@
+from collections.abc import Mapping
 from datetime import timedelta
 
 import pytest
@@ -21,6 +22,10 @@ class Sample(PluginSettings):
     token: str = Field(default="", repr=False)
     verify: bool = True
     retries: int = 3
+
+    @classmethod
+    def placeholders(cls) -> Mapping[str, str]:
+        return {"url": "dns.lan"}
 
 
 @pytest.mark.parametrize(
@@ -60,11 +65,11 @@ def test_settings_fields_describe_each_setting() -> None:
     fields = settings_fields(Sample, {"url": "http://dns", "token": "s3cret"}, {"url": "Bad"})
 
     assert fields == (
-        FormField("interval", "Interval", "How often the plugin runs.", FieldKind.DURATION, "5m", False, ""),
-        FormField("url", "Server address", "Where it lives", FieldKind.TEXT, "http://dns", False, "Bad"),
-        FormField("token", "Token", "", FieldKind.HIDDEN, "", False, ""),
-        FormField("verify", "Verify", "", FieldKind.TOGGLE, "", True, ""),
-        FormField("retries", "Retries", "", FieldKind.NUMBER, "3", False, ""),
+        FormField("interval", "Run every", "How often it runs.", FieldKind.DURATION, "5m", "", False, ""),
+        FormField("url", "Server address", "Where it lives", FieldKind.TEXT, "http://dns", "dns.lan", False, "Bad"),
+        FormField("token", "Token", "", FieldKind.HIDDEN, "", "Saved, leave empty to keep", False, ""),
+        FormField("verify", "Verify", "", FieldKind.TOGGLE, "", "", True, ""),
+        FormField("retries", "Retries", "", FieldKind.NUMBER, "3", "", False, ""),
     )  # fmt: skip
 
 
@@ -104,3 +109,9 @@ def test_read_settings_form_reports_every_error() -> None:
     assert result.settings is None
     assert result.errors["interval"] == DURATION_HINT
     assert "integer" in result.errors["retries"]
+
+
+def test_secret_field_says_when_nothing_is_saved() -> None:
+    token = next(field for field in settings_fields(Sample, {}, {}) if field.name == "token")
+
+    assert token.placeholder == "Not set"

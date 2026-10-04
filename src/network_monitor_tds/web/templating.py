@@ -5,6 +5,7 @@ from fastapi.templating import Jinja2Templates
 
 from network_monitor_tds import __version__
 from network_monitor_tds.web.drawings import DRAWINGS
+from network_monitor_tds.web.pages.board import GROUPINGS, SORTINGS, Grouping, Sorting
 from network_monitor_tds.web.views import category_choices, drawing_groups
 
 TEMPLATES_DIR = Path(__file__).parent / "templates"
@@ -12,14 +13,24 @@ THEME_COOKIE = "nmtds_theme"
 THEMES = (("auto", "Auto"), ("light", "Light"), ("dark", "Dark"))
 CARD_STYLE_COOKIE = "nmtds_cards"
 CARD_STYLES = (("artwork", "Artwork"), ("studio", "Studio"))
+GROUPING_COOKIE = "nmtds_group"
+SORTING_COOKIE = "nmtds_sort"
 
 
 def theme_of(request: Request) -> str:
-    return _chosen(request, THEME_COOKIE, THEMES)
+    return _chosen(request, THEME_COOKIE, THEMES, "auto")
 
 
 def card_style_of(request: Request) -> str:
-    return _chosen(request, CARD_STYLE_COOKIE, CARD_STYLES)
+    return _chosen(request, CARD_STYLE_COOKIE, CARD_STYLES, "artwork")
+
+
+def grouping_of(request: Request) -> Grouping:
+    return Grouping(_chosen(request, GROUPING_COOKIE, GROUPINGS, Grouping.CATEGORY))
+
+
+def sorting_of(request: Request) -> Sorting:
+    return Sorting(_chosen(request, SORTING_COOKIE, SORTINGS, Sorting.SMART))
 
 
 templates = Jinja2Templates(directory=TEMPLATES_DIR)
@@ -33,11 +44,18 @@ templates.env.globals.update(
     card_style_of=card_style_of,
     card_styles=CARD_STYLES,
     card_style_cookie=CARD_STYLE_COOKIE,
+    grouping_of=grouping_of,
+    groupings=GROUPINGS,
+    grouping_cookie=GROUPING_COOKIE,
+    sorting_of=sorting_of,
+    sortings=SORTINGS,
+    sorting_cookie=SORTING_COOKIE,
     drawing_footprints={drawing.name: drawing.footprint for drawing in DRAWINGS},
 )
 
 
-def _chosen(request: Request, cookie: str, choices: tuple[tuple[str, str], ...]) -> str:
-    default = choices[0][0]
+def _chosen(
+    request: Request, cookie: str, choices: tuple[tuple[str, str], ...], default: str
+) -> str:
     chosen = request.cookies.get(cookie, default)
     return chosen if chosen in dict(choices) else default

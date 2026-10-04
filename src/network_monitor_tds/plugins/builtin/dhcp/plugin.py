@@ -1,7 +1,11 @@
+from collections.abc import Mapping
 from typing import ClassVar
 
 from network_monitor_tds.domain.plugins.models import PluginId
-from network_monitor_tds.plugins.builtin.capture.interfaces import resolve_interface
+from network_monitor_tds.plugins.builtin.capture.interfaces import (
+    interface_placeholder,
+    resolve_interface,
+)
 from network_monitor_tds.plugins.builtin.capture.sniffer import capture
 from network_monitor_tds.plugins.builtin.dhcp.packets import DHCP_FILTER, dhcp_sighting
 from network_monitor_tds.plugins.sdk.base import ListenerPlugin, PluginContext
@@ -10,6 +14,10 @@ from network_monitor_tds.plugins.sdk.models import PluginInfo, PluginPurpose, Pl
 
 class DhcpSnifferSettings(PluginSettings):
     interface: str = ""
+
+    @classmethod
+    def placeholders(cls) -> Mapping[str, str]:
+        return {"interface": interface_placeholder()}
 
 
 class DhcpSnifferPlugin(ListenerPlugin[DhcpSnifferSettings]):

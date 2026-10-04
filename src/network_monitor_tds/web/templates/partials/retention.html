@@ -1,11 +1,14 @@
 <section id="retention">
   <h2>History</h2>
-  <p class="lede">Online and offline history and the event log are deleted once they are older than this. Devices are always kept.</p>
+  <p class="lede">How long to keep online and offline history and the event log. Older entries are deleted once a day. Devices and your labels are always kept.</p>
   <form class="netgrid" hx-post="/settings/retention" hx-target="#retention" hx-swap="outerHTML">
-    <div class="field{{ ' has-error' if retention.error }}">
-      <label for="retention-keep_days">Keep history for (days)</label>
-      <input id="retention-keep_days" class="mono" name="keep_days" value="{{ retention.keep_days }}" inputmode="numeric" placeholder="90">
-      {% if retention.error %}<span class="error">{{ retention.error }}</span>{% endif %}
+    <div class="field wide{{ ' has-error' if retention.error }}">
+      <label for="retention-keep_days">Keep for</label>
+      <div class="with-unit">
+        <input id="retention-keep_days" class="mono" name="keep_days" value="{{ retention.keep_days }}" inputmode="numeric" placeholder="90">
+        <span>days</span>
+      </div>
+      {% if retention.error %}<span class="error">{{ retention.error }}</span>{% else %}<span class="hint">At least 14 days, so the device panel's two-week heatmap is always complete.</span>{% endif %}
     </div>
     <div class="actions"><button type="submit" class="btn primary">Save</button></div>
   </form>

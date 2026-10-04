@@ -42,4 +42,8 @@ Press **Forget device** at the bottom of the panel to delete a device you no lon
 
 ## Settings
 
-The Settings page has two tabs. **General** holds the theme (Auto, Light or Dark) and the card style (Artwork, with each device on a pattern in its category's colour, or Studio, on a plain backdrop), both saved in each browser, the presence thresholds and how long history is kept. **Plugins** lists every plugin, grouped by what it is for (passive and active device finders, third-party integrations, metadata providers, developer tools), with a switch, its current status and its settings. Changes apply immediately. See [Discovery plugins](plugins.md) and [How online and offline work](presence.md).
+The Settings page has three tabs.
+
+- **General** holds how long history is kept and how long a device can stay silent before it is marked offline. These apply to the whole monitor.
+- **Appearance** is saved in each browser only. *Style* sets the theme (Auto, Light or Dark) and the card style (Artwork, with each device on a pattern in its category's colour, or Studio, on a plain backdrop). *Presentation* sets how the devices page is grouped and sorted when you open it; you can still change both on the page, and a link that includes them opens exactly that view.
+- **Sources** lists every plugin, the parts of the monitor that find devices or learn about them, grouped by what it is for (passive and active device finders, third-party integrations, metadata providers, developer tools), with a switch, its current status and its settings. Changes apply immediately. See [Discovery plugins](plugins.md) and [How online and offline work](presence.md).

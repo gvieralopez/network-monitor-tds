@@ -1,6 +1,6 @@
-<section id="appearance">
-  <h2>Appearance</h2>
-  <p class="lede">How the monitor looks in this browser. Both choices are saved in this browser only.</p>
+<section id="style">
+  <h2>Style</h2>
+  <p class="lede">How the monitor looks in this browser. Saved here only, so other browsers keep their own.</p>
   <div class="appearance">
     <div class="appearance-row">
       <span class="label">Theme</span>
@@ -21,6 +21,30 @@
         {% endfor %}
       </div>
       <span class="hint">Artwork puts each device on a pattern in its category's colour. Studio puts it on a plain backdrop.</span>
+    </div>
+  </div>
+</section>
+<section id="presentation">
+  <h2>Presentation</h2>
+  <p class="lede">How the devices page is arranged when you open it in this browser. You can still change both on the page.</p>
+  <div class="appearance">
+    <div class="appearance-row">
+      <label class="label" for="pref-group">Group by</label>
+      <select id="pref-group" aria-label="Group by" data-cookie="{{ grouping_cookie }}">
+        {% set current = grouping_of(request) %}
+        {% for value, label in groupings %}
+        <option value="{{ value }}" {% if current == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="appearance-row">
+      <label class="label" for="pref-sort">Sort by</label>
+      <select id="pref-sort" aria-label="Sort by" data-cookie="{{ sorting_cookie }}">
+        {% set current = sorting_of(request) %}
+        {% for value, label in sortings %}
+        <option value="{{ value }}" {% if current == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
     </div>
   </div>
 </section>

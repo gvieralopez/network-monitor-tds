@@ -5,6 +5,7 @@
   </form>
   <div class="pd">{{ card.description }}</div>
   {% with plugin_id=card.plugin_id, status=card.status %}{% include "partials/plugin_status.html" %}{% endwith %}
+  {% if card.setup_hint %}<div class="pm">{{ card.setup_hint }}</div>{% endif %}
   {% if card.fields %}
   <details class="cfg-wrap"{% if card.expanded %} open{% endif %}>
     <summary>Settings</summary>

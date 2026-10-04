@@ -1,3 +1,4 @@
+from collections.abc import Mapping
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from enum import StrEnum
@@ -45,6 +46,14 @@ class PluginSettings(BaseModel):
     @classmethod
     def secret_fields(cls) -> frozenset[str]:
         return frozenset(name for name, field in cls.model_fields.items() if not field.repr)
+
+    @classmethod
+    def setup_fields(cls) -> frozenset[str]:
+        return frozenset()
+
+    @classmethod
+    def placeholders(cls) -> Mapping[str, str]:
+        return {}
 
 
 class ScheduledSettings(PluginSettings):

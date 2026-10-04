@@ -18,7 +18,7 @@ from network_monitor_tds.web.drawings import CATEGORY_COLORS, CATEGORY_LABELS
 from network_monitor_tds.web.models import WebContext
 from network_monitor_tds.web.pages.board import BoardQuery, build_board
 from network_monitor_tds.web.pages.schemas import LabelsForm
-from network_monitor_tds.web.templating import templates
+from network_monitor_tds.web.templating import grouping_of, sorting_of, templates
 from network_monitor_tds.web.views import card_view, drawer_view, hero_view
 
 router = APIRouter()
@@ -29,6 +29,7 @@ async def devices_page(
     request: Request, context: ContextDep, query: Annotated[BoardQuery, Query()]
 ) -> HTMLResponse:
     now = context.clock.now()
+    query = _with_browser_defaults(query, request)
     summaries = await list_devices(context.unit_of_work(), now)
     board = build_board(summaries, query)
     counts = {category: 0 for category in CATEGORY_LABELS}
@@ -76,6 +77,12 @@ async def forget(context: ContextDep, mac: MacDep) -> HTMLResponse:
     name = await forget_device(context.unit_of_work(), mac)
     triggers = {"devices-changed": None, "toast": f"Forgot {name}"}
     return HTMLResponse("", headers={"HX-Trigger": json.dumps(triggers)})
+
+
+def _with_browser_defaults(query: BoardQuery, request: Request) -> BoardQuery:
+    defaults = {"group": grouping_of(request), "sort": sorting_of(request)}
+    missing = {name: value for name, value in defaults.items() if name not in request.query_params}
+    return query.model_copy(update=missing)
 
 
 async def _drawer(

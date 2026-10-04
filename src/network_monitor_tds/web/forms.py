@@ -12,12 +12,15 @@ from network_monitor_tds.plugins.sdk.models import PluginSettings
 
 DURATION_PART = re.compile(r"(\d+)\s*([hms])")
 UNIT_SECONDS = {"h": 3600, "m": 60, "s": 1}
-DURATION_HINT = "Use a duration like 30s, 5m or 1h30m"
+DURATION_HINT = "Enter a duration such as 30s, 10m or 1h30m."
+COMMON_LABELS = {"interval": "Run every", "timeout": "Give up after"}
 COMMON_HELP = {
-    "interval": "How often the plugin runs.",
+    "interval": "How often it runs.",
     "timeout": "Stops a run that takes longer than this.",
-    "interface": "Network interface to use. Leave empty to use the one with the default route.",
+    "interface": "Leave empty to use the one with the default route.",
 }
+KEPT_PLACEHOLDER = "Saved, leave empty to keep"
+UNSET_PLACEHOLDER = "Not set"
 
 
 class FieldKind(StrEnum):
@@ -35,6 +38,7 @@ class FormField:
     help: str
     kind: FieldKind
     value: str
+    placeholder: str
     checked: bool
     error: str
 
@@ -67,10 +71,17 @@ def settings_fields(
     model: type[PluginSettings], settings: Mapping[str, JsonValue], errors: Mapping[str, str]
 ) -> tuple[FormField, ...]:
     current = _current(model, settings)
+    placeholders = model.placeholders()
     return tuple(
-        _form_field(name, field, getattr(current, name), errors.get(name, ""))
+        _form_field(
+            name, field, getattr(current, name), placeholders.get(name, ""), errors.get(name, "")
+        )
         for name, field in model.model_fields.items()
     )
+
+
+def field_label(name: str, field: FieldInfo) -> str:
+    return field.title or COMMON_LABELS.get(name) or name.replace("_", " ").capitalize()
 
 
 def read_settings_form(
@@ -107,17 +118,26 @@ def _current(model: type[PluginSettings], settings: Mapping[str, JsonValue]) -> 
         return model()
 
 
-def _form_field(name: str, field: FieldInfo, value: object, error: str) -> FormField:
+def _form_field(
+    name: str, field: FieldInfo, value: object, placeholder: str, error: str
+) -> FormField:
     kind = _kind(field)
     return FormField(
         name=name,
-        label=field.title or name.replace("_", " ").capitalize(),
+        label=field_label(name, field),
         help=field.description or COMMON_HELP.get(name, ""),
         kind=kind,
         value=_display(kind, value),
+        placeholder=_placeholder(kind, value, placeholder),
         checked=kind is FieldKind.TOGGLE and bool(value),
         error=error,
     )
+
+
+def _placeholder(kind: FieldKind, value: object, placeholder: str) -> str:
+    if kind is FieldKind.HIDDEN:
+        return KEPT_PLACEHOLDER if value else UNSET_PLACEHOLDER
+    return placeholder
 
 
 def _kind(field: FieldInfo) -> FieldKind:

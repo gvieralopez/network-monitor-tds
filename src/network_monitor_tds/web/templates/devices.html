@@ -22,14 +22,14 @@
       </div>
       <label class="sort" for="group">Group
         <select id="group" name="group">
-          {% for value, label in [("none", "None"), ("category", "Category"), ("status", "Status"), ("vendor", "Vendor")] %}
+          {% for value, label in groupings %}
           <option value="{{ value }}" {% if query.group == value %}selected{% endif %}>{{ label }}</option>
           {% endfor %}
         </select>
       </label>
       <label class="sort" for="sort">Sort
         <select id="sort" name="sort">
-          {% for value, label in [("smart", "New, then online"), ("name", "Name"), ("ip", "IP address"), ("seen", "Last seen")] %}
+          {% for value, label in sortings %}
           <option value="{{ value }}" {% if query.sort == value %}selected{% endif %}>{{ label }}</option>
           {% endfor %}
         </select>

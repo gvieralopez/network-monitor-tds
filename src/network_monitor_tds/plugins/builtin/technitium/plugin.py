@@ -15,7 +15,11 @@ from network_monitor_tds.plugins.sdk.models import PluginInfo, PluginPurpose, Sc
 
 
 class TechnitiumSettings(ScheduledSettings):
-    interval: timedelta = timedelta(minutes=5)
+    interval: timedelta = Field(
+        default=timedelta(minutes=5),
+        title="Import leases every",
+        description="How often to read the leases from Technitium.",
+    )
     timeout: timedelta = timedelta(seconds=30)
     url: str = Field(
         default="",
@@ -33,6 +37,10 @@ class TechnitiumSettings(ScheduledSettings):
         title="Verify TLS certificate",
         description="Turn off only for self-signed certificates on HTTPS.",
     )
+
+    @classmethod
+    def setup_fields(cls) -> frozenset[str]:
+        return frozenset({"url", "token"})
 
     @field_validator("url")
     @classmethod

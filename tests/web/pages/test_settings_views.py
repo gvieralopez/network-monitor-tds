@@ -6,14 +6,18 @@ from network_monitor_tds.application.models import PluginState, PluginStatus
 from network_monitor_tds.domain.plugins.models import PluginConfig, PluginId
 from network_monitor_tds.domain.presence.policy import DEFAULT_POLICY, PresencePolicy
 from network_monitor_tds.domain.retention.models import RetentionPolicy
+from network_monitor_tds.plugins.builtin.capture.errors import CapturePermissionError
+from network_monitor_tds.plugins.builtin.technitium.plugin import TechnitiumPlugin
 from network_monitor_tds.plugins.sdk.models import PluginPurpose
 from network_monitor_tds.web.pages.settings_views import (
+    DOCS_URL,
     PluginCardView,
     StatusView,
     Tone,
     parse_retention,
     plugin_groups,
     policy_view,
+    setup_hint,
     status_view,
     sweep_interval,
     sweep_warning,
@@ -27,11 +31,16 @@ SWEEP = PluginId("arp-sweep")
 @pytest.mark.parametrize(
     ("enabled", "status", "view"),
     [
-        (False, PluginStatus(PluginState.RUNNING, None, None), StatusView("Off", Tone.QUIET)),
-        (True, PluginStatus(PluginState.FAILING, T0, "no access"), StatusView("Error: no access", Tone.BAD)),
-        (True, PluginStatus(PluginState.RUNNING, T0, None), StatusView("Working · last success 3 min ago", Tone.GOOD)),
-        (True, PluginStatus(PluginState.RUNNING, None, None), StatusView("Running", Tone.GOOD)),
-        (True, PluginStatus(PluginState.STOPPED, None, None), StatusView("Not running", Tone.QUIET)),
+        (False, PluginStatus(PluginState.RUNNING, None, None), StatusView("Off", Tone.QUIET, "")),
+        (True, PluginStatus(PluginState.FAILING, T0, "no access"), StatusView("no access", Tone.BAD, "")),
+        (
+            True,
+            PluginStatus(PluginState.FAILING, T0, str(CapturePermissionError())),
+            StatusView("Needs packet-capture permission", Tone.BAD, f"{DOCS_URL}/capture-permissions.md"),
+        ),
+        (True, PluginStatus(PluginState.RUNNING, T0, None), StatusView("Working · last success 3 min ago", Tone.GOOD, "")),
+        (True, PluginStatus(PluginState.RUNNING, None, None), StatusView("Running", Tone.GOOD, "")),
+        (True, PluginStatus(PluginState.STOPPED, None, None), StatusView("Not running", Tone.QUIET, "")),
     ],
 )  # fmt: skip
 def test_status_view(enabled: bool, status: PluginStatus, view: StatusView) -> None:
@@ -98,7 +107,7 @@ def test_plugin_groups(purposes: list[PluginPurpose], titles: list[tuple[str, in
 
 def _card(plugin_id: str, purpose: PluginPurpose) -> PluginCardView:
     return PluginCardView(
-        plugin_id, plugin_id, "", purpose, True, StatusView("Off", Tone.QUIET), (), False
+        plugin_id, plugin_id, "", purpose, True, StatusView("Off", Tone.QUIET, ""), "", (), False
     )
 
 
@@ -108,3 +117,18 @@ def _card(plugin_id: str, purpose: PluginPurpose) -> PluginCardView:
 )  # fmt: skip
 def test_parse_retention(text: str, policy: RetentionPolicy | None) -> None:
     assert parse_retention(text) == policy
+
+
+@pytest.mark.parametrize(
+    ("enabled", "settings", "hint"),
+    [
+        (False, {}, "Fill in “Server address” and “API token”, then switch it on."),
+        (False, {"url": "http://dns:5380"}, "Fill in “API token”, then switch it on."),
+        (False, {"url": "http://dns:5380", "token": "t"}, ""),
+        (True, {}, ""),
+    ],
+)
+def test_setup_hint(enabled: bool, settings: dict[str, str], hint: str) -> None:
+    config = PluginConfig(PluginId("technitium"), enabled, settings, T0)
+
+    assert setup_hint(TechnitiumPlugin, config) == hint

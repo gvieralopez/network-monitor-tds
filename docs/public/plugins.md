@@ -1,8 +1,8 @@
 # Discovery plugins
 
-Each plugin finds devices, or learns about them, in a different way. Switch them on and off and change their settings on the Settings page; changes apply immediately. Each plugin shows its status there: working (with the time of its last success), off, or the error that stops it.
+Each plugin finds devices, or learns about them, in a different way. Switch them on and off and change their settings under **Settings → Sources**; changes apply immediately. Each plugin shows its status there: working (with the time of its last success), off, or the error that stops it.
 
-The Settings page groups them by what they are for:
+The Sources tab groups them by what they are for:
 
 - **Passive device finders** hear devices from the traffic they send anyway, without sending anything.
 - **Active device finders** ask the network who is there, on a schedule.
@@ -23,22 +23,22 @@ The Settings page groups them by what they are for:
 
 Asks devices that have gone quiet whether they are still there, and records the monitor's own machine too. This is what tells the monitor that quiet devices are still around.
 
-Every **Interval** it asks only the devices in the subnet that no plugin has heard from for half an interval, so a device that answered the previous sweep is always asked again. Every **Full sweep every** it asks every address in the subnet instead, which also finds devices the listeners missed. The first run after starting, or after changing the settings, is always a full sweep. Devices silent for longer than **Full sweep every** are left to the next full sweep.
+Every **Check quiet devices every** it asks only the devices in the subnet that no plugin has heard from for half an interval, so a device that answered the previous sweep is always asked again. Every **Sweep the whole subnet every** it asks every address in the subnet instead, which also finds devices the listeners missed. The first run after starting, or after changing the settings, is always a full sweep. Devices silent for longer than **Sweep the whole subnet every** are left to the next full sweep.
 
 | Setting | Default | Meaning |
 |---|---|---|
-| Interval | 5m | How often to ask quiet devices. |
-| Full sweep every | 30m | How often to ask every address in the subnet. |
-| Timeout | 1m | Gives up on a sweep that takes longer. |
+| Check quiet devices every | 5m | How often to ask quiet devices. |
+| Sweep the whole subnet every | 30m | How often to ask every address in the subnet. |
+| Give up after | 1m | Gives up on a sweep that takes longer. |
 | Interface | automatic | Network interface. Empty means the one with the default route. |
 | Subnet | automatic | Subnet to sweep, e.g. `192.168.1.0/24`. Empty means the interface's subnet. |
-| Reply timeout | 3s | How long to wait for answers. |
+| Wait for replies | 3s | How long to wait for answers. |
 
 Subnets larger than 1,024 addresses are refused, so a typo cannot start a scan of a `/16`.
 
 ## ARP listener
 
-Watches ARP traffic to notice devices between sweeps. Each device is reported at most once per **Report every** (default 1m), so chatty devices do not flood the database.
+Watches ARP traffic to notice devices between sweeps. Each device is reported at most once per **Report each device at most every** (default 1m), so chatty devices do not flood the database.
 
 ## DHCP sniffer
 

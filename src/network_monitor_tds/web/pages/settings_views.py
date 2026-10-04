@@ -13,9 +13,10 @@ from network_monitor_tds.domain.retention.models import (
     MIN_KEEP_DAYS,
     RetentionPolicy,
 )
+from network_monitor_tds.plugins.builtin.capture.errors import CapturePermissionError
 from network_monitor_tds.plugins.host.registry import PluginClass
 from network_monitor_tds.plugins.sdk.models import PluginPurpose
-from network_monitor_tds.web.forms import FormField, format_duration, settings_fields
+from network_monitor_tds.web.forms import FormField, field_label, format_duration, settings_fields
 from network_monitor_tds.web.views import ago
 
 SWEEP_PLUGIN = PluginId("arp-sweep")
@@ -42,10 +43,16 @@ PURPOSE_GROUPS = {
         "Simulated devices for trying the app without a real network.",
     ),
 }
-
+DOCS_URL = "https://github.com/gvieralopez/network-monitor-tds/blob/main/docs/public"
+KNOWN_PROBLEMS = {
+    str(CapturePermissionError()): (
+        "Needs packet-capture permission",
+        f"{DOCS_URL}/capture-permissions.md",
+    )
+}
 
 DURATION = TypeAdapter(timedelta)
-RETENTION_HINT = f"Use a whole number of days from {MIN_KEEP_DAYS} to {MAX_KEEP_DAYS}"
+RETENTION_HINT = f"Enter a whole number of days from {MIN_KEEP_DAYS} to {MAX_KEEP_DAYS}."
 
 
 class Tone(StrEnum):
@@ -58,6 +65,7 @@ class Tone(StrEnum):
 class StatusView:
     text: str
     tone: Tone
+    help_url: str
 
 
 @dataclass(frozen=True, slots=True)
@@ -68,6 +76,7 @@ class PluginCardView:
     purpose: PluginPurpose
     enabled: bool
     status: StatusView
+    setup_hint: str
     fields: tuple[FormField, ...]
     expanded: bool
 
@@ -107,6 +116,7 @@ def plugin_card(
         purpose=plugin.info.purpose,
         enabled=config.enabled,
         status=status_view(config.enabled, status, now),
+        setup_hint=setup_hint(plugin, config),
         fields=settings_fields(plugin.settings_model, config.settings, errors),
         expanded=bool(errors),
     )
@@ -127,16 +137,31 @@ def plugin_groups(cards: Iterable[PluginCardView]) -> tuple[PluginGroupView, ...
 
 def status_view(enabled: bool, status: PluginStatus, now: datetime) -> StatusView:
     if not enabled:
-        return StatusView("Off", Tone.QUIET)
+        return StatusView("Off", Tone.QUIET, "")
     match status.state:
         case PluginState.FAILING:
-            return StatusView(f"Error: {status.last_error}", Tone.BAD)
+            problem = status.last_error or "Failing"
+            text, help_url = KNOWN_PROBLEMS.get(problem, (problem, ""))
+            return StatusView(text, Tone.BAD, help_url)
         case PluginState.RUNNING if status.last_success is not None:
-            return StatusView(f"Working · last success {ago(now - status.last_success)}", Tone.GOOD)
+            last = ago(now - status.last_success)
+            return StatusView(f"Working · last success {last}", Tone.GOOD, "")
         case PluginState.RUNNING:
-            return StatusView("Running", Tone.GOOD)
+            return StatusView("Running", Tone.GOOD, "")
         case _:
-            return StatusView("Not running", Tone.QUIET)
+            return StatusView("Not running", Tone.QUIET, "")
+
+
+def setup_hint(plugin: PluginClass, config: PluginConfig) -> str:
+    model = plugin.settings_model
+    missing = [
+        f"“{field_label(name, model.model_fields[name])}”"
+        for name in model.model_fields
+        if name in model.setup_fields() and not config.settings.get(name)
+    ]
+    if config.enabled or not missing:
+        return ""
+    return f"Fill in {' and '.join(missing)}, then switch it on."
 
 
 def policy_view(policy: PresencePolicy, sweep_interval: timedelta | None) -> PresenceView:
@@ -166,9 +191,9 @@ def sweep_warning(policy: PresencePolicy, sweep_interval: timedelta | None) -> s
     if shortest >= sweep_interval * SWEEPS_BEFORE_OFFLINE:
         return ""
     return (
-        f"The ARP sweep runs every {format_duration(sweep_interval)}. Thresholds shorter than "
-        f"{format_duration(sweep_interval * SWEEPS_BEFORE_OFFLINE)} will make quiet devices "
-        "flicker between online and offline."
+        f"The ARP sweep checks quiet devices every {format_duration(sweep_interval)}. A wait "
+        f"shorter than {format_duration(sweep_interval * SWEEPS_BEFORE_OFFLINE)} makes devices "
+        "that only answer the sweep flicker between online and offline."
     )
 
 

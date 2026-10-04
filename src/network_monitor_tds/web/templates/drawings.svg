@@ -277,5 +277,47 @@
       <path d="M92 80a8 8 0 1 1 11.5 7.2c-2.6 1.4-3.5 2.8-3.5 6" fill="none" stroke="#7d5c33" stroke-width="4" stroke-linecap="round"/>
       <circle cx="100" cy="102" r="2.6" fill="#7d5c33"/>
     </symbol>
+    <symbol id="dv-water-heater" viewBox="0 0 200 140">
+      <rect x="84" y="100" width="6" height="12" fill="url(#dv-alu)"/>
+      <rect x="110" y="100" width="6" height="12" fill="url(#dv-alu)"/>
+      <rect x="82" y="103" width="10" height="4" rx="1" fill="url(#dv-blue)"/>
+      <rect x="108" y="103" width="10" height="4" rx="1" fill="url(#dv-coral)"/>
+      <path d="M70 16v80a30 9 0 0 0 60 0V16z" fill="url(#dv-white-h)"/>
+      <ellipse cx="100" cy="16" rx="30" ry="9" fill="#fbfcfd"/>
+      <path d="M70 30a30 9 0 0 0 60 0" fill="none" stroke="#000" stroke-opacity=".07" stroke-width="1.4"/>
+      <rect x="86" y="44" width="28" height="22" rx="4" fill="#eef0f3"/>
+      <rect x="90" y="48" width="20" height="10" rx="2" fill="url(#dv-glass)"/>
+      <circle cx="100" cy="62" r="1.8" fill="#f0b44a"/>
+    </symbol>
+
+    <symbol id="dv-ereader" viewBox="0 0 200 140">
+      <rect x="62" y="8" width="76" height="104" rx="7" fill="url(#dv-dark)"/>
+      <rect x="68" y="15" width="64" height="80" rx="1.5" fill="url(#dv-white)"/>
+      <g fill="#c3c8cf"><rect x="74" y="24" width="52" height="2.5" rx="1"/><rect x="74" y="31" width="48" height="2.5" rx="1"/><rect x="74" y="38" width="52" height="2.5" rx="1"/><rect x="74" y="45" width="38" height="2.5" rx="1"/><rect x="74" y="56" width="52" height="2.5" rx="1"/><rect x="74" y="63" width="50" height="2.5" rx="1"/><rect x="74" y="70" width="44" height="2.5" rx="1"/><rect x="74" y="77" width="30" height="2.5" rx="1"/></g>
+    </symbol>
+
+    <symbol id="dv-board" viewBox="0 0 200 140">
+      <rect x="40" y="74" width="120" height="38" rx="3" fill="url(#dv-coral)"/>
+      <rect x="40" y="62" width="120" height="14" rx="3" fill="url(#dv-white)"/>
+      <path d="M40 62l14-14h92l14 14z" fill="#fbfcfd"/>
+      <rect x="52" y="80" width="22" height="26" rx="1.5" fill="url(#dv-alu)"/>
+      <rect x="80" y="80" width="22" height="26" rx="1.5" fill="url(#dv-alu)"/>
+      <rect x="108" y="80" width="30" height="28" rx="1.5" fill="url(#dv-alu)"/>
+      <g fill="#2a2e35"><rect x="55" y="84" width="16" height="6" rx="1"/><rect x="55" y="95" width="16" height="6" rx="1"/><rect x="83" y="84" width="16" height="6" rx="1"/><rect x="83" y="95" width="16" height="6" rx="1"/><rect x="112" y="85" width="22" height="13" rx="1"/><rect x="119" y="97" width="8" height="4"/></g>
+      <circle cx="148" cy="86" r="2" fill="#3ccf8e"/>
+      <circle cx="148" cy="94" r="2" fill="#f0b44a"/>
+    </symbol>
+
+    <symbol id="dv-streaming-stick" viewBox="0 0 200 140">
+      <rect x="16" y="94" width="26" height="16" rx="2" fill="url(#dv-alu)"/>
+      <rect x="20" y="99" width="18" height="6" rx="1" fill="#2a2e35"/>
+      <rect x="40" y="88" width="96" height="24" rx="10" fill="url(#dv-dark)"/>
+      <path d="M50 88h76c4 0 7 1 9 3H41c2-2 5-3 9-3z" fill="#fff" opacity=".08"/>
+      <rect x="150" y="20" width="26" height="92" rx="12" fill="url(#dv-dark)"/>
+      <rect x="158" y="27" width="10" height="2" rx="1" fill="#7fd3ff"/>
+      <circle cx="163" cy="44" r="9" fill="#3b414b"/>
+      <circle cx="163" cy="44" r="4" fill="#262a31"/>
+      <g fill="#262a31"><circle cx="157" cy="62" r="2.6"/><circle cx="169" cy="62" r="2.6"/><circle cx="157" cy="72" r="2.6"/><circle cx="169" cy="72" r="2.6"/><circle cx="163" cy="84" r="2.6"/></g>
+    </symbol>
   </defs>
 </svg>

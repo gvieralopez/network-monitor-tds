@@ -4,7 +4,7 @@ All data lives in one SQLite database, `nmtds.db`, in the data folder (`NMTDS_DA
 
 ## How long history is kept
 
-Online history and events are deleted once they are older than **Keep history for** under **Settings → General** (90 days by default, at least 14 so the device panel's two-week history is always complete). The monitor checks once when it starts and then once a day.
+Online history and events are deleted once they are older than **Keep for** under **Settings → General → History** (90 days by default, at least 14 so the device panel's two-week history is always complete). The monitor checks once when it starts and then once a day.
 
 Devices themselves, their names, labels and what plugins learned about them are never deleted automatically, however long a device has been gone. A device that comes back after months is recognised as the same device, not reported as new.
 

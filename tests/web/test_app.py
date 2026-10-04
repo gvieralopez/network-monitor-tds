@@ -8,6 +8,7 @@ from httpx import ASGITransport, AsyncClient
 from network_monitor_tds.domain.network.models import MacAddress
 from network_monitor_tds.web.app import create_app
 from network_monitor_tds.web.models import WebContext
+from network_monitor_tds.web.templating import GROUPING_COOKIE, SORTING_COOKIE
 
 pytestmark = pytest.mark.anyio
 
@@ -58,6 +59,33 @@ async def test_devices_page_filters(
 
     assert response.status_code == 200
     assert posters_in(response.text) == posters
+
+
+@pytest.mark.usefixtures("seen_device")
+@pytest.mark.parametrize(
+    ("cookies", "params", "group", "sort"),
+    [
+        ({}, {}, "category", "smart"),
+        ({GROUPING_COOKIE: "vendor", SORTING_COOKIE: "seen"}, {}, "vendor", "seen"),
+        (
+            {GROUPING_COOKIE: "vendor", SORTING_COOKIE: "seen"},
+            {"group": "status"},
+            "status",
+            "seen",
+        ),
+        ({GROUPING_COOKIE: "sideways"}, {}, "category", "smart"),
+    ],
+)
+async def test_devices_page_opens_with_the_browser_defaults(
+    client: AsyncClient, cookies: dict[str, str], params: dict[str, str], group: str, sort: str
+) -> None:
+    for name, value in cookies.items():
+        client.cookies.set(name, value)
+
+    response = await client.get("/", params=params)
+
+    assert f'<option value="{group}" selected>' in response.text
+    assert f'<option value="{sort}" selected>' in response.text
 
 
 async def test_devices_page_rejects_invalid_filters(client: AsyncClient) -> None:

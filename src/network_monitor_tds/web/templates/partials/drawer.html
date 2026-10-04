@@ -12,7 +12,7 @@
   <div class="d-body">
     {% if card.is_new %}
     <div class="notice"><span>First seen {{ drawer.first_seen }}. Not reviewed yet.</span>
-      <button type="button" class="btn" hx-post="/devices/{{ card.mac }}/acknowledge" hx-target="#drawer">Mark as known</button></div>
+      <button type="button" class="btn" hx-post="/devices/{{ card.mac }}/acknowledge" hx-target="closest .notice" hx-swap="delete">Mark as known</button></div>
     {% endif %}
 
     <section class="section">
