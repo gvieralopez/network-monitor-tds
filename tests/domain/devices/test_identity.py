@@ -38,6 +38,19 @@ def test_user_label_wins(mac: MacAddress, make_facts: FactsFactory) -> None:
         ),
         ({KnownField.MDNS_NAME: "DS920.local."}, Resolved("DS920", KnownField.MDNS_NAME)),
         (
+            {KnownField.LEASE_HOSTNAME: "amazon-FS-TV.gao.it", KnownField.DHCP_HOSTNAME: "x"},
+            Resolved("amazon-FS-TV", KnownField.LEASE_HOSTNAME),
+        ),
+        ({KnownField.DHCP_HOSTNAME: "hive.gao.it"}, Resolved("hive", KnownField.DHCP_HOSTNAME)),
+        (
+            {KnownField.LEASE_HOSTNAME: "localhost.localdomain", KnownField.VENDOR: "HP"},
+            Resolved("HP device", KnownField.VENDOR),
+        ),
+        (
+            {KnownField.UPNP_FRIENDLY_NAME: "Mr. Smith's TV"},
+            Resolved("Mr. Smith's TV", KnownField.UPNP_FRIENDLY_NAME),
+        ),
+        (
             {KnownField.UPNP_FRIENDLY_NAME: "LG webOS TV"},
             Resolved("LG webOS TV", KnownField.UPNP_FRIENDLY_NAME),
         ),
