@@ -1,6 +1,7 @@
 # Network Monitor TDS documentation
 
 - [Getting started](getting-started.md): install, run, and try the demo network.
+- [Running in Docker](docker.md): the published image and a compose example.
 - [Using the web interface](web-interface.md): the device catalogue, filters, device panel and labels.
 - [How devices are named and categorized](device-identity.md)
 - [How online and offline work](presence.md)

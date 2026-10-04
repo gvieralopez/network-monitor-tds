@@ -226,4 +226,4 @@ __marimo__/
 *.db.bak-*
 
 # Local runtime data
-data/
+/data/

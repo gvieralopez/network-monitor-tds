@@ -18,7 +18,7 @@ Granting the capabilities to the Python interpreter (`setcap`) also works, but t
 
 ## In a container
 
-Run the container with host networking and only these two capabilities, rather than privileged:
+Run the container with host networking and only these two capabilities, rather than privileged. The image cannot start without them; see [Running in Docker](docker.md) for the full setup.
 
 ```yaml
 network_mode: host

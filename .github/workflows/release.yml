@@ -13,14 +13,16 @@ concurrency:
 jobs:
   release:
     if: github.event.workflow_run.conclusion == 'success'
-    uses: gvieralopez/cookie-pyrate/.github/workflows/reusable-release.yml@v0.1.9
+    uses: gvieralopez/cookie-pyrate/.github/workflows/reusable-release.yml@v0.1.10
     permissions:
       contents: write
+      packages: write
     with:
-      cookie-pyrate-ref: v0.1.9
+      cookie-pyrate-ref: v0.1.10
       create-github-release: true
       attach-distribution: false
       publish-to-pypi: false # if set to true, needs extra config — see DEVELOPMENT.md
+      publish-docker-image: true
       prepare-next-version: true
     secrets:
       # Created by `make repo`; lets the version bumps land on a protected main.

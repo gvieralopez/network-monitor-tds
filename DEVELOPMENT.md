@@ -159,6 +159,9 @@ process with the following options on the `.github/workflows/release.yml` workfl
   GitHub release as downloadable files. Requires `create-github-release` to also be on.
 - `publish-to-pypi` (off by default) — builds the distribution and publishes it to PyPI.
   Only relevant if you distribute this project as a package.
+- `publish-docker-image` (on in this project) — builds the Dockerfile and pushes the image to
+  `ghcr.io/gvieralopez/network-monitor-tds`, tagged with the version and `latest`. Needs
+  `packages: write` in the release job's `permissions`.
 - `prepare-next-version` (on by default) — bumps `main` to the next prerelease once the
   release is out.
 
@@ -201,7 +204,18 @@ Removes build artifacts, caches, and temporary files.
 make dockerimage
 ```
 
-Generates a Docker image with the package pre-installed and ready to use.
+Generates a Docker image with the package pre-installed and ready to use. To try it on the local
+network, with its data in a named volume:
+
+```bash
+docker run --rm --network host --cap-add NET_RAW --cap-add NET_ADMIN \
+  -v nmtds-data:/data network-monitor-tds:latest
+```
+
+The image runs as a non-root user (uid 10001) and listens on `0.0.0.0:8000`. Both capabilities are
+required: without them the container stops at start with `operation not permitted`. To keep the
+data in a host folder instead, make it writable by uid 10001, or run with `--user` set to the
+folder's owner.
 
 
 

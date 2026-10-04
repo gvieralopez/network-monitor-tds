@@ -94,7 +94,9 @@ class _RunningCapture:
     sniffer: AsyncSniffer
 
     def stop(self) -> None:
-        self.sniffer.stop(join=False)
+        # scapy never closes a socket it was given; closing it before the sniffer thread exits
+        # makes that thread read from a closed socket and log a warning.
+        self.sniffer.stop(join=True)
         self.socket.close()
 
 

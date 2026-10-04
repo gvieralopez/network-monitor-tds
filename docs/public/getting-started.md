@@ -10,6 +10,8 @@ Network Monitor TDS watches your home network and shows every device it finds: w
 
 ## Install
 
+To run the published image instead of installing from source, see [Running in Docker](docker.md).
+
 ```bash
 git clone https://github.com/gvieralopez/network-monitor-tds.git
 cd network-monitor-tds
