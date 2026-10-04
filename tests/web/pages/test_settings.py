@@ -33,15 +33,26 @@ def control(web_context: WebContext) -> FakeControl:
     return web_context.control
 
 
-async def test_settings_page(client: AsyncClient, web_context: WebContext) -> None:
-    control(web_context).statuses[DEMO] = PluginStatus(PluginState.FAILING, None, "no access")
-
+async def test_general_settings_page(client: AsyncClient) -> None:
     response = await client.get("/settings")
 
     assert response.status_code == 200
+    assert '<a href="/settings" aria-current="page">General</a>' in response.text
+    assert 'name="offline_after" value="10m"' in response.text
+    assert "Demo network" not in response.text
+
+
+async def test_plugin_settings_page(client: AsyncClient, web_context: WebContext) -> None:
+    control(web_context).statuses[DEMO] = PluginStatus(PluginState.FAILING, None, "no access")
+
+    response = await client.get("/settings/plugins")
+
+    assert response.status_code == 200
+    assert '<a href="/settings/plugins" aria-current="page">Plugins</a>' in response.text
+    assert "Check on a schedule" in response.text
     assert "Demo network" in response.text
     assert "Error: no access" not in response.text
-    assert 'name="offline_after" value="10m"' in response.text
+    assert 'name="offline_after"' not in response.text
 
 
 async def test_toggle_plugin(client: AsyncClient, web_context: WebContext) -> None:

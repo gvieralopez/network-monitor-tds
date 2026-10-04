@@ -1,5 +1,5 @@
 <div class="plug{{ '' if card.enabled else ' off' }}" id="plugin-{{ card.plugin_id }}">
-  <div class="pn">{{ card.name }} <span class="kind">{{ card.kind }}</span><span class="code">{{ card.plugin_id }}</span></div>
+  <div class="pn">{{ card.name }} <span class="code">{{ card.plugin_id }}</span></div>
   <form class="switch-form" hx-post="/settings/plugins/{{ card.plugin_id }}/enabled" hx-trigger="change" hx-target="#plugin-{{ card.plugin_id }}" hx-swap="outerHTML">
     <label class="switch" title="{{ 'Turn off' if card.enabled else 'Turn on' }}"><input type="checkbox" name="enabled" value="true" {% if card.enabled %}checked{% endif %} aria-label="Enable {{ card.name }}"><span></span></label>
   </form>

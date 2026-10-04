@@ -43,7 +43,7 @@ Split into stories, done one at a time in this order. Each story ends with `make
 
 ### Story 2: Settings tabs and plugin grouping
 
-- [ ] **Rework settings.** The settings view is cluttered. Add internal tabs (General, Plugins,
+- [x] **Rework settings.** The settings view is cluttered. Add internal tabs (General, Plugins,
       maybe Presence) and group plugins by type (discovery, enrichment, integration). Done before
       Stories 4 and 5 so their new settings land straight in the new layout.
 

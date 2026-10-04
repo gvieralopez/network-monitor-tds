@@ -110,7 +110,7 @@ async def test_settings_page_lists_plugins(client: AsyncClient, web_context: Web
     async with web_context.unit_of_work() as uow:
         assert await uow.plugin_configs.list() == []
 
-    empty = await client.get("/settings")
+    empty = await client.get("/settings/plugins")
 
     assert empty.status_code == 200
     assert "No plugins installed." in empty.text

@@ -4,16 +4,26 @@
 {% block content %}
 <main class="wrap">
   <div class="settings">
+    <nav class="tabs" aria-label="Settings sections">
+      <a href="/settings" {% if tab == "general" %}aria-current="page"{% endif %}>General</a>
+      <a href="/settings/plugins" {% if tab == "plugins" %}aria-current="page"{% endif %}>Plugins</a>
+    </nav>
+    {% if tab == "plugins" %}
+    <p class="lede">Each plugin finds or describes devices in a different way. Changes apply straight away.</p>
+    {% for group in groups %}
     <section>
-      <h2>Discovery plugins</h2>
-      <p class="lede">Each plugin finds devices in a different way. Changes apply straight away.</p>
+      <h2>{{ group.title }}</h2>
+      <p class="lede">{{ group.lede }}</p>
       <div class="plist">
-        {% for card in cards %}{% include "partials/plugin_card.html" %}{% else %}
-        <div class="plug"><div class="pd">No plugins installed.</div></div>
-        {% endfor %}
+        {% for card in group.cards %}{% include "partials/plugin_card.html" %}{% endfor %}
       </div>
     </section>
+    {% else %}
+    <div class="plist"><div class="plug"><div class="pd">No plugins installed.</div></div></div>
+    {% endfor %}
+    {% else %}
     {% include "partials/presence.html" %}
+    {% endif %}
   </div>
 </main>
 {% endblock %}

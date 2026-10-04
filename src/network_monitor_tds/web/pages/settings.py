@@ -21,6 +21,7 @@ from network_monitor_tds.web.models import WebContext
 from network_monitor_tds.web.pages.settings_views import (
     PresenceView,
     plugin_card,
+    plugin_groups,
     policy_view,
     status_view,
     sweep_interval,
@@ -33,7 +34,20 @@ PRESENCE_FIELDS = ("offline_after", "mobile_offline_after")
 
 
 @router.get("", response_class=HTMLResponse)
-async def settings_page(request: Request, context: ContextDep) -> HTMLResponse:
+async def general_settings_page(request: Request, context: ContextDep) -> HTMLResponse:
+    configs = {
+        config.plugin_id: config for config in await list_plugin_configs(context.unit_of_work())
+    }
+    policy = await load_presence_policy(context.unit_of_work())
+    return templates.TemplateResponse(
+        request,
+        "settings.html",
+        {"tab": "general", "presence": policy_view(policy, sweep_interval(configs))},
+    )
+
+
+@router.get("/plugins", response_class=HTMLResponse)
+async def plugin_settings_page(request: Request, context: ContextDep) -> HTMLResponse:
     now = context.clock.now()
     configs = {
         config.plugin_id: config for config in await list_plugin_configs(context.unit_of_work())
@@ -43,11 +57,8 @@ async def settings_page(request: Request, context: ContextDep) -> HTMLResponse:
         for plugin_id, plugin in sorted(context.plugins.items())
         if plugin_id in configs
     ]
-    policy = await load_presence_policy(context.unit_of_work())
     return templates.TemplateResponse(
-        request,
-        "settings.html",
-        {"cards": cards, "presence": policy_view(policy, sweep_interval(configs))},
+        request, "settings.html", {"tab": "plugins", "groups": plugin_groups(cards)}
     )
 
 

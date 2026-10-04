@@ -1,4 +1,4 @@
-from collections.abc import Mapping
+from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from enum import StrEnum
@@ -15,10 +15,16 @@ from network_monitor_tds.web.views import ago
 
 SWEEP_PLUGIN = PluginId("arp-sweep")
 SWEEPS_BEFORE_OFFLINE = 2
-KIND_LABELS = {
-    PluginKind.LISTENER: "Listens",
-    PluginKind.SCHEDULED: "Scheduled",
-    PluginKind.ENRICHMENT: "Enrichment",
+KIND_GROUPS = {
+    PluginKind.LISTENER: (
+        "Listen passively",
+        "Hear devices as they talk on the network. Nothing is sent.",
+    ),
+    PluginKind.SCHEDULED: (
+        "Check on a schedule",
+        "Scan the network or ask other services for devices every few minutes.",
+    ),
+    PluginKind.ENRICHMENT: ("Enrich devices", "Add details to devices the other plugins found."),
 }
 
 
@@ -42,11 +48,18 @@ class PluginCardView:
     plugin_id: str
     name: str
     description: str
-    kind: str
+    kind: PluginKind
     enabled: bool
     status: StatusView
     fields: tuple[FormField, ...]
     expanded: bool
+
+
+@dataclass(frozen=True, slots=True)
+class PluginGroupView:
+    title: str
+    lede: str
+    cards: tuple[PluginCardView, ...]
 
 
 @dataclass(frozen=True, slots=True)
@@ -68,11 +81,22 @@ def plugin_card(
         plugin_id=config.plugin_id,
         name=plugin.info.name,
         description=plugin.info.description,
-        kind=KIND_LABELS[plugin.kind],
+        kind=plugin.kind,
         enabled=config.enabled,
         status=status_view(config.enabled, status, now),
         fields=settings_fields(plugin.settings_model, config.settings, errors),
         expanded=bool(errors),
+    )
+
+
+def plugin_groups(cards: Iterable[PluginCardView]) -> tuple[PluginGroupView, ...]:
+    by_kind: dict[PluginKind, list[PluginCardView]] = {kind: [] for kind in KIND_GROUPS}
+    for card in cards:
+        by_kind[card.kind].append(card)
+    return tuple(
+        PluginGroupView(*KIND_GROUPS[kind], tuple(group))
+        for kind, group in by_kind.items()
+        if group
     )
 
 
