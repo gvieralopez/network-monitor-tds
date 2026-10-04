@@ -47,4 +47,4 @@ See [DEVELOPMENT.md](DEVELOPMENT.md) for the full workflow and [AGENTS.md](AGENT
 
 ---
 
-<sub>Project starter provided by [Cookie Pyrate](https://github.com/gvieralopez/cookie-pyrate). Thanks to [NetAlertX](https://github.com/jokob-sk/NetAlertX) for the inspiration.</sub>
+<sub>Project starter provided by [Cookie Pyrate](https://github.com/gvieralopez/cookie-pyrate). Thanks to [NetAlertX](https://github.com/netalertx/NetAlertX) for the inspiration.</sub>

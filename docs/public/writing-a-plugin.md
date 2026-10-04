@@ -52,7 +52,9 @@ class PrinterPlugin(ScheduledPlugin[PrinterSettings]):
     settings_model: ClassVar[type[PrinterSettings]] = PrinterSettings
 
     async def run(self, context: PluginContext) -> None:
-        await context.sighting(MacAddress.parse("64:4e:d7:0b:c9:18"), None, {"mdns_name": "printer"})
+        await context.sighting(
+            MacAddress.parse("64:4e:d7:0b:c9:18"), None, {"mdns_name": "printer"}
+        )
 ```
 
 Register it in your package's `pyproject.toml`, then reinstall it next to the monitor:
