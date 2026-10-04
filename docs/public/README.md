@@ -9,5 +9,6 @@
 - [Technitium DHCP integration](technitium.md)
 - [Configuration](configuration.md): environment variables and where data lives.
 - [Command line](cli.md)
+- [JSON API](api.md): read devices from scripts and home automation.
 - [Data, upgrades and backups](data-and-upgrades.md)
 - [Writing a plugin](writing-a-plugin.md)
