@@ -4,6 +4,8 @@ Each device card shows a drawing of the kind of device it is, on top of the artw
 
 Product images were considered and rejected. The monitor rarely knows the exact model, so an image of a specific product would often be wrong, and product photos or logos would bring copyright and trademark problems into the repository. Drawings of kinds of devices avoid both, stay small enough to review in a diff, and look like one family because they share a canvas, a camera angle, light and materials.
 
+Letting users upload their own images was also considered and dropped: the built-in set and the per-category defaults cover the need, and uploads would bring storage, image validation and a second visual style to keep consistent.
+
 ## Consequences
 
 - Drawings show a kind of device ("tower console, white"), never a product: no brand names in ids or labels, and no logos or signature product details in the drawings.
