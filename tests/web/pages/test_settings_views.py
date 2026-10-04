@@ -6,7 +6,7 @@ from network_monitor_tds.application.models import PluginState, PluginStatus
 from network_monitor_tds.domain.plugins.models import PluginConfig, PluginId
 from network_monitor_tds.domain.presence.policy import DEFAULT_POLICY, PresencePolicy
 from network_monitor_tds.domain.retention.models import RetentionPolicy
-from network_monitor_tds.plugins.sdk.models import PluginKind
+from network_monitor_tds.plugins.sdk.models import PluginPurpose
 from network_monitor_tds.web.pages.settings_views import (
     PluginCardView,
     StatusView,
@@ -74,24 +74,31 @@ def test_policy_view() -> None:
 
 
 @pytest.mark.parametrize(
-    ("kinds", "titles"),
+    ("purposes", "titles"),
     [
         ([], []),
-        ([PluginKind.ENRICHMENT, PluginKind.LISTENER], [("Listen passively", 1), ("Enrich devices", 1)]),
-        ([PluginKind.SCHEDULED, PluginKind.SCHEDULED], [("Check on a schedule", 2)]),
+        (
+            [PluginPurpose.DEVELOPMENT, PluginPurpose.PASSIVE_DISCOVERY],
+            [("Passive device finders", 1), ("Developer tools", 1)],
+        ),
+        (
+            [PluginPurpose.INTEGRATION, PluginPurpose.METADATA, PluginPurpose.ACTIVE_DISCOVERY],
+            [("Active device finders", 1), ("Third-party integrations", 1), ("Metadata providers", 1)],
+        ),
+        ([PluginPurpose.PASSIVE_DISCOVERY] * 2, [("Passive device finders", 2)]),
     ],
 )  # fmt: skip
-def test_plugin_groups(kinds: list[PluginKind], titles: list[tuple[str, int]]) -> None:
-    cards = [_card(f"plugin-{index}", kind) for index, kind in enumerate(kinds)]
+def test_plugin_groups(purposes: list[PluginPurpose], titles: list[tuple[str, int]]) -> None:
+    cards = [_card(f"plugin-{index}", purpose) for index, purpose in enumerate(purposes)]
 
     groups = plugin_groups(cards)
 
     assert [(group.title, len(group.cards)) for group in groups] == titles
 
 
-def _card(plugin_id: str, kind: PluginKind) -> PluginCardView:
+def _card(plugin_id: str, purpose: PluginPurpose) -> PluginCardView:
     return PluginCardView(
-        plugin_id, plugin_id, "", kind, True, StatusView("Off", Tone.QUIET), (), False
+        plugin_id, plugin_id, "", purpose, True, StatusView("Off", Tone.QUIET), (), False
     )
 
 

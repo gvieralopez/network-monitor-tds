@@ -1,0 +1,10 @@
+<section id="appearance">
+  <h2>Appearance</h2>
+  <p class="lede">Light or dark, or follow this device's system setting. The choice is saved in this browser only.</p>
+  <div class="seg" role="radiogroup" aria-label="Theme" data-theme-cookie="{{ theme_cookie }}">
+    {% set current = theme_of(request) %}
+    {% for value, label in themes %}
+    <label><input type="radio" name="theme" value="{{ value }}" {% if current == value %}checked{% endif %}>{{ label }}</label>
+    {% endfor %}
+  </div>
+</section>

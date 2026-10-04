@@ -3,9 +3,11 @@ from pathlib import Path
 
 import pytest
 
+from network_monitor_tds import bootstrap
 from network_monitor_tds.application.plugins import set_plugin_enabled, sync_plugin_configs
-from network_monitor_tds.bootstrap import build_container, prepare_database, serve
+from network_monitor_tds.bootstrap import build_container, serve
 from network_monitor_tds.domain.plugins.models import PluginId
+from network_monitor_tds.infrastructure.db.migrator import prepare_database
 from network_monitor_tds.plugins.host.registry import plugin_defaults
 from network_monitor_tds.settings import AppSettings
 from tests.conftest import wait_until
@@ -19,7 +21,7 @@ async def test_serve_monitors_the_demo_network(
     monkeypatch.setenv("NMTDS_PORT", "0")
     settings = AppSettings()
     container = build_container(settings)
-    await prepare_database(container)
+    await prepare_database(container.engine, settings.database_path)
     await sync_plugin_configs(
         container.unit_of_work(), plugin_defaults(dict(container.plugins)), container.clock.now()
     )
@@ -46,3 +48,21 @@ async def test_serve_monitors_the_demo_network(
     assert device_count > 0
     assert (data_dir / "nmtds.db").exists()
     await wait_until(server.done)
+
+
+class StoppingServer:
+    async def serve(self) -> None:
+        await asyncio.sleep(0.05)
+
+
+async def test_serve_returns_once_the_web_server_stops(
+    data_dir: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(bootstrap, "_web_server", lambda _container: StoppingServer())
+    settings = AppSettings()
+    container = build_container(settings)
+    await prepare_database(container.engine, settings.database_path)
+    await container.engine.dispose()
+
+    async with asyncio.timeout(5):
+        await serve(settings)

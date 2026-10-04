@@ -11,6 +11,8 @@ NAME_PRIORITY = (
     KnownField.MDNS_NAME,
     KnownField.UPNP_FRIENDLY_NAME,
 )
+# A DHCP hostname has no dots; anything after the first one is a DNS domain (`hive.gao.it`).
+HOSTNAME_FIELDS = frozenset({KnownField.LEASE_HOSTNAME, KnownField.DHCP_HOSTNAME})
 _PLACEHOLDER_NAMES = frozenset({"*", "localhost", "unknown", "none", "(none)"})
 _LOCAL_SUFFIXES = (".local", ".lan", ".home", ".localdomain", ".home.arpa")
 
@@ -20,7 +22,7 @@ def resolve_name(mac: MacAddress, labels: DeviceLabels, facts: Mapping[str, Fact
         return Resolved(labels.name.strip(), Fallback.USER)
     for field in NAME_PRIORITY:
         fact = facts.get(field)
-        name = _clean_hostname(fact.value) if fact is not None else ""
+        name = _clean_name(field, fact.value) if fact is not None else ""
         if name:
             return Resolved(name, field)
     vendor = facts.get(KnownField.VENDOR)
@@ -35,8 +37,10 @@ def resolve_category(labels: DeviceLabels, facts: Mapping[str, Fact]) -> Resolve
     return classify(facts)
 
 
-def _clean_hostname(raw: str) -> str:
+def _clean_name(field: str, raw: str) -> str:
     name = raw.strip().rstrip(".")
+    if field in HOSTNAME_FIELDS:
+        name = name.split(".", 1)[0]
     for suffix in _LOCAL_SUFFIXES:
         name = name.removesuffix(suffix)
     return "" if name.lower() in _PLACEHOLDER_NAMES else name

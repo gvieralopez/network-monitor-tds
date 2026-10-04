@@ -16,6 +16,9 @@ from tests.conftest import FactsFactory
         ("Pixel-8", Category.PHONE),
         ("ThinkPad-X1", Category.COMPUTER),
         ("gustavo-pc", Category.COMPUTER),
+        ("Mac", Category.COMPUTER),
+        ("Johns-MBP", Category.COMPUTER),
+        ("Watch", Category.PHONE),
         ("Chromecast", Category.MEDIA),
         ("LG webOS TV", Category.MEDIA),
         ("living-room-tv", Category.MEDIA),
@@ -65,6 +68,15 @@ def test_hostname_rules(make_facts: FactsFactory, hostname: str, category: Categ
         ({KnownField.VENDOR: "Espressif Inc."}, Category.IOT, KnownField.VENDOR),
         ({KnownField.VENDOR: "Synology Incorporated"}, Category.SERVER, KnownField.VENDOR),
         ({KnownField.VENDOR: "Sony Interactive Entertainment"}, Category.MEDIA, KnownField.VENDOR),
+        ({KnownField.VENDOR: "FRITZ! Technology"}, Category.NETWORK, KnownField.VENDOR),
+        ({KnownField.VENDOR: "Amazon Technologies"}, Category.MEDIA, KnownField.VENDOR),
+        (
+            {KnownField.VENDOR: "CLOUD NETWORK TECHNOLOGY SINGAPORE"},
+            Category.COMPUTER,
+            KnownField.VENDOR,
+        ),
+        ({KnownField.VENDOR: "GIGA-BYTE TECHNOLOGY"}, Category.COMPUTER, KnownField.VENDOR),
+        ({KnownField.VENDOR: "Micro-Star INTL"}, Category.COMPUTER, KnownField.VENDOR),
         ({KnownField.VENDOR: "Lenovo"}, Category.UNKNOWN, Fallback.DEFAULT),
         ({}, Category.UNKNOWN, Fallback.DEFAULT),
     ],
@@ -82,3 +94,11 @@ def test_hostname_takes_precedence_over_vendor(make_facts: FactsFactory) -> None
     facts = make_facts({KnownField.DHCP_HOSTNAME: "front-door-cam", KnownField.VENDOR: "Espressif"})
 
     assert classify(facts).value is Category.CAMERA
+
+
+def test_amazon_vendor_gives_way_to_a_kindle_hostname(make_facts: FactsFactory) -> None:
+    facts = make_facts(
+        {KnownField.DHCP_HOSTNAME: "Kindle-Paperwhite", KnownField.VENDOR: "Amazon Technologies"}
+    )
+
+    assert classify(facts).value is Category.TABLET

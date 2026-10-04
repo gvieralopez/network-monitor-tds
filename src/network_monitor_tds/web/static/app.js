@@ -49,6 +49,16 @@
     }
   });
 
+  document.addEventListener("change", (event) => {
+    const picker = event.target.closest?.("[data-theme-cookie]");
+    if (!picker) return;
+    const theme = event.target.value;
+    document.cookie = `${picker.dataset.themeCookie}=${theme}; path=/; max-age=31536000; SameSite=Lax`;
+    if (theme === "auto") delete document.documentElement.dataset.theme;
+    else document.documentElement.dataset.theme = theme;
+    toast(`Theme: ${event.target.closest("label").textContent.trim()}`);
+  });
+
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape" && document.querySelector("#drawer .drawer")) closeDrawer();
   });

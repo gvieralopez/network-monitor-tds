@@ -14,7 +14,6 @@ from network_monitor_tds.application.ports import UnitOfWork
 from network_monitor_tds.domain.plugins.models import PluginId
 from network_monitor_tds.infrastructure.clock import SystemClock
 from network_monitor_tds.infrastructure.db.engine import create_engine, create_session_factory
-from network_monitor_tds.infrastructure.db.migrator import upgrade_to_head
 from network_monitor_tds.infrastructure.db.unit_of_work import unit_of_work_factory
 from network_monitor_tds.infrastructure.messaging.bus import InMemoryEventBus
 from network_monitor_tds.plugins.host.host import PluginHost, known_devices
@@ -44,14 +43,8 @@ class Container:
 async def serve(settings: AppSettings) -> None:
     container = build_container(settings)
     try:
-        await prepare_database(container)
         logger.info("Installed plugins: %s", ", ".join(container.plugins) or "none")
-        async with asyncio.TaskGroup() as group:
-            group.create_task(container.monitor.run_ingestion(), name="ingestion")
-            group.create_task(container.monitor.run_presence_checks(asyncio.sleep), name="presence")
-            group.create_task(container.monitor.run_pruning(asyncio.sleep), name="pruning")
-            group.create_task(container.host.run(), name="plugins")
-            group.create_task(_web_server(container).serve(), name="web")
+        await _run_until_the_web_server_stops(container)
     finally:
         await container.engine.dispose()
 
@@ -89,11 +82,6 @@ def build_container(settings: AppSettings) -> Container:
     )
 
 
-async def prepare_database(container: Container) -> None:
-    container.settings.data_dir.mkdir(parents=True, exist_ok=True)
-    await upgrade_to_head(container.engine, container.settings.database_path)
-
-
 def create_web_app(container: Container) -> FastAPI:
     return create_app(
         WebContext(
@@ -105,6 +93,23 @@ def create_web_app(container: Container) -> FastAPI:
             timezone=_local_timezone(),
         )
     )
+
+
+# uvicorn stops on SIGTERM/SIGINT; the background loops never end on their own.
+async def _run_until_the_web_server_stops(container: Container) -> None:
+    async with asyncio.TaskGroup() as group:
+        background = [
+            group.create_task(container.monitor.run_ingestion(), name="ingestion"),
+            group.create_task(
+                container.monitor.run_presence_checks(asyncio.sleep), name="presence"
+            ),
+            group.create_task(container.monitor.run_pruning(asyncio.sleep), name="pruning"),
+            group.create_task(container.host.run(), name="plugins"),
+        ]
+        await _web_server(container).serve()
+        logger.info("Shutting down")
+        for task in background:
+            task.cancel()
 
 
 def _web_server(container: Container) -> uvicorn.Server:

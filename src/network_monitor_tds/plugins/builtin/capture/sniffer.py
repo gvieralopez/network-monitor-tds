@@ -60,7 +60,10 @@ class CaptureHub:
         if self._running is not None:
             self._running.stop()
         self._bpf, self._running = bpf, running
-        logger.info("Capturing on %s with filter %r", self._interface, bpf)
+        if bpf:
+            logger.info("Capturing on %s with filter %r", self._interface, bpf)
+        else:
+            logger.info("Stopped capturing on %s", self._interface)
 
     def _start(self, bpf: str) -> _RunningCapture:
         loop = asyncio.get_running_loop()

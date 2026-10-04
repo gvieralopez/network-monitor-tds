@@ -15,12 +15,12 @@ NAME_RULES = (
     ClassificationRule(
         Category.PHONE,
         fragments=("iphone", "android", "galaxy", "oneplus", "redmi", "xiaomi", "motorola"),
-        words=("pixel", "moto"),
+        words=("pixel", "moto", "watch"),
     ),
     ClassificationRule(
         Category.COMPUTER,
         fragments=("macbook", "laptop", "desktop", "thinkpad", "workstation"),
-        words=("imac", "pc"),
+        words=("imac", "mac", "mbp", "pc"),
     ),
     ClassificationRule(
         Category.MEDIA,
@@ -82,10 +82,29 @@ VENDOR_RULES = (
         Category.CAMERA, fragments=("reolink", "hikvision", "dahua", "axiscomm"), words=()
     ),
     ClassificationRule(
-        Category.MEDIA, fragments=("sonyinteractive", "nintendo", "roku", "sonos"), words=()
+        Category.MEDIA,
+        fragments=("sonyinteractive", "nintendo", "roku", "sonos", "amazontechnologies"),
+        words=(),
     ),
     ClassificationRule(Category.PRINTER, fragments=("seikoepson", "brotherind"), words=()),
-    ClassificationRule(Category.NETWORK, fragments=("ubiquiti", "mikrotik"), words=("avm",)),
+    ClassificationRule(
+        Category.NETWORK, fragments=("ubiquiti", "mikrotik", "fritz"), words=("avm",)
+    ),
+    ClassificationRule(
+        Category.COMPUTER,
+        fragments=(
+            "cloudnetworktechnology",
+            "honhai",
+            "intelcorporate",
+            "azurewave",
+            "liteon",
+            "gigabyte",
+            "asustek",
+            "microstar",
+            "asrock",
+        ),
+        words=(),
+    ),
 )
 
 RULES_BY_FIELD = (

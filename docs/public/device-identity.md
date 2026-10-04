@@ -14,11 +14,11 @@ The name shown is the first available of:
 6. "*Vendor* device", from the manufacturer of its network card;
 7. its MAC address.
 
-Local suffixes such as `.local`, `.lan` and `.home.arpa` are removed, and placeholder names like `localhost` or `*` are skipped. The device panel shows the detected name and where it came from, even after you rename the device.
+Local suffixes such as `.local`, `.lan` and `.home.arpa` are removed, and DHCP hostnames lose any DNS domain (`hive.example.com` becomes `hive`). Placeholder names like `localhost` or `*` are skipped. The device panel shows the detected name and where it came from, even after you rename the device.
 
 ## Categories
 
-Categories are network, server, computer, phone, tablet, media, smart home, camera, printer and unknown. The category is guessed from, in order: hostnames (`iPhone`, `ThinkPad`, `shellyplug`, `DiskStation` …), mDNS services (`_googlecast`, `_ipp` …), the DHCP vendor class (`android-dhcp`, `MSFT`), and the manufacturer. Anything the rules do not recognise is "unknown". Choosing a category yourself always wins.
+Categories are network, server, computer, phone, tablet, media, smart home, camera, printer and unknown. The category is guessed from, in order: hostnames (`iPhone`, `ThinkPad`, `shellyplug`, `DiskStation` …), mDNS services (`_googlecast`, `_ipp` …), the DHCP vendor class (`android-dhcp`, `MSFT`), and the manufacturer. Manufacturers that mostly make PC network cards or motherboards (Intel, GIGA-BYTE, ASUSTek, Hon Hai …) count as computers, so a server built from PC parts shows as a computer until you choose "server". Smartwatches count as phones, which gives them the longer offline threshold. Anything the rules do not recognise is "unknown". Choosing a category yourself always wins.
 
 ## Randomized MAC addresses
 

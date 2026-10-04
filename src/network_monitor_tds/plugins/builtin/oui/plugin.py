@@ -5,7 +5,7 @@ from network_monitor_tds.domain.observations.models import KnownField
 from network_monitor_tds.domain.plugins.models import PluginId
 from network_monitor_tds.plugins.builtin.oui.lookup import vendor_for
 from network_monitor_tds.plugins.sdk.base import EnrichmentPlugin, PluginContext
-from network_monitor_tds.plugins.sdk.models import PluginInfo, PluginSettings
+from network_monitor_tds.plugins.sdk.models import PluginInfo, PluginPurpose, PluginSettings
 
 
 class OuiSettings(PluginSettings):
@@ -18,6 +18,7 @@ class OuiPlugin(EnrichmentPlugin[OuiSettings]):
         name="MAC vendor lookup",
         description="Finds the manufacturer from the MAC prefix, using an offline database.",
         enabled_by_default=True,
+        purpose=PluginPurpose.METADATA,
     )
     settings_model: ClassVar[type[OuiSettings]] = OuiSettings
 

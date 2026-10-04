@@ -2,20 +2,22 @@
 
 Each plugin finds devices, or learns about them, in a different way. Switch them on and off and change their settings on the Settings page; changes apply immediately. Each plugin shows its status there: working (with the time of its last success), off, or the error that stops it.
 
-There are three kinds:
+The Settings page groups them by what they are for:
 
-- **Listens**: runs all the time and reacts to traffic.
-- **Scheduled**: runs every so often.
-- **Enrichment**: runs once for every new device.
+- **Passive device finders** hear devices from the traffic they send anyway, without sending anything.
+- **Active device finders** ask the network who is there, on a schedule.
+- **Third-party integrations** read devices from services you already run.
+- **Metadata providers** add details to devices the other plugins found.
+- **Developer tools** produce simulated devices for trying the app.
 
-| Plugin | Id | Kind | On by default | Needs capture permissions |
+| Plugin | Id | Group | On by default | Needs capture permissions |
 |---|---|---|---|---|
-| ARP sweep | `arp-sweep` | Scheduled | yes | yes |
-| ARP listener | `arp-listen` | Listens | yes | yes |
-| DHCP sniffer | `dhcp-sniff` | Listens | yes | yes |
-| MAC vendor lookup | `oui` | Enrichment | yes | no |
-| Technitium DHCP leases | `technitium` | Scheduled | no | no |
-| Demo network | `demo` | Scheduled | no | no |
+| ARP listener | `arp-listen` | Passive device finders | yes | yes |
+| DHCP sniffer | `dhcp-sniff` | Passive device finders | yes | yes |
+| ARP sweep | `arp-sweep` | Active device finders | yes | yes |
+| Technitium DHCP leases | `technitium` | Third-party integrations | no | no |
+| MAC vendor lookup | `oui` | Metadata providers | yes | no |
+| Demo network | `demo` | Developer tools | no | no |
 
 ## ARP sweep
 

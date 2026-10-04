@@ -11,7 +11,7 @@ from network_monitor_tds.domain.plugins.models import PluginId
 from network_monitor_tds.plugins.builtin.technitium.client import fetch_leases
 from network_monitor_tds.plugins.builtin.technitium.schemas import Lease
 from network_monitor_tds.plugins.sdk.base import PluginContext, ScheduledPlugin
-from network_monitor_tds.plugins.sdk.models import PluginInfo, ScheduledSettings
+from network_monitor_tds.plugins.sdk.models import PluginInfo, PluginPurpose, ScheduledSettings
 
 
 class TechnitiumSettings(ScheduledSettings):
@@ -49,6 +49,7 @@ class TechnitiumPlugin(ScheduledPlugin[TechnitiumSettings]):
         name="Technitium DHCP leases",
         description="Imports lease hostnames from the Technitium DNS Server API.",
         enabled_by_default=False,
+        purpose=PluginPurpose.INTEGRATION,
     )
     settings_model: ClassVar[type[TechnitiumSettings]] = TechnitiumSettings
 

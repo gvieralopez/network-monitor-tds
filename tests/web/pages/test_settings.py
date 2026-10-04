@@ -12,6 +12,7 @@ from network_monitor_tds.domain.retention.models import DEFAULT_RETENTION, Reten
 from network_monitor_tds.plugins.host.registry import plugin_defaults
 from network_monitor_tds.web.app import create_app
 from network_monitor_tds.web.models import WebContext
+from network_monitor_tds.web.templating import THEME_COOKIE
 from tests.conftest import T0, FakeControl
 
 pytestmark = pytest.mark.anyio
@@ -51,7 +52,7 @@ async def test_plugin_settings_page(client: AsyncClient, web_context: WebContext
 
     assert response.status_code == 200
     assert '<a href="/settings/plugins" aria-current="page">Plugins</a>' in response.text
-    assert "Check on a schedule" in response.text
+    assert "Developer tools" in response.text
     assert "Demo network" in response.text
     assert "Error: no access" not in response.text
     assert 'name="offline_after"' not in response.text
@@ -147,3 +148,26 @@ async def test_invalid_retention_is_rejected(
     assert "HX-Trigger" not in response.headers
     assert "Use a whole number of days from 14 to 3650" in response.text
     assert await load_retention_policy(web_context.unit_of_work()) == DEFAULT_RETENTION
+
+
+@pytest.mark.parametrize(
+    ("cookie", "attribute", "checked"),
+    [
+        (None, None, "auto"),
+        ("dark", ' data-theme="dark"', "dark"),
+        ("light", ' data-theme="light"', "light"),
+        ("purple", None, "auto"),
+    ],
+)
+@pytest.mark.parametrize("path", ["/settings", "/"])
+async def test_theme_comes_from_the_cookie(
+    client: AsyncClient, cookie: str | None, attribute: str | None, checked: str, path: str
+) -> None:
+    if cookie is not None:
+        client.cookies.set(THEME_COOKIE, cookie)
+
+    response = await client.get(path)
+
+    assert ('<html lang="en"' + (attribute or "") + ">") in response.text
+    if path == "/settings":
+        assert f'value="{checked}" checked' in response.text

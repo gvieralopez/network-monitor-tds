@@ -18,6 +18,11 @@ logger = logging.getLogger(__name__)
 MIGRATIONS_DIR = Path(__file__).parent / "migrations"
 
 
+async def prepare_database(engine: AsyncEngine, database_path: Path) -> None:
+    database_path.parent.mkdir(parents=True, exist_ok=True)
+    await upgrade_to_head(engine, database_path)
+
+
 async def upgrade_to_head(engine: AsyncEngine, database_path: Path) -> None:
     config = alembic_config()
     script = ScriptDirectory.from_config(config)
