@@ -7,7 +7,7 @@ on:
 
 jobs:
   qa:
-    uses: gvieralopez/cookie-pyrate/.github/workflows/reusable-qa.yml@v0.1.9
+    uses: gvieralopez/cookie-pyrate/.github/workflows/reusable-qa.yml@v0.1.10
     with:
-      cookie-pyrate-ref: v0.1.9
+      cookie-pyrate-ref: v0.1.10
       python-version: "3.14"

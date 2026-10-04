@@ -1,0 +1,49 @@
+{% macro icon(name, class="") -%}
+<svg class="{{ class }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{ icon_paths.get(name, icon_paths['question']) }}"/></svg>
+{%- endmacro %}
+
+{% macro artwork(card, extra="") -%}
+<div class="art{{ extra }}" style="{{ card.art.style }}">
+  <svg class="pat" viewBox="0 0 160 100" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    {%- for c in card.art.circles %}<circle cx="{{ '%.1f' % c.cx }}" cy="{{ '%.1f' % c.cy }}" r="{{ c.r }}" fill="none" stroke="#fff" stroke-opacity="{{ '%.3f' % c.opacity }}"/>{% endfor %}
+    {%- for s in card.art.strokes %}<path d="{{ s.path }}" fill="none" stroke="#fff" stroke-opacity="{{ '%.2f' % s.opacity }}"/>{% endfor %}
+    {%- set fill = card.art.fill %}
+    {%- if fill and fill.kind == "dots" %}
+    <defs>
+      <pattern id="{{ card.art.pattern_id }}" width="11" height="11" patternUnits="userSpaceOnUse" patternTransform="rotate({{ '%.0f' % fill.rotation }})"><circle cx="2" cy="2" r="1.3" fill="#fff" fill-opacity=".28"/></pattern>
+      <linearGradient id="{{ card.art.pattern_id }}g" x1="0" x2="1"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#fff"/></linearGradient>
+      <mask id="{{ card.art.pattern_id }}m"><rect width="160" height="100" fill="url(#{{ card.art.pattern_id }}g)"/></mask>
+    </defs>
+    <rect width="160" height="100" fill="url(#{{ card.art.pattern_id }})" mask="url(#{{ card.art.pattern_id }}m)"/>
+    {%- elif fill %}
+    <defs><pattern id="{{ card.art.pattern_id }}" width="{{ fill.width * 2 }}" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate({{ '%.0f' % fill.rotation }})"><rect width="{{ fill.width }}" height="10" fill="#fff" fill-opacity=".09"/></pattern></defs>
+    <rect width="160" height="100" fill="url(#{{ card.art.pattern_id }})"/>
+    {%- endif %}
+  </svg>
+  <span class="art-ghost">{{ icon(card.icon) }}</span>
+  <span class="art-ico">{{ icon(card.icon) }}</span>
+  {{ caller() if caller }}
+</div>
+{%- endmacro %}
+
+{% macro strip(hours) -%}
+<div class="strip" title="Last 24 hours">{% for on in hours %}<i class="{{ 'on' if on }}"></i>{% endfor %}</div>
+{%- endmacro %}
+
+{% macro poster(card, index) -%}
+<button type="button" class="poster{{ '' if card.online else ' is-off' }}{{ ' is-new' if card.is_new }}"
+        style="--cat:var(--cat-{{ card.color }});--i:{{ index }}"
+        hx-get="/devices/{{ card.mac }}" hx-target="#drawer" hx-swap="innerHTML">
+  {% call artwork(card) %}
+    <span class="art-status"><i class="dot" style="--i:{{ index }}"></i>{{ card.status }}</span>
+    {% if card.is_new %}<span class="art-new">NEW</span>{% endif %}
+    <span class="art-ip">{{ card.ip }}</span>
+  {% endcall %}
+  <div class="meta">
+    <div class="name">{{ card.name }}</div>
+    <div class="sub">{{ card.category }} · {{ card.vendor }}</div>
+    {{ strip(card.strip) }}
+    <div class="meta-foot"><span>{{ card.hours_online }} h online in 24 h</span><span>{{ card.seen }}</span></div>
+  </div>
+</button>
+{%- endmacro %}

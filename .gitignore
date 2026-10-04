@@ -218,3 +218,12 @@ __marimo__/
 # Checkout of the shared Cookie Pyrate actions, made by the CI workflows in the
 # workspace root. It is a separate repository and is linted where it lives.
 .cookie-pyrate/
+
+# Local SQLite databases
+*.db
+*.db-shm
+*.db-wal
+*.db.bak-*
+
+# Local runtime data
+/data/

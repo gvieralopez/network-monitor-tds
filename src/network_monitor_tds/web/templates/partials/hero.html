@@ -1,0 +1,27 @@
+<section class="hero" id="hero" aria-label="Network summary">
+  <div>
+    <div class="hero-num">{{ hero.online }}<span> / {{ hero.total }}</span></div>
+    <div class="hero-cap">devices online right now</div>
+    <div class="hero-pills">
+      {% if hero.new %}<a class="pill new" href="/?new=true&amp;group={{ query.group }}"><b>{{ hero.new }}</b> new to review</a>{% endif %}
+      <a class="pill" href="/?status=offline&amp;group={{ query.group }}"><b>{{ hero.offline }}</b> offline</a>
+    </div>
+  </div>
+  <div class="chart">
+    <div class="chart-title"><span>Devices seen per hour, last 24 hours</span><span>peak {{ hero.chart.peak }}</span></div>
+    <div class="chart-wrap" data-series="{{ hero.chart.series | join(',') }}" data-axis="{{ hero.axis | join(',') }}">
+      <svg viewBox="0 0 {{ hero.chart.width }} {{ hero.chart.height }}" preserveAspectRatio="none" aria-hidden="true">
+        <line class="grid-l" x1="0" x2="{{ hero.chart.width }}" y1="8" y2="8" vector-effect="non-scaling-stroke"/>
+        <line class="grid-l" x1="0" x2="{{ hero.chart.width }}" y1="64" y2="64" vector-effect="non-scaling-stroke"/>
+        <line class="grid-l" x1="0" x2="{{ hero.chart.width }}" y1="{{ hero.chart.height }}" y2="{{ hero.chart.height }}" vector-effect="non-scaling-stroke"/>
+        <path class="area" d="{{ hero.chart.area }}"/>
+        <path class="line" d="{{ hero.chart.line }}"/>
+      </svg>
+      <span class="end" style="left:100%;top:{{ '%.1f' % hero.chart.end_top }}%"></span>
+      <span class="cross" hidden></span>
+      <span class="tip" hidden></span>
+      <div class="hit" role="img" aria-label="Devices seen per hour over the last 24 hours, peak {{ hero.chart.peak }}"></div>
+    </div>
+    <div class="chart-axis">{% for label in hero.axis %}<span>{{ label }}</span>{% endfor %}<span>now</span></div>
+  </div>
+</section>

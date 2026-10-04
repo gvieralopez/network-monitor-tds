@@ -1,0 +1,131 @@
+import asyncio
+import logging
+from datetime import timedelta
+
+import pytest
+
+from network_monitor_tds.application.models import Backoff
+from network_monitor_tds.application.scheduling import (
+    SILENT,
+    run_once,
+    run_periodically,
+    run_with_restarts,
+)
+from network_monitor_tds.errors import NetworkMonitorError
+from tests.conftest import Stop
+
+pytestmark = pytest.mark.anyio
+
+LOGGER = logging.getLogger("tests.scheduling")
+SECOND = timedelta(seconds=1)
+
+
+class RecordingSleep:
+    def __init__(self, limit: int) -> None:
+        self.calls: list[float] = []
+        self._limit = limit
+
+    async def __call__(self, seconds: float) -> None:
+        self.calls.append(seconds)
+        if len(self.calls) >= self._limit:
+            raise Stop
+
+
+class RecordingReporter:
+    def __init__(self) -> None:
+        self.reports: list[str] = []
+
+    def running(self) -> None:
+        self.reports.append("running")
+
+    def succeeded(self) -> None:
+        self.reports.append("succeeded")
+
+    def failed(self, reason: str) -> None:
+        self.reports.append(f"failed: {reason}")
+
+
+async def test_run_periodically_repeats_job_at_interval() -> None:
+    runs: list[int] = []
+    sleep = RecordingSleep(3)
+    reporter = RecordingReporter()
+
+    async def job() -> None:
+        runs.append(1)
+
+    with pytest.raises(Stop):
+        await run_periodically(job, 30 * SECOND, SECOND, sleep, LOGGER, reporter)
+
+    assert len(runs) == 3
+    assert sleep.calls == [30.0, 30.0, 30.0]
+    assert reporter.reports == ["running", "succeeded"] * 3
+
+
+async def test_run_once_logs_and_reports_failures(caplog: pytest.LogCaptureFixture) -> None:
+    reporter = RecordingReporter()
+
+    async def job() -> None:
+        raise RuntimeError
+
+    await run_once(job, SECOND, LOGGER, reporter)
+
+    assert "Failed" in caplog.text
+    assert reporter.reports == ["running", "failed: RuntimeError"]
+
+
+async def test_run_once_times_out(caplog: pytest.LogCaptureFixture) -> None:
+    reporter = RecordingReporter()
+
+    async def job() -> None:
+        await asyncio.sleep(10)
+
+    await run_once(job, timedelta(milliseconds=10), LOGGER, reporter)
+
+    assert "Timed out" in caplog.text
+    assert reporter.reports == ["running", "failed: Timed out after 0:00:00.010000"]
+
+
+async def test_run_once_propagates_cancellation() -> None:
+    async def job() -> None:
+        raise asyncio.CancelledError
+
+    with pytest.raises(asyncio.CancelledError):
+        await run_once(job, SECOND, LOGGER, SILENT)
+
+
+async def test_run_with_restarts_backs_off_on_crashes_and_resets_after_clean_exit() -> None:
+    outcomes = iter([RuntimeError, RuntimeError, RuntimeError, None, RuntimeError])
+    sleep = RecordingSleep(5)
+    reporter = RecordingReporter()
+
+    async def job() -> None:
+        outcome = next(outcomes)
+        if outcome is not None:
+            raise outcome
+
+    with pytest.raises(Stop):
+        await run_with_restarts(job, Backoff(SECOND, 3 * SECOND), sleep, LOGGER, reporter)
+
+    assert sleep.calls == [1.0, 2.0, 3.0, 1.0, 1.0]
+    assert reporter.reports[6:8] == ["running", "failed: Stopped unexpectedly"]
+
+
+async def test_known_errors_are_logged_without_traceback(caplog: pytest.LogCaptureFixture) -> None:
+    async def job() -> None:
+        raise NetworkMonitorError("plugin needs configuring")
+
+    await run_once(job, SECOND, LOGGER, SILENT)
+    with pytest.raises(Stop):
+        await run_with_restarts(job, Backoff(SECOND, SECOND), RecordingSleep(1), LOGGER, SILENT)
+
+    assert [record.getMessage() for record in caplog.records] == [
+        "Failed: plugin needs configuring",
+        "Crashed: plugin needs configuring; restarting in 0:00:01",
+    ]
+    assert all(record.exc_info is None for record in caplog.records)
+
+
+def test_silent_reporter_does_nothing() -> None:
+    SILENT.running()
+    SILENT.succeeded()
+    SILENT.failed("ignored")

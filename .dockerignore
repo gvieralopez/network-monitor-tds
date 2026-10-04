@@ -9,3 +9,5 @@ build
 .git
 .env
 .env.test
+data
+.coverage
