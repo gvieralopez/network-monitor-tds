@@ -19,11 +19,14 @@ There are three kinds:
 
 ## ARP sweep
 
-Asks every address in the subnet who is there, and records the monitor's own machine too. This is what tells the monitor that quiet devices are still around.
+Asks devices that have gone quiet whether they are still there, and records the monitor's own machine too. This is what tells the monitor that quiet devices are still around.
+
+Every **Interval** it asks only the devices in the subnet that no plugin has heard from for half an interval, so a device that answered the previous sweep is always asked again. Every **Full sweep every** it asks every address in the subnet instead, which also finds devices the listeners missed. The first run after starting, or after changing the settings, is always a full sweep. Devices silent for longer than **Full sweep every** are left to the next full sweep.
 
 | Setting | Default | Meaning |
 |---|---|---|
-| Interval | 5m | How often to sweep. |
+| Interval | 5m | How often to ask quiet devices. |
+| Full sweep every | 30m | How often to ask every address in the subnet. |
 | Timeout | 1m | Gives up on a sweep that takes longer. |
 | Interface | automatic | Network interface. Empty means the one with the default route. |
 | Subnet | automatic | Subnet to sweep, e.g. `192.168.1.0/24`. Empty means the interface's subnet. |

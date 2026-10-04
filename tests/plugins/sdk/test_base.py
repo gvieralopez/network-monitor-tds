@@ -6,7 +6,7 @@ import pytest
 from network_monitor_tds.domain.network.models import MacAddress
 from network_monitor_tds.domain.observations.models import KnownField, Observation, ObservationKind
 from network_monitor_tds.plugins.sdk.base import PluginContext
-from tests.conftest import DHCP_SNIFF, T0, FixedClock
+from tests.conftest import DHCP_SNIFF, T0, FixedClock, no_known_devices
 
 pytestmark = pytest.mark.anyio
 
@@ -20,7 +20,9 @@ class Collector:
 
 
 def context(collector: Collector) -> PluginContext:
-    return PluginContext(DHCP_SNIFF, FixedClock(T0), collector, logging.getLogger("tests"))
+    return PluginContext(
+        DHCP_SNIFF, FixedClock(T0), collector, logging.getLogger("tests"), no_known_devices
+    )
 
 
 async def test_sighting_builds_observation(mac: MacAddress, ip: IPv4Address) -> None:

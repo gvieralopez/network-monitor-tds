@@ -56,7 +56,7 @@ Split into stories, done one at a time in this order. Each story ends with `make
 
 ### Story 4: Targeted ARP sweeps
 
-- [ ] **Targeted ARP sweeps.** Sweep only devices not heard from recently every few minutes, and
+- [x] **Targeted ARP sweeps.** Sweep only devices not heard from recently every few minutes, and
       the full subnet less often. Today every sweep covers the full subnet. Both intervals become
       plugin settings in the Plugins tab. Done after Story 3 so a regression points at one change.
 

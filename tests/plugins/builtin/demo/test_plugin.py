@@ -7,6 +7,7 @@ from network_monitor_tds.domain.observations.models import Observation
 from network_monitor_tds.plugins.builtin.demo.network import DEVICES
 from network_monitor_tds.plugins.builtin.demo.plugin import DemoPlugin, DemoSettings
 from network_monitor_tds.plugins.sdk.base import PluginContext
+from tests.conftest import no_known_devices
 
 pytestmark = pytest.mark.anyio
 
@@ -30,7 +31,9 @@ async def test_delayed_devices_join_after_start() -> None:
         seen.append(observation)
 
     plugin = DemoPlugin(DemoSettings())
-    context = PluginContext(DemoPlugin.info.plugin_id, clock, collect, logging.getLogger("demo"))
+    context = PluginContext(
+        DemoPlugin.info.plugin_id, clock, collect, logging.getLogger("demo"), no_known_devices
+    )
 
     await plugin.run(context)
     first_run = {observation.mac for observation in seen}

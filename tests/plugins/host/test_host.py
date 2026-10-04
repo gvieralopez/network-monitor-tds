@@ -13,7 +13,7 @@ from network_monitor_tds.domain.events.models import DeviceEvent, EventKind
 from network_monitor_tds.domain.network.models import MacAddress
 from network_monitor_tds.domain.plugins.models import PluginConfig, PluginId
 from network_monitor_tds.infrastructure.messaging.bus import InMemoryEventBus
-from network_monitor_tds.plugins.host.host import PluginHost
+from network_monitor_tds.plugins.host.host import PluginHost, known_devices
 from network_monitor_tds.plugins.host.registry import PluginClass, plugin_defaults
 from network_monitor_tds.plugins.sdk.base import (
     EnrichmentPlugin,
@@ -21,8 +21,13 @@ from network_monitor_tds.plugins.sdk.base import (
     PluginContext,
     ScheduledPlugin,
 )
-from network_monitor_tds.plugins.sdk.models import PluginInfo, PluginSettings, ScheduledSettings
-from tests.conftest import T0, Database, FixedClock, fast_sleep, wait_until
+from network_monitor_tds.plugins.sdk.models import (
+    KnownDevice,
+    PluginInfo,
+    PluginSettings,
+    ScheduledSettings,
+)
+from tests.conftest import T0, Database, FixedClock, fast_sleep, no_known_devices, wait_until
 
 pytestmark = pytest.mark.anyio
 
@@ -93,7 +98,11 @@ def host(database: Database, bus: InMemoryEventBus) -> PluginHost:
         unit_of_work=database.unit_of_work,
         events=bus,
         context_factory=lambda plugin_id: PluginContext(
-            plugin_id, FixedClock(T0), _discard, logging.getLogger(f"tests.{plugin_id}")
+            plugin_id,
+            FixedClock(T0),
+            _discard,
+            logging.getLogger(f"tests.{plugin_id}"),
+            no_known_devices,
         ),
         clock=FixedClock(T0),
         sleep=fast_sleep,
@@ -228,3 +237,9 @@ async def test_invalid_settings_are_reported_as_failing(database: Database) -> N
     assert status.last_error.startswith(
         "Invalid settings: interval: Input should be a valid timedelta"
     )
+
+
+async def test_known_devices(database: Database, stored_device: Device) -> None:
+    assert await known_devices(database.unit_of_work) == [
+        KnownDevice(stored_device.mac, stored_device.ip, stored_device.last_seen)
+    ]

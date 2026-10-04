@@ -27,6 +27,7 @@ from network_monitor_tds.infrastructure.db.unit_of_work import SqlUnitOfWork, un
 from network_monitor_tds.infrastructure.messaging.bus import InMemoryEventBus
 from network_monitor_tds.plugins.builtin.demo.plugin import DemoPlugin
 from network_monitor_tds.plugins.sdk.base import PluginContext
+from network_monitor_tds.plugins.sdk.models import KnownDevice
 from network_monitor_tds.web.models import WebContext
 
 T0 = datetime(2026, 10, 3, 12, 0, tzinfo=UTC)
@@ -183,5 +184,13 @@ class RecordingEmit:
 
 def plugin_context(plugin_id: str, emit: RecordingEmit) -> PluginContext:
     return PluginContext(
-        PluginId(plugin_id), FixedClock(T0), emit, logging.getLogger(f"tests.{plugin_id}")
+        PluginId(plugin_id),
+        FixedClock(T0),
+        emit,
+        logging.getLogger(f"tests.{plugin_id}"),
+        no_known_devices,
     )
+
+
+async def no_known_devices() -> list[KnownDevice]:
+    return []

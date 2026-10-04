@@ -1,9 +1,11 @@
 from dataclasses import dataclass
-from datetime import timedelta
+from datetime import datetime, timedelta
 from enum import StrEnum
+from ipaddress import IPv4Address
 
 from pydantic import BaseModel, ConfigDict
 
+from network_monitor_tds.domain.network.models import MacAddress
 from network_monitor_tds.domain.plugins.models import PluginId
 
 
@@ -19,6 +21,13 @@ class PluginInfo:
     name: str
     description: str
     enabled_by_default: bool
+
+
+@dataclass(frozen=True, slots=True)
+class KnownDevice:
+    mac: MacAddress
+    ip: IPv4Address | None
+    last_seen: datetime
 
 
 class PluginSettings(BaseModel):

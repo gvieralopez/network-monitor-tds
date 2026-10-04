@@ -12,7 +12,7 @@ Network Monitor TDS shows every device on your network as a card in a catalogue:
 - **Device catalogue.** Every device gets generated artwork in its category's colour, its status, IP, vendor and a 24-hour activity strip. Search, filter by status, category or new devices, group into rows by category, status or vendor, and sort.
 - **Live.** Cards update by themselves when devices come online, go offline or appear for the first time.
 - **Device panel.** A 14-day hourly presence heatmap, which plugins found the device and what each learned, and your own name, category and icon.
-- **Passive first.** New devices are noticed within seconds from their own DHCP and ARP traffic; active ARP sweeps run only every 5 minutes, so quiet phones and IoT devices are not woken up constantly.
+- **Passive first.** New devices are noticed within seconds from their own DHCP and ARP traffic; active ARP sweeps ask only devices that have gone quiet, every 5 minutes, and the whole subnet every 30, so quiet phones and IoT devices are not woken up constantly.
 - **Plugins.** ARP sweep, ARP listener, DHCP sniffer, offline MAC vendor lookup, Technitium DHCP leases, and a demo network. Switch them on and off and edit their settings on the Settings page, without restarting. Third-party plugins install as ordinary Python packages.
 - **Simple to run.** One process, one SQLite file, automatic database upgrades with backups.
 

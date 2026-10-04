@@ -40,4 +40,4 @@ Press **Mark as known** to remove the NEW tag without changing anything else.
 
 ## Settings
 
-The Settings page lists every discovery plugin with a switch, its current status and its settings, and the presence thresholds. Changes apply immediately. See [Discovery plugins](plugins.md) and [How online and offline work](presence.md).
+The Settings page has two tabs. **General** holds the presence thresholds. **Plugins** lists every plugin, grouped by how it works (listening, running on a schedule, enriching devices), with a switch, its current status and its settings. Changes apply immediately. See [Discovery plugins](plugins.md) and [How online and offline work](presence.md).

@@ -3,6 +3,7 @@ import logging
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from datetime import UTC, datetime, tzinfo
+from functools import partial
 
 import uvicorn
 from fastapi import FastAPI
@@ -16,7 +17,7 @@ from network_monitor_tds.infrastructure.db.engine import create_engine, create_s
 from network_monitor_tds.infrastructure.db.migrator import upgrade_to_head
 from network_monitor_tds.infrastructure.db.unit_of_work import unit_of_work_factory
 from network_monitor_tds.infrastructure.messaging.bus import InMemoryEventBus
-from network_monitor_tds.plugins.host.host import PluginHost
+from network_monitor_tds.plugins.host.host import PluginHost, known_devices
 from network_monitor_tds.plugins.host.registry import PluginClass, discover_plugins
 from network_monitor_tds.plugins.sdk.base import PluginContext
 from network_monitor_tds.settings import AppSettings
@@ -70,6 +71,7 @@ def build_container(settings: AppSettings) -> Container:
             clock=clock,
             emit=monitor.emit,
             logger=logging.getLogger(f"network_monitor_tds.plugins.{plugin_id}"),
+            known_devices=partial(known_devices, unit_of_work),
         ),
         clock=clock,
         sleep=asyncio.sleep,

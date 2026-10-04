@@ -31,6 +31,7 @@ from network_monitor_tds.plugins.sdk.base import (
     PluginContext,
     ScheduledPlugin,
 )
+from network_monitor_tds.plugins.sdk.models import KnownDevice
 
 logger = logging.getLogger(__name__)
 
@@ -146,8 +147,15 @@ class PluginHost:
                     await _enrich(plugin, context, reporter, event.mac)
 
     async def _known_devices(self) -> list[MacAddress]:
-        async with self._unit_of_work() as uow:
-            return [device.mac for device in await uow.devices.list()]
+        return [device.mac for device in await known_devices(self._unit_of_work)]
+
+
+async def known_devices(unit_of_work: Callable[[], UnitOfWork]) -> list[KnownDevice]:
+    async with unit_of_work() as uow:
+        return [
+            KnownDevice(device.mac, device.ip, device.last_seen)
+            for device in await uow.devices.list()
+        ]
 
 
 def _first_problem(error: ValidationError) -> str:

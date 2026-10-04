@@ -1,6 +1,6 @@
 import logging
 from abc import ABC, abstractmethod
-from collections.abc import Awaitable, Callable, Mapping
+from collections.abc import Awaitable, Callable, Mapping, Sequence
 from dataclasses import dataclass
 from ipaddress import IPv4Address
 from typing import ClassVar
@@ -10,6 +10,7 @@ from network_monitor_tds.domain.observations.models import Observation, Observat
 from network_monitor_tds.domain.plugins.models import PluginId
 from network_monitor_tds.domain.time import Clock
 from network_monitor_tds.plugins.sdk.models import (
+    KnownDevice,
     PluginInfo,
     PluginKind,
     PluginSettings,
@@ -17,6 +18,7 @@ from network_monitor_tds.plugins.sdk.models import (
 )
 
 type Emit = Callable[[Observation], Awaitable[None]]
+type KnownDevices = Callable[[], Awaitable[Sequence[KnownDevice]]]
 
 
 @dataclass(frozen=True, slots=True)
@@ -25,6 +27,7 @@ class PluginContext:
     clock: Clock
     emit: Emit
     logger: logging.Logger
+    known_devices: KnownDevices
 
     async def sighting(
         self, mac: MacAddress, ip: IPv4Address | None, fields: Mapping[str, str]

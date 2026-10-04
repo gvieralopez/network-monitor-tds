@@ -19,6 +19,8 @@ The context passed to your method has two ways to report:
 - `await context.sighting(mac, ip, fields)` when the device was on the network just now. Sightings create devices and mark them online.
 - `await context.enrichment(mac, fields)` for information that does not prove the device is there. Enrichment for a device the monitor has never seen is ignored.
 
+To read what the monitor already knows, `await context.known_devices()` returns every device with its MAC address, last IP address and when any plugin last saw it. The ARP sweep uses it to ask only devices that have gone quiet.
+
 `fields` is a dictionary of strings. Use the names in `network_monitor_tds.domain.observations.models.KnownField` when they fit (`dhcp_hostname`, `mdns_name`, `vendor` …): the monitor uses them for device names and categories. Any other name is stored and shown in the device panel.
 
 ## Settings
