@@ -1,6 +1,6 @@
 [project]
 name = "network_monitor_tds"
-version = "0.2.1-beta0"
+version = "0.2.1"
 description = "A network monitor that doesn't sucks"
 readme = "README.md"
 requires-python = ">=3.14"
