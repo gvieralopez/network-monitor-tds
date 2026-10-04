@@ -652,7 +652,7 @@ wheels = [
 
 [[package]]
 name = "network-monitor-tds"
-version = "0.2.2b0"
+version = "0.3.0b0"
 source = { editable = "." }
 dependencies = [
     { name = "aiosqlite" },
