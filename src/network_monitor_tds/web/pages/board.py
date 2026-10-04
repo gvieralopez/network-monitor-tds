@@ -34,6 +34,20 @@ class Sorting(StrEnum):
     SEEN = "seen"
 
 
+GROUPINGS = (
+    (Grouping.NONE, "None"),
+    (Grouping.CATEGORY, "Category"),
+    (Grouping.STATUS, "Status"),
+    (Grouping.VENDOR, "Vendor"),
+)
+SORTINGS = (
+    (Sorting.SMART, "New, then online"),
+    (Sorting.NAME, "Name"),
+    (Sorting.IP, "IP address"),
+    (Sorting.SEEN, "Last seen"),
+)
+
+
 class BoardQuery(BaseModel):
     model_config = ConfigDict(frozen=True, extra="ignore")
 

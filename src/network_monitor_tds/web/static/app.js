@@ -55,9 +55,10 @@
     const { cookie, attribute } = picker.dataset;
     const value = event.target.value;
     document.cookie = `${cookie}=${value}; path=/; max-age=31536000; SameSite=Lax`;
-    if (value === picker.dataset.default) delete document.documentElement.dataset[attribute];
-    else document.documentElement.dataset[attribute] = value;
-    toast(`${picker.getAttribute("aria-label")}: ${event.target.closest("label").textContent.trim()}`);
+    if (attribute && value === picker.dataset.default) delete document.documentElement.dataset[attribute];
+    else if (attribute) document.documentElement.dataset[attribute] = value;
+    const choice = event.target.selectedOptions?.[0] ?? event.target.closest("label");
+    toast(`${picker.getAttribute("aria-label")}: ${choice.textContent.trim()}`);
   });
 
   document.addEventListener("keydown", (event) => {

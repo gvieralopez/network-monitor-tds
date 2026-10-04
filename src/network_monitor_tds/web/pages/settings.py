@@ -60,6 +60,11 @@ async def general_settings_page(request: Request, context: ContextDep) -> HTMLRe
     )
 
 
+@router.get("/appearance", response_class=HTMLResponse)
+async def appearance_settings_page(request: Request) -> HTMLResponse:
+    return templates.TemplateResponse(request, "settings.html", {"tab": "appearance"})
+
+
 @router.get("/plugins", response_class=HTMLResponse)
 async def plugin_settings_page(request: Request, context: ContextDep) -> HTMLResponse:
     now = context.clock.now()

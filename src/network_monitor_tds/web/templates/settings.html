@@ -6,10 +6,10 @@
   <div class="settings">
     <nav class="tabs" aria-label="Settings sections">
       <a href="/settings" {% if tab == "general" %}aria-current="page"{% endif %}>General</a>
+      <a href="/settings/appearance" {% if tab == "appearance" %}aria-current="page"{% endif %}>Appearance</a>
       <a href="/settings/plugins" {% if tab == "plugins" %}aria-current="page"{% endif %}>Plugins</a>
     </nav>
     {% if tab == "plugins" %}
-    <p class="lede">Each plugin finds or describes devices in a different way. Changes apply straight away.</p>
     {% for group in groups %}
     <section>
       <h2>{{ group.title }}</h2>
@@ -21,8 +21,9 @@
     {% else %}
     <div class="plist"><div class="plug"><div class="pd">No plugins installed.</div></div></div>
     {% endfor %}
-    {% else %}
+    {% elif tab == "appearance" %}
     {% include "partials/appearance.html" %}
+    {% else %}
     {% include "partials/presence.html" %}
     {% include "partials/retention.html" %}
     {% endif %}
