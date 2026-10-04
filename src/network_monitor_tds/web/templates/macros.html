@@ -1,5 +1,5 @@
-{% macro icon(name, class="") -%}
-<svg class="{{ class }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{ icon_paths.get(name, icon_paths['question']) }}"/></svg>
+{% macro drawing(name, class="") -%}
+<svg class="{{ class }}" viewBox="0 0 200 140" aria-hidden="true"><ellipse class="ground" cx="100" cy="112" rx="{{ drawing_footprints[name] }}" ry="4.5" fill="#000" opacity=".3" filter="url(#dv-soft)"/><use href="#dv-{{ name }}"/></svg>
 {%- endmacro %}
 
 {% macro artwork(card, extra="") -%}
@@ -20,8 +20,7 @@
     <rect width="160" height="100" fill="url(#{{ card.art.pattern_id }})"/>
     {%- endif %}
   </svg>
-  <span class="art-ghost">{{ icon(card.icon) }}</span>
-  <span class="art-ico">{{ icon(card.icon) }}</span>
+  {{ drawing(card.icon, "thumb") }}
   {{ caller() if caller }}
 </div>
 {%- endmacro %}

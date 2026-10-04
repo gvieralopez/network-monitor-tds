@@ -34,6 +34,9 @@ async def test_devices_page_renders_catalogue(client: AsyncClient) -> None:
     assert "New on your network" in response.text
     assert posters_in(response.text) == 2
     assert "esp-31f5e" in response.text
+    assert 'id="dv-chip"' in response.text
+    assert 'href="#dv-chip"' in response.text
+    assert 'class="ground" cx="100" cy="112" rx="32"' in response.text
 
 
 @pytest.mark.usefixtures("seen_device")
@@ -70,6 +73,7 @@ async def test_drawer(client: AsyncClient, seen_device: MacAddress) -> None:
     assert 'id="drawer-name">esp-31f5e' in response.text
     assert "Mark as known" in response.text
     assert "Forget device" in response.text
+    assert "Hybrid console, two-tone" in response.text
     assert "First found by <b>Demo network</b>" in response.text
 
 

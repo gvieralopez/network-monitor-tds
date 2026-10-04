@@ -13,7 +13,7 @@ A made-up MAC address a device uses instead of its real one, recognisable by the
 _Avoid_: Private address, fake MAC
 
 **Label**:
-A name, category or icon the user chose for a device; always wins over what was detected.
+A name, category or drawing the user chose for a device; always wins over what was detected.
 _Avoid_: Alias, override, custom name
 
 **Detected name**:

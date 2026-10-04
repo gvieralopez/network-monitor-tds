@@ -8,6 +8,7 @@ from network_monitor_tds.application.models import NetworkOverview
 from network_monitor_tds.domain.devices.models import Category, DeviceLabels
 from network_monitor_tds.domain.network.models import MacAddress
 from network_monitor_tds.domain.observations.models import KnownField
+from network_monitor_tds.web.drawings import CATEGORY_LABELS, DRAWINGS
 from network_monitor_tds.web.models import WebContext
 from network_monitor_tds.web.views import (
     ago,
@@ -15,6 +16,7 @@ from network_monitor_tds.web.views import (
     category_choices,
     chart_view,
     drawer_view,
+    drawing_groups,
     hero_view,
     percentage,
 )
@@ -61,6 +63,13 @@ def test_category_choices_cover_every_category() -> None:
     assert [value for value, _ in category_choices()] == [category.value for category in Category]
 
 
+def test_drawing_groups_list_every_drawing_once_in_category_order() -> None:
+    groups = drawing_groups()
+
+    assert [group.label for group in groups] == [CATEGORY_LABELS[category] for category in Category]
+    assert [d.name for group in groups for d in group.drawings] == [d.name for d in DRAWINGS]
+
+
 @pytest.mark.anyio
 async def test_card_and_drawer_views(
     database: Database, seen_device: MacAddress, web_context: WebContext
@@ -84,6 +93,7 @@ async def test_card_and_drawer_views(
         "esp-31f5e", "DHCP", "Smart home"
     )  # fmt: skip
     assert (drawer.labels_name, drawer.labels_category, drawer.labels_icon) == ("", "", "")
+    assert drawer.automatic_icon == "chip"
     assert len(drawer.rows) == 14
 
 
@@ -106,5 +116,6 @@ async def test_drawer_keeps_detected_values_next_to_labels(
     assert drawer.detected_name == "esp-31f5e"
     assert drawer.detected_category == "Smart home"
     assert (drawer.labels_category, drawer.labels_icon) == ("camera", "camera")
+    assert drawer.automatic_icon == "camera"
     assert drawer.first_found_by == "demo"
     assert KnownField.DHCP_HOSTNAME in detail.facts

@@ -14,7 +14,7 @@ from network_monitor_tds.application.devices import (
 )
 from network_monitor_tds.domain.network.models import MacAddress
 from network_monitor_tds.web.dependencies import ContextDep, MacDep
-from network_monitor_tds.web.icons import CATEGORY_COLORS, CATEGORY_LABELS
+from network_monitor_tds.web.drawings import CATEGORY_COLORS, CATEGORY_LABELS
 from network_monitor_tds.web.models import WebContext
 from network_monitor_tds.web.pages.board import BoardQuery, build_board
 from network_monitor_tds.web.pages.schemas import LabelsForm

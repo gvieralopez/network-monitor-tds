@@ -50,13 +50,14 @@
   });
 
   document.addEventListener("change", (event) => {
-    const picker = event.target.closest?.("[data-theme-cookie]");
+    const picker = event.target.closest?.("[data-cookie]");
     if (!picker) return;
-    const theme = event.target.value;
-    document.cookie = `${picker.dataset.themeCookie}=${theme}; path=/; max-age=31536000; SameSite=Lax`;
-    if (theme === "auto") delete document.documentElement.dataset.theme;
-    else document.documentElement.dataset.theme = theme;
-    toast(`Theme: ${event.target.closest("label").textContent.trim()}`);
+    const { cookie, attribute } = picker.dataset;
+    const value = event.target.value;
+    document.cookie = `${cookie}=${value}; path=/; max-age=31536000; SameSite=Lax`;
+    if (value === picker.dataset.default) delete document.documentElement.dataset[attribute];
+    else document.documentElement.dataset[attribute] = value;
+    toast(`${picker.getAttribute("aria-label")}: ${event.target.closest("label").textContent.trim()}`);
   });
 
   document.addEventListener("keydown", (event) => {

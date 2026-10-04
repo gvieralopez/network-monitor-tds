@@ -1,4 +1,4 @@
-{% from "macros.html" import artwork, icon %}
+{% from "macros.html" import artwork, drawing %}
 {% set card = drawer.card %}
 <div class="scrim" data-close></div>
 <aside class="drawer" role="dialog" aria-modal="true" aria-labelledby="drawer-name" style="--cat:var(--cat-{{ card.color }})">
@@ -65,11 +65,20 @@
           </select>
         </div>
         <fieldset class="field">
-          <legend class="label">Icon</legend>
-          <div class="icons">
-            <label class="auto" title="Automatic"><input type="radio" name="icon" value="" {% if not drawer.labels_icon %}checked{% endif %}>Auto</label>
-            {% for name in icon_paths %}
-            <label title="{{ name }}"><input type="radio" name="icon" value="{{ name }}" {% if name == drawer.labels_icon %}checked{% endif %}>{{ icon(name) }}</label>
+          <legend class="label">Drawing</legend>
+          <div class="drawings">
+            <div class="tiles">
+              <label class="tile"><input type="radio" name="icon" value="" {% if not drawer.labels_icon %}checked{% endif %}>{{ drawing(drawer.automatic_icon) }}<span>Automatic</span></label>
+            </div>
+            {% for group in drawing_groups %}
+            <div class="dgroup" style="--cat:var(--cat-{{ group.color }})">
+              <span class="dgroup-name">{{ group.label }}</span>
+              <div class="tiles">
+                {% for item in group.drawings %}
+                <label class="tile"><input type="radio" name="icon" value="{{ item.name }}" {% if item.name == drawer.labels_icon %}checked{% endif %}>{{ drawing(item.name) }}<span>{{ item.label }}</span></label>
+                {% endfor %}
+              </div>
+            </div>
             {% endfor %}
           </div>
         </fieldset>

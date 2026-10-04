@@ -9,7 +9,13 @@ from network_monitor_tds.domain.devices.models import NO_LABELS, Category, Fallb
 from network_monitor_tds.domain.observations.models import Fact, KnownField
 from network_monitor_tds.domain.plugins.models import PluginId
 from network_monitor_tds.web.art import Artwork, artwork
-from network_monitor_tds.web.icons import CATEGORY_COLORS, CATEGORY_ICONS, CATEGORY_LABELS
+from network_monitor_tds.web.drawings import (
+    CATEGORY_COLORS,
+    CATEGORY_DRAWINGS,
+    CATEGORY_LABELS,
+    DRAWINGS,
+    Drawing,
+)
 from network_monitor_tds.web.pages.board import vendor_label
 
 CHART_WIDTH = 1000
@@ -45,6 +51,13 @@ class CardView:
     hours_online: int
     strip: tuple[bool, ...]
     art: Artwork
+
+
+@dataclass(frozen=True, slots=True)
+class DrawingGroupView:
+    label: str
+    color: str
+    drawings: tuple[Drawing, ...]
 
 
 @dataclass(frozen=True, slots=True)
@@ -95,6 +108,7 @@ class DrawerView:
     labels_name: str
     labels_category: str
     labels_icon: str
+    automatic_icon: str
 
 
 def card_view(summary: DeviceSummary, now: datetime) -> CardView:
@@ -105,7 +119,7 @@ def card_view(summary: DeviceSummary, now: datetime) -> CardView:
         name=summary.name.value,
         category=CATEGORY_LABELS[category],
         color=CATEGORY_COLORS[category],
-        icon=device.labels.icon or CATEGORY_ICONS[category],
+        icon=device.labels.icon or CATEGORY_DRAWINGS[category],
         vendor=vendor_label(summary),
         ip=str(device.ip or "No IP"),
         online=summary.online,
@@ -195,6 +209,7 @@ def drawer_view(
         labels_name=device.labels.name or "",
         labels_category=device.labels.category.value if device.labels.category else "",
         labels_icon=device.labels.icon or "",
+        automatic_icon=CATEGORY_DRAWINGS[summary.category.value],
     )
 
 
@@ -206,6 +221,17 @@ def percentage(ratio: float) -> str:
 
 def category_choices() -> tuple[tuple[str, str], ...]:
     return tuple((category.value, CATEGORY_LABELS[category]) for category in Category)
+
+
+def drawing_groups() -> tuple[DrawingGroupView, ...]:
+    return tuple(
+        DrawingGroupView(
+            label=CATEGORY_LABELS[category],
+            color=CATEGORY_COLORS[category],
+            drawings=tuple(drawing for drawing in DRAWINGS if drawing.category is category),
+        )
+        for category in Category
+    )
 
 
 def _details(plugin_id: PluginId, facts: Mapping[str, Fact]) -> str:

@@ -10,6 +10,7 @@ Style, conventions and tooling for this project.
 2. Data structures live in `models.py`, error types in `errors.py`, unless the framework in use recommends a different file structure.
 3. Order functions top-down — callers before callees, private helpers (`_name`) last — so the most important read first.
 4. Do not write docstrings or descriptive comments unless the user asks for them or they provide context that cannot be inferred by reading the code.
+5. Device drawings (the SVG symbols on device cards) follow `docs/device-drawings.md`.
 
 ## Design
 
