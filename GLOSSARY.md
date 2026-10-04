@@ -35,7 +35,7 @@ _Avoid_: Unknown device (that is the *unknown* category)
 ## Discovery
 
 **Plugin**:
-One way of finding or learning about devices; it reports observations and nothing else.
+One way of finding or learning about devices; it reports observations and nothing else. The Settings page lists plugins under *Sources*.
 _Avoid_: Scanner, module, integration
 
 **Observation**:

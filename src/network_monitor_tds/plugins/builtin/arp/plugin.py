@@ -1,4 +1,5 @@
 import asyncio
+from collections.abc import Mapping
 from datetime import datetime, timedelta
 from ipaddress import IPv4Address, IPv4Network
 from typing import ClassVar
@@ -16,8 +17,10 @@ from network_monitor_tds.plugins.builtin.arp.sweep import (
 from network_monitor_tds.plugins.builtin.capture.errors import NetworkTooLargeError
 from network_monitor_tds.plugins.builtin.capture.interfaces import (
     interface_network,
+    interface_placeholder,
     own_sighting,
     resolve_interface,
+    subnet_placeholder,
 )
 from network_monitor_tds.plugins.builtin.capture.models import Sighting
 from network_monitor_tds.plugins.builtin.capture.sniffer import capture
@@ -37,21 +40,30 @@ QUIET_FRACTION_OF_INTERVAL = 0.5
 class ArpSweepSettings(ScheduledSettings):
     interval: timedelta = Field(
         default=timedelta(minutes=5),
-        description="How often to ask devices that have gone quiet whether they are still there.",
+        title="Check quiet devices every",
+        description="Asks devices that have gone quiet whether they are still there.",
     )
     full_sweep_every: timedelta = Field(
         default=timedelta(minutes=30),
-        description="How often to ask every address in the subnet, to find new devices.",
+        title="Sweep the whole subnet every",
+        description="Asks every address in the subnet, to find new devices.",
     )
-    timeout: timedelta = timedelta(minutes=1)
+    timeout: timedelta = Field(
+        default=timedelta(minutes=1),
+        title="Give up after",
+        description="Stops a sweep that takes longer than this.",
+    )
     interface: str = ""
-    subnet: str = Field(
-        default="",
-        description="Subnet to sweep, e.g. 192.168.1.0/24. Leave empty to use the interface's.",
-    )
+    subnet: str = Field(default="", description="Leave empty to use the interface's subnet.")
     reply_timeout: timedelta = Field(
-        default=timedelta(seconds=3), description="How long to wait for replies after asking."
+        default=timedelta(seconds=3),
+        title="Wait for replies",
+        description="How long to wait for answers after asking.",
     )
+
+    @classmethod
+    def placeholders(cls) -> Mapping[str, str]:
+        return {"interface": interface_placeholder(), "subnet": subnet_placeholder()}
 
     @field_validator("subnet")
     @classmethod
@@ -65,8 +77,13 @@ class ArpListenerSettings(PluginSettings):
     interface: str = ""
     report_every: timedelta = Field(
         default=timedelta(minutes=1),
-        description="Reports each device at most this often, to keep chatty devices quiet.",
+        title="Report each device at most every",
+        description="Keeps chatty devices from flooding the monitor.",
     )
+
+    @classmethod
+    def placeholders(cls) -> Mapping[str, str]:
+        return {"interface": interface_placeholder()}
 
 
 class ArpSweepPlugin(ScheduledPlugin[ArpSweepSettings]):

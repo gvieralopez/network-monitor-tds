@@ -7,7 +7,7 @@ The integration only reads. It never changes anything in Technitium, and it neve
 ## Set it up
 
 1. In Technitium, open **Administration → Sessions** and create an API token.
-2. In Network Monitor TDS, open **Settings → Technitium DHCP leases → Settings** and fill in:
+2. In Network Monitor TDS, open **Settings → Sources → Technitium DHCP leases → Settings** and fill in:
    - **Server address**: the Technitium web console, for example `http://192.168.1.10:5380`.
    - **API token**: the token from step 1.
    - **Verify TLS certificate**: turn it off only if you use HTTPS with a self-signed certificate.

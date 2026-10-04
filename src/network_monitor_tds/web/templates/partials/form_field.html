@@ -5,9 +5,9 @@
   {% else %}
   <label for="{{ field_id }}">{{ field.label }}</label>
   {% if field.kind == "hidden" %}
-  <input id="{{ field_id }}" type="password" name="{{ field.name }}" placeholder="Unchanged" autocomplete="new-password">
+  <input id="{{ field_id }}" type="password" name="{{ field.name }}" placeholder="{{ field.placeholder }}" autocomplete="new-password">
   {% else %}
-  <input id="{{ field_id }}" name="{{ field.name }}" value="{{ field.value }}"{% if field.kind == "duration" %} class="mono" placeholder="5m" inputmode="text"{% elif field.kind == "number" %} inputmode="numeric"{% endif %}>
+  <input id="{{ field_id }}" name="{{ field.name }}" value="{{ field.value }}"{% if field.kind == "duration" %} class="mono" placeholder="5m" inputmode="text"{% elif field.kind == "number" %} inputmode="numeric"{% elif field.placeholder %} placeholder="{{ field.placeholder }}"{% endif %}>
   {% endif %}
   {% endif %}
   {% if field.error %}<span class="error">{{ field.error }}</span>{% elif field.help %}<span class="hint">{{ field.help }}</span>{% endif %}

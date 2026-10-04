@@ -16,6 +16,18 @@ def resolve_interface(configured: str) -> str:
     return configured or str(Route().route(UNSPECIFIED)[0])
 
 
+def interface_placeholder() -> str:
+    return f"{resolve_interface('')} (default route)"
+
+
+def subnet_placeholder() -> str:
+    interface = resolve_interface("")
+    try:
+        return f"{interface_network(interface)}, from {interface}"
+    except UnknownNetworkError:
+        return ""
+
+
 def interface_network(interface: str) -> IPv4Network:
     for net, mask, gateway, route_interface, address, _metric in Route().routes:
         if route_interface != interface or gateway != UNSPECIFIED:

@@ -1,4 +1,5 @@
 from ipaddress import IPv4Address, IPv4Network
+from typing import ClassVar
 
 import pytest
 
@@ -54,3 +55,20 @@ def test_own_sighting(monkeypatch: pytest.MonkeyPatch) -> None:
     assert interfaces.own_sighting("wlan0") == Sighting(
         MacAddress.parse("04:68:74:5c:e3:fb"), IPv4Address("192.168.1.107"), {}
     )
+
+
+def test_placeholders_name_the_default_interface_and_its_subnet() -> None:
+    assert interfaces.interface_placeholder() == "wlan0 (default route)"
+    assert interfaces.subnet_placeholder() == "192.168.1.0/24, from wlan0"
+
+
+def test_subnet_placeholder_is_empty_without_a_subnet(monkeypatch: pytest.MonkeyPatch) -> None:
+    class NoSubnet:
+        routes: ClassVar[list[tuple[int, int, str, str, str, int]]] = []
+
+        def route(self, _destination: str) -> tuple[str, str, str]:
+            return ("wlan0", "192.168.1.107", "192.168.1.1")
+
+    monkeypatch.setattr(interfaces, "Route", NoSubnet)
+
+    assert interfaces.subnet_placeholder() == ""

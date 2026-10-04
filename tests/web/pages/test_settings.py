@@ -80,10 +80,10 @@ async def test_plugin_settings_page(client: AsyncClient, web_context: WebContext
     response = await client.get("/settings/plugins")
 
     assert response.status_code == 200
-    assert '<a href="/settings/plugins" aria-current="page">Plugins</a>' in response.text
+    assert '<a href="/settings/plugins" aria-current="page">Sources</a>' in response.text
     assert "Developer tools" in response.text
     assert "Demo network" in response.text
-    assert "Error: no access" not in response.text
+    assert "no access" not in response.text
     assert 'name="offline_after"' not in response.text
 
 

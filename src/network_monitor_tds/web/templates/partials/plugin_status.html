@@ -1,1 +1,1 @@
-<div class="pm status-{{ status.tone }}" hx-get="/settings/plugins/{{ plugin_id }}/status" hx-trigger="every 10s" hx-swap="outerHTML">{{ status.text }}</div>
+<div class="pm status-{{ status.tone }}" hx-get="/settings/plugins/{{ plugin_id }}/status" hx-trigger="every 10s" hx-swap="outerHTML">{{ status.text }}{% if status.help_url %} · <a href="{{ status.help_url }}" target="_blank" rel="noopener">How to fix</a>{% endif %}</div>

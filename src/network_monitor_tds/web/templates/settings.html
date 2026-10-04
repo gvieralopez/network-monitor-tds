@@ -7,7 +7,7 @@
     <nav class="tabs" aria-label="Settings sections">
       <a href="/settings" {% if tab == "general" %}aria-current="page"{% endif %}>General</a>
       <a href="/settings/appearance" {% if tab == "appearance" %}aria-current="page"{% endif %}>Appearance</a>
-      <a href="/settings/plugins" {% if tab == "plugins" %}aria-current="page"{% endif %}>Plugins</a>
+      <a href="/settings/plugins" {% if tab == "plugins" %}aria-current="page"{% endif %}>Sources</a>
     </nav>
     {% if tab == "plugins" %}
     {% for group in groups %}
