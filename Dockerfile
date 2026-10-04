@@ -44,5 +44,7 @@ USER nmtds
 VOLUME /data
 EXPOSE 8000
 
-CMD ["nmtds", "serve"]
+# Migrate in a short-lived CLI process, then hand PID 1 to a server that never loads the CLI
+# or alembic (about 12 MiB less for the long-running process).
+CMD ["/bin/sh", "-c", "nmtds db upgrade && exec python -m network_monitor_tds.server"]
 

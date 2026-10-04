@@ -99,7 +99,9 @@ async def test_hub_fans_packets_out_by_filter(sockets: list[FakeSocket]) -> None
     await udp.aclose()
 
 
-async def test_hub_narrows_then_stops_as_subscribers_leave(sockets: list[FakeSocket]) -> None:
+async def test_hub_narrows_then_stops_as_subscribers_leave(
+    sockets: list[FakeSocket], caplog: pytest.LogCaptureFixture
+) -> None:
     hub = CaptureHub("wlan0")
     arp, udp = hub.packets(ARP_ONLY), hub.packets(UDP_ONLY)
     next_arp, next_udp = asyncio.ensure_future(anext(arp)), asyncio.ensure_future(anext(udp))
@@ -110,11 +112,13 @@ async def test_hub_narrows_then_stops_as_subscribers_leave(sockets: list[FakeSoc
 
     await udp.aclose()
     narrowed = sockets[-1]
-    await arp.aclose()
+    with caplog.at_level(logging.INFO):
+        await arp.aclose()
 
     assert narrowed.bpf == "(arp)"
     assert all(socket.closed for socket in sockets)
     assert not any(socket.sniffer and socket.sniffer.running for socket in sockets)
+    assert "Stopped capturing on wlan0" in caplog.text
 
 
 async def test_hub_ignores_subscribers_with_a_filter_already_captured(

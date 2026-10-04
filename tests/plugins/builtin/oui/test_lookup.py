@@ -22,7 +22,7 @@ def test_vendor_for(mac: str, vendor: str | None) -> None:
 
 
 def test_directory_is_large_and_cached() -> None:
-    assert len(vendor_directory()) > 30_000
+    assert vendor_directory().count(b"\n") > 30_000
     assert vendor_directory() is vendor_directory()
 
 

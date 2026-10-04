@@ -15,14 +15,15 @@ LEGAL_SUFFIXES = frozenset(
 
 
 def vendor_for(mac: MacAddress) -> str | None:
-    vendor = vendor_directory().get(mac.oui.replace(":", ""))
+    vendor = _find_vendor(vendor_directory(), mac.oui.replace(":", ""))
     return clean_vendor(vendor) if vendor is not None else None
 
 
+# Kept as the raw "<prefix>\t<vendor>\n" lines (about 1 MiB) rather than a dict of 40 000
+# entries (about 8 MiB), since lookups only happen when a device is first seen.
 @cache
-def vendor_directory() -> dict[str, str]:
-    table = gzip.decompress(DATA_FILE.read_bytes()).decode()
-    return dict(line.split("\t", 1) for line in table.splitlines())
+def vendor_directory() -> bytes:
+    return b"\n" + gzip.decompress(DATA_FILE.read_bytes())
 
 
 def clean_vendor(name: str) -> str:
@@ -34,3 +35,13 @@ def clean_vendor(name: str) -> str:
 
 def _is_legal_suffix(word: str) -> bool:
     return word.lower().replace(".", "") in LEGAL_SUFFIXES
+
+
+def _find_vendor(directory: bytes, prefix: str) -> str | None:
+    key = f"\n{prefix}\t".encode()
+    start = directory.find(key)
+    if start < 0:
+        return None
+    start += len(key)
+    end = directory.find(b"\n", start)
+    return directory[start : end if end >= 0 else len(directory)].decode()

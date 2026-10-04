@@ -14,9 +14,9 @@ from network_monitor_tds.application.plugins import (
     sync_plugin_configs,
     update_plugin_settings,
 )
-from network_monitor_tds.bootstrap import Container, build_container, prepare_database, serve
+from network_monitor_tds.bootstrap import Container, build_container, serve
 from network_monitor_tds.domain.plugins.models import PluginConfig, PluginId
-from network_monitor_tds.infrastructure.db.migrator import current_revision
+from network_monitor_tds.infrastructure.db.migrator import current_revision, prepare_database
 from network_monitor_tds.plugins.host.registry import PluginClass, plugin_defaults
 from network_monitor_tds.settings import AppSettings
 
@@ -31,7 +31,9 @@ app.add_typer(plugins_app, name="plugins")
 
 @app.command("serve", help="Run the monitor.")
 def serve_command() -> None:
-    asyncio.run(serve(AppSettings()))
+    settings = AppSettings()
+    _with_database(lambda container: prepare_database(container.engine, settings.database_path))
+    asyncio.run(serve(settings))
 
 
 @app.command("version", help="Show the installed version.")
@@ -102,7 +104,7 @@ def plugins_set_command(
 
 def _with_prepared_database[T](action: Callable[[Container], Awaitable[T]]) -> T:
     async def prepare_then(container: Container) -> T:
-        await prepare_database(container)
+        await prepare_database(container.engine, container.settings.database_path)
         await sync_plugin_configs(
             container.unit_of_work(),
             plugin_defaults(dict(container.plugins)),
