@@ -7,13 +7,14 @@ from fastapi.responses import HTMLResponse
 from network_monitor_tds.application.devices import (
     acknowledge_device,
     device_detail,
+    forget_device,
     list_devices,
     network_overview,
     relabel_device,
 )
 from network_monitor_tds.domain.network.models import MacAddress
 from network_monitor_tds.web.dependencies import ContextDep, MacDep
-from network_monitor_tds.web.icons import CATEGORY_COLORS, CATEGORY_LABELS
+from network_monitor_tds.web.drawings import CATEGORY_COLORS, CATEGORY_LABELS
 from network_monitor_tds.web.models import WebContext
 from network_monitor_tds.web.pages.board import BoardQuery, build_board
 from network_monitor_tds.web.pages.schemas import LabelsForm
@@ -68,6 +69,13 @@ async def acknowledge(request: Request, context: ContextDep, mac: MacDep) -> HTM
     return await _drawer(
         request, context, mac, {"devices-changed": None, "toast": "Marked as known"}
     )
+
+
+@router.post("/devices/{mac}/forget", response_class=HTMLResponse)
+async def forget(context: ContextDep, mac: MacDep) -> HTMLResponse:
+    name = await forget_device(context.unit_of_work(), mac)
+    triggers = {"devices-changed": None, "toast": f"Forgot {name}"}
+    return HTMLResponse("", headers={"HX-Trigger": json.dumps(triggers)})
 
 
 async def _drawer(

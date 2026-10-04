@@ -12,7 +12,7 @@ from network_monitor_tds.domain.retention.models import DEFAULT_RETENTION, Reten
 from network_monitor_tds.plugins.host.registry import plugin_defaults
 from network_monitor_tds.web.app import create_app
 from network_monitor_tds.web.models import WebContext
-from network_monitor_tds.web.templating import THEME_COOKIE
+from network_monitor_tds.web.templating import CARD_STYLE_COOKIE, THEME_COOKIE
 from tests.conftest import T0, FakeControl
 
 pytestmark = pytest.mark.anyio
@@ -171,3 +171,28 @@ async def test_theme_comes_from_the_cookie(
     assert ('<html lang="en"' + (attribute or "") + ">") in response.text
     if path == "/settings":
         assert f'value="{checked}" checked' in response.text
+
+
+@pytest.mark.parametrize(
+    ("cookies", "attributes", "checked"),
+    [
+        ({}, "", "artwork"),
+        ({CARD_STYLE_COOKIE: "studio"}, ' data-cards="studio"', "studio"),
+        ({CARD_STYLE_COOKIE: "plaid"}, "", "artwork"),
+        (
+            {THEME_COOKIE: "dark", CARD_STYLE_COOKIE: "studio"},
+            ' data-theme="dark" data-cards="studio"',
+            "studio",
+        ),
+    ],
+)
+async def test_card_style_comes_from_the_cookie(
+    client: AsyncClient, cookies: dict[str, str], attributes: str, checked: str
+) -> None:
+    for name, value in cookies.items():
+        client.cookies.set(name, value)
+
+    response = await client.get("/settings")
+
+    assert f'<html lang="en"{attributes}>' in response.text
+    assert f'name="cards" value="{checked}" checked' in response.text

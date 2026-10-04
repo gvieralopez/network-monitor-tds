@@ -1,7 +1,7 @@
 from pydantic import BaseModel, ConfigDict, field_validator
 
 from network_monitor_tds.domain.devices.models import Category, DeviceLabels
-from network_monitor_tds.web.icons import ICONS
+from network_monitor_tds.web.drawings import DRAWING_NAMES
 
 
 class LabelsForm(BaseModel):
@@ -19,7 +19,7 @@ class LabelsForm(BaseModel):
     @field_validator("icon")
     @classmethod
     def known_icon(cls, value: str | None) -> str | None:
-        if value is not None and value not in ICONS:
+        if value is not None and value not in DRAWING_NAMES:
             message = f"Unknown icon {value!r}"
             raise ValueError(message)
         return value

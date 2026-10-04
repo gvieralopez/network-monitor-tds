@@ -8,7 +8,7 @@ The top of the page shows how many devices are online now, with buttons for devi
 
 Each device is a card with:
 
-- artwork in its category's colour, generated from its MAC address, so every device looks different and keeps the same look;
+- a drawing of the kind of device it is, on artwork in its category's colour generated from its MAC address, so every device looks different and keeps the same look;
 - online or "last seen" status, a **NEW** tag if you have not reviewed it yet, and its IP address;
 - name, category and vendor ("Private MAC" when the device hides its real address);
 - a strip with one block per hour of the last 24 hours, filled when the device was online.
@@ -34,10 +34,12 @@ Click a card to open its panel:
 - **Presence, last 14 days**: one row per day, one square per hour, today at the top. Hours before the device was first seen show as "no data".
 - **Discovered by**: the plugin that found the device first, and every plugin that has reported it since. Hover a plugin to see what it learned.
 - **Details**: IP and MAC address, vendor, the detected name and where it came from, and the detected type.
-- **Your labels**: your own name, category and icon. Leave a field on automatic to keep using what was detected. Saving also marks the device as known.
+- **Your labels**: your own name, category and drawing. The drawings are grouped by category; for example, consoles come in several shapes and colours. Leave a field on automatic to keep using what was detected. Saving also marks the device as known.
 
 Press **Mark as known** to remove the NEW tag without changing anything else.
 
+Press **Forget device** at the bottom of the panel to delete a device you no longer own, together with its labels, details and history. This cannot be undone. If the device is still on the network, it shows up again as a new device the next time it is seen.
+
 ## Settings
 
-The Settings page has two tabs. **General** holds the theme (Auto, Light or Dark, saved in each browser), the presence thresholds and how long history is kept. **Plugins** lists every plugin, grouped by what it is for (passive and active device finders, third-party integrations, metadata providers, developer tools), with a switch, its current status and its settings. Changes apply immediately. See [Discovery plugins](plugins.md) and [How online and offline work](presence.md).
+The Settings page has two tabs. **General** holds the theme (Auto, Light or Dark) and the card style (Artwork, with each device on a pattern in its category's colour, or Studio, on a plain backdrop), both saved in each browser, the presence thresholds and how long history is kept. **Plugins** lists every plugin, grouped by what it is for (passive and active device finders, third-party integrations, metadata providers, developer tools), with a switch, its current status and its settings. Changes apply immediately. See [Discovery plugins](plugins.md) and [How online and offline work](presence.md).

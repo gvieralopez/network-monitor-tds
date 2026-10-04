@@ -7,7 +7,7 @@ from pydantic import BaseModel, ConfigDict
 
 from network_monitor_tds.application.models import DeviceSummary
 from network_monitor_tds.domain.devices.models import Category
-from network_monitor_tds.web.icons import CATEGORY_LABELS
+from network_monitor_tds.web.drawings import CATEGORY_LABELS
 
 PRIVATE_MAC_VENDOR = "Private MAC"
 UNKNOWN_VENDOR = "Unknown vendor"

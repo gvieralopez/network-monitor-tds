@@ -1,7 +1,7 @@
-{% from "macros.html" import icon %}
 {% set theme = theme_of(request) %}
+{% set card_style = card_style_of(request) %}
 <!doctype html>
-<html lang="en"{% if theme != "auto" %} data-theme="{{ theme }}"{% endif %}>
+<html lang="en"{% if theme != "auto" %} data-theme="{{ theme }}"{% endif %}{% if card_style != "artwork" %} data-cards="{{ card_style }}"{% endif %}>
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -13,6 +13,7 @@
   <script src="/static/app.js?v={{ version }}" defer></script>
 </head>
 <body hx-ext="sse" sse-connect="/events" class="intro">
+  {% include "drawings.svg" %}
   <div class="wrap">
     <header class="top">
       <a class="brand" href="/">

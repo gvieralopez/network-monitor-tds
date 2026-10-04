@@ -1,10 +1,26 @@
 <section id="appearance">
   <h2>Appearance</h2>
-  <p class="lede">Light or dark, or follow this device's system setting. The choice is saved in this browser only.</p>
-  <div class="seg" role="radiogroup" aria-label="Theme" data-theme-cookie="{{ theme_cookie }}">
-    {% set current = theme_of(request) %}
-    {% for value, label in themes %}
-    <label><input type="radio" name="theme" value="{{ value }}" {% if current == value %}checked{% endif %}>{{ label }}</label>
-    {% endfor %}
+  <p class="lede">How the monitor looks in this browser. Both choices are saved in this browser only.</p>
+  <div class="appearance">
+    <div class="appearance-row">
+      <span class="label">Theme</span>
+      <div class="seg" role="radiogroup" aria-label="Theme" data-cookie="{{ theme_cookie }}" data-attribute="theme" data-default="auto">
+        {% set current = theme_of(request) %}
+        {% for value, label in themes %}
+        <label><input type="radio" name="theme" value="{{ value }}" {% if current == value %}checked{% endif %}>{{ label }}</label>
+        {% endfor %}
+      </div>
+      <span class="hint">Light or dark, or follow this device's system setting.</span>
+    </div>
+    <div class="appearance-row">
+      <span class="label">Cards</span>
+      <div class="seg" role="radiogroup" aria-label="Cards" data-cookie="{{ card_style_cookie }}" data-attribute="cards" data-default="artwork">
+        {% set current = card_style_of(request) %}
+        {% for value, label in card_styles %}
+        <label><input type="radio" name="cards" value="{{ value }}" {% if current == value %}checked{% endif %}>{{ label }}</label>
+        {% endfor %}
+      </div>
+      <span class="hint">Artwork puts each device on a pattern in its category's colour. Studio puts it on a plain backdrop.</span>
+    </div>
   </div>
 </section>

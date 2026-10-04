@@ -1,0 +1,281 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" class="sprite" aria-hidden="true" focusable="false">
+  <defs>
+    <linearGradient id="dv-dark" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#474d57"/><stop offset="1" stop-color="#1b1e23"/></linearGradient>
+    <linearGradient id="dv-dark-h" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#1d2025"/><stop offset=".35" stop-color="#4a5059"/><stop offset="1" stop-color="#1d2025"/></linearGradient>
+    <linearGradient id="dv-white" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fbfcfd"/><stop offset="1" stop-color="#c3c8cf"/></linearGradient>
+    <linearGradient id="dv-white-h" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#b9bec5"/><stop offset=".35" stop-color="#f7f8fa"/><stop offset="1" stop-color="#bfc4cb"/></linearGradient>
+    <linearGradient id="dv-alu" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e3e7eb"/><stop offset="1" stop-color="#a9afb7"/></linearGradient>
+    <linearGradient id="dv-glass" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#34507a"/><stop offset="1" stop-color="#121826"/></linearGradient>
+    <linearGradient id="dv-wall" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2d4a7a"/><stop offset=".55" stop-color="#6a3d78"/><stop offset="1" stop-color="#d07a5c"/></linearGradient>
+    <linearGradient id="dv-blue" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7fa2c9"/><stop offset="1" stop-color="#4b6d96"/></linearGradient>
+    <linearGradient id="dv-coral" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ea9a8b"/><stop offset="1" stop-color="#bc6457"/></linearGradient>
+    <linearGradient id="dv-gray" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a7adb5"/><stop offset="1" stop-color="#6b7178"/></linearGradient>
+    <linearGradient id="dv-fabric-h" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#5a5f66"/><stop offset=".35" stop-color="#a3a9b0"/><stop offset="1" stop-color="#62676e"/></linearGradient>
+    <linearGradient id="dv-kraft" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d6ad76"/><stop offset="1" stop-color="#ac8250"/></linearGradient>
+    <radialGradient id="dv-bulb-glass" cx=".4" cy=".35" r=".7"><stop offset="0" stop-color="#fffaf0"/><stop offset=".6" stop-color="#fbe3ad"/><stop offset="1" stop-color="#eec375"/></radialGradient>
+    <filter id="dv-soft" x="-20%" y="-300%" width="140%" height="700%"><feGaussianBlur stdDeviation="3.5"/></filter>
+    <pattern id="dv-fabric" width="4" height="4" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r=".8" fill="#000" fill-opacity=".18"/></pattern>
+  
+    <symbol id="dv-router" viewBox="0 0 200 140">
+      <rect x="53" y="16" width="6" height="58" rx="3" transform="rotate(-14 56 74)" fill="url(#dv-dark)"/>
+      <rect x="97" y="10" width="6" height="62" rx="3" fill="url(#dv-dark)"/>
+      <rect x="141" y="16" width="6" height="58" rx="3" transform="rotate(14 144 74)" fill="url(#dv-dark)"/>
+      <path d="M36 82l14-12h100l14 12z" fill="#fbfcfd"/>
+      <rect x="36" y="82" width="128" height="30" rx="4" fill="url(#dv-white)"/>
+      <g fill="#3ccf8e"><circle cx="50" cy="97" r="2.2"/><circle cx="60" cy="97" r="2.2"/><circle cx="70" cy="97" r="2.2"/></g>
+      <circle cx="80" cy="97" r="2.2" fill="#f0b44a"/>
+      <path d="M118 92v10M124 92v10M130 92v10M136 92v10M142 92v10M148 92v10" stroke="#9aa1aa" stroke-width="1.4" stroke-linecap="round"/>
+    </symbol>
+  
+    <symbol id="dv-wifi" viewBox="0 0 200 140">
+      <path d="M66 46v58a34 8 0 0 0 68 0V46z" fill="url(#dv-white-h)"/>
+      <ellipse cx="100" cy="46" rx="34" ry="10" fill="#fbfcfd"/>
+      <ellipse cx="100" cy="46" rx="25" ry="6.6" fill="#eceff2"/>
+      <path d="M66 60a34 9 0 0 0 68 0" fill="none" stroke="#000" stroke-opacity=".07" stroke-width="1.4"/>
+      <ellipse cx="100" cy="98" rx="3.2" ry="1.6" fill="#3ccf8e"/>
+    </symbol>
+  
+    <symbol id="dv-server" viewBox="0 0 200 140">
+      <path d="M30 46l10-10h120l10 10z" fill="#5a606a"/>
+      <rect x="30" y="46" width="140" height="32" rx="2" fill="url(#dv-dark)"/>
+      <rect x="30" y="80" width="140" height="32" rx="2" fill="url(#dv-dark)"/>
+      <g fill="#2a2e35"><rect x="44" y="52" width="13" height="20" rx="1.5"/><rect x="60" y="52" width="13" height="20" rx="1.5"/><rect x="76" y="52" width="13" height="20" rx="1.5"/><rect x="92" y="52" width="13" height="20" rx="1.5"/><rect x="44" y="86" width="13" height="20" rx="1.5"/><rect x="60" y="86" width="13" height="20" rx="1.5"/><rect x="76" y="86" width="13" height="20" rx="1.5"/><rect x="92" y="86" width="13" height="20" rx="1.5"/></g>
+      <g fill="#6b717b"><rect x="30" y="46" width="6" height="32" rx="1"/><rect x="164" y="46" width="6" height="32" rx="1"/><rect x="30" y="80" width="6" height="32" rx="1"/><rect x="164" y="80" width="6" height="32" rx="1"/></g>
+      <g fill="#3ccf8e"><circle cx="154" cy="56" r="2"/><circle cx="154" cy="90" r="2"/></g>
+      <g fill="#7fd3ff"><circle cx="146" cy="56" r="2"/><circle cx="146" cy="90" r="2"/></g>
+      <path d="M116 64h22M116 69h22M116 98h22M116 103h22" stroke="#2a2e35" stroke-width="1.4" stroke-linecap="round"/>
+    </symbol>
+  
+    <symbol id="dv-disk" viewBox="0 0 200 140">
+      <path d="M58 22l8-8h68l8 8z" fill="#5a606a"/>
+      <rect x="58" y="22" width="84" height="90" rx="6" fill="url(#dv-dark)"/>
+      <rect x="66" y="32" width="30" height="72" rx="2" fill="#2a2e35"/>
+      <rect x="100" y="32" width="30" height="72" rx="2" fill="#2a2e35"/>
+      <path d="M71 40h20M71 45h20M105 40h20M105 45h20" stroke="#40464f" stroke-width="1.4" stroke-linecap="round"/>
+      <g fill="#3ccf8e"><circle cx="136" cy="38" r="2"/><circle cx="136" cy="47" r="2"/></g>
+      <circle cx="136" cy="56" r="2" fill="#7fd3ff"/>
+    </symbol>
+  
+    <symbol id="dv-laptop" viewBox="0 0 200 140">
+      <path d="M48 14h104a5 5 0 0 1 5 5v75H43V19a5 5 0 0 1 5-5z" fill="url(#dv-alu)"/>
+      <rect x="48" y="19" width="104" height="70" rx="1" fill="url(#dv-glass)"/>
+      <rect x="56" y="27" width="52" height="30" rx="2" fill="#fff" opacity=".14"/>
+      <rect x="66" y="48" width="62" height="32" rx="2" fill="#fff" opacity=".1"/>
+      <path d="M30 94h140l14 12a2.5 2.5 0 0 1-2 3H18a2.5 2.5 0 0 1-2-3z" fill="url(#dv-alu)"/>
+      <path d="M86 94h28v1.5a2 2 0 0 1-2 2H88a2 2 0 0 1-2-2z" fill="#8f959d"/>
+      <rect x="16" y="109" width="168" height="3" rx="1.5" fill="#949aa2"/>
+    </symbol>
+  
+    <symbol id="dv-desktop" viewBox="0 0 200 140">
+      <ellipse cx="100" cy="108" rx="34" ry="4" fill="url(#dv-alu)"/>
+      <rect x="93" y="86" width="14" height="22" fill="url(#dv-alu)"/>
+      <rect x="22" y="8" width="156" height="82" rx="3" fill="#16191e"/>
+      <rect x="25" y="11" width="150" height="72" fill="url(#dv-glass)"/>
+      <rect x="34" y="20" width="60" height="38" rx="2" fill="#fff" opacity=".14"/>
+      <rect x="100" y="30" width="64" height="44" rx="2" fill="#fff" opacity=".1"/>
+      <path d="M25 11h60l-34 72H25z" fill="#fff" opacity=".05"/>
+    </symbol>
+  
+    <symbol id="dv-phone" viewBox="0 0 200 140">
+      <rect x="74" y="10" width="52" height="102" rx="10" fill="url(#dv-dark)"/>
+      <rect x="80" y="16" width="24" height="26" rx="7" fill="#2a2e35"/>
+      <g fill="#0b0d10"><circle cx="87" cy="23" r="4.2"/><circle cx="87" cy="35" r="4.2"/><circle cx="97" cy="29" r="4.2"/></g>
+      <g fill="#34507a"><circle cx="87" cy="23" r="1.8"/><circle cx="87" cy="35" r="1.8"/><circle cx="97" cy="29" r="1.8"/></g>
+      <path d="M74 64l52-34v20l-52 34z" fill="#fff" opacity=".05"/>
+    </symbol>
+  
+    <symbol id="dv-phone-white" viewBox="0 0 200 140">
+      <rect x="74" y="10" width="52" height="102" rx="10" fill="url(#dv-white)"/>
+      <rect x="80" y="16" width="24" height="26" rx="7" fill="#dfe3e8"/>
+      <g fill="#1b1e23"><circle cx="87" cy="23" r="4.2"/><circle cx="87" cy="35" r="4.2"/><circle cx="97" cy="29" r="4.2"/></g>
+      <g fill="#34507a"><circle cx="87" cy="23" r="1.8"/><circle cx="87" cy="35" r="1.8"/><circle cx="97" cy="29" r="1.8"/></g>
+      <path d="M74 64l52-34v20l-52 34z" fill="#fff" opacity=".25"/>
+    </symbol>
+  
+    <symbol id="dv-tablet" viewBox="0 0 200 140">
+      <rect x="61" y="8" width="78" height="104" rx="7" fill="url(#dv-dark)"/>
+      <rect x="65" y="12" width="70" height="96" rx="4" fill="url(#dv-wall)"/>
+      <circle cx="116" cy="44" r="10" fill="#f3c27a" opacity=".85"/>
+      <path d="M65 84q18-14 36-6t34-6v32a4 4 0 0 1-4 4H69a4 4 0 0 1-4-4z" fill="#1d2440" opacity=".75"/>
+      <path d="M65 12h36l-22 96H69a4 4 0 0 1-4-4z" fill="#fff" opacity=".06"/>
+    </symbol>
+  
+    <symbol id="dv-watch" viewBox="0 0 200 140">
+      <rect x="84" y="6" width="32" height="32" rx="4" fill="url(#dv-dark)"/>
+      <rect x="84" y="84" width="32" height="28" rx="4" fill="url(#dv-dark)"/>
+      <rect x="126" y="50" width="5" height="12" rx="2.5" fill="url(#dv-alu)"/>
+      <rect x="72" y="30" width="56" height="60" rx="14" fill="url(#dv-alu)"/>
+      <rect x="76" y="34" width="48" height="52" rx="11" fill="#0b0d10"/>
+      <circle cx="100" cy="60" r="15" fill="none" stroke="#3ccf8e" stroke-width="3" stroke-dasharray="70 100" stroke-linecap="round" transform="rotate(-90 100 60)"/>
+      <circle cx="100" cy="60" r="9.5" fill="none" stroke="#f0b44a" stroke-width="3" stroke-dasharray="36 100" stroke-linecap="round" transform="rotate(-90 100 60)"/>
+    </symbol>
+  
+    <symbol id="dv-tv" viewBox="0 0 200 140">
+      <path d="M44 100l-8 12h6l8-12zM156 100l8 12h-6l-8-12z" fill="#2a2e35"/>
+      <rect x="16" y="8" width="168" height="92" rx="3" fill="#16191e"/>
+      <rect x="19" y="11" width="162" height="84" fill="url(#dv-wall)"/>
+      <circle cx="132" cy="48" r="11" fill="#f3c27a" opacity=".85"/>
+      <path d="M19 78q40-20 80-8t82-8v33H19z" fill="#1d2440" opacity=".75"/>
+      <path d="M19 11h66l-38 84H19z" fill="#fff" opacity=".06"/>
+    </symbol>
+  
+    <symbol id="dv-speaker" viewBox="0 0 200 140">
+      <path d="M74 26v78a26 8 0 0 0 52 0V26z" fill="url(#dv-fabric-h)"/>
+      <path d="M74 26v78a26 8 0 0 0 52 0V26z" fill="url(#dv-fabric)"/>
+      <ellipse cx="100" cy="26" rx="26" ry="8" fill="#cfd3d8"/>
+      <ellipse cx="100" cy="26" rx="22" ry="6.4" fill="none" stroke="#7fd3ff" stroke-width="1.6" opacity=".9"/>
+      <ellipse cx="100" cy="26" rx="17" ry="4.6" fill="#b8bdc3"/>
+    </symbol>
+  
+    <symbol id="dv-gamepad" viewBox="0 0 200 140">
+      <path d="M72 44h56c14 0 22 8 25 20l6 32c2 10-7 18-15 12l-13-12H69l-13 12c-8 6-17-2-15-12l6-32c3-12 11-20 25-20z" fill="url(#dv-dark)"/>
+      <path d="M72 44h56c8 0 14 3 18 8H54c4-5 10-8 18-8z" fill="#fff" opacity=".08"/>
+      <g fill="#262a31"><rect x="60" y="61.5" width="16" height="5" rx="1.5"/><rect x="65.5" y="56" width="5" height="16" rx="1.5"/><circle cx="132" cy="58" r="2.8"/><circle cx="132" cy="70" r="2.8"/><circle cx="126" cy="64" r="2.8"/><circle cx="138" cy="64" r="2.8"/></g>
+      <circle cx="86" cy="81" r="8" fill="#262a31"/><circle cx="86" cy="81" r="5" fill="#3b414b"/>
+      <circle cx="114" cy="81" r="8" fill="#262a31"/><circle cx="114" cy="81" r="5" fill="#3b414b"/>
+      <rect x="92" y="50" width="16" height="3" rx="1.5" fill="#7fd3ff" opacity=".85"/>
+    </symbol>
+  
+    <symbol id="dv-console-hybrid-duo" viewBox="0 0 200 140">
+      <g transform="translate(0 8)">
+        <path d="M44 34h-12a14 14 0 0 0-14 14v42a14 14 0 0 0 14 14h12z" fill="url(#dv-blue)"/>
+        <path d="M156 34h12a14 14 0 0 1 14 14v42a14 14 0 0 1-14 14h-12z" fill="url(#dv-coral)"/>
+        <rect x="44" y="34" width="112" height="70" rx="3" fill="url(#dv-dark)"/>
+        <rect x="52" y="40" width="96" height="58" rx="2" fill="url(#dv-glass)"/>
+        <path d="M52 40h46l-28 58H52z" fill="#fff" opacity=".07"/>
+        <circle cx="31" cy="52" r="6.5" fill="#262a31"/><circle cx="31" cy="52" r="4" fill="#3b414b"/>
+        <g fill="#262a31"><circle cx="31" cy="74" r="2.6"/><circle cx="31" cy="86" r="2.6"/><circle cx="25" cy="80" r="2.6"/><circle cx="37" cy="80" r="2.6"/><circle cx="169" cy="46" r="2.6"/><circle cx="169" cy="58" r="2.6"/><circle cx="163" cy="52" r="2.6"/><circle cx="175" cy="52" r="2.6"/></g>
+        <circle cx="169" cy="82" r="6.5" fill="#262a31"/><circle cx="169" cy="82" r="4" fill="#3b414b"/>
+      </g>
+    </symbol>
+  
+    <symbol id="dv-console-hybrid-gray" viewBox="0 0 200 140">
+      <g transform="translate(0 8)">
+        <path d="M44 34h-12a14 14 0 0 0-14 14v42a14 14 0 0 0 14 14h12z" fill="url(#dv-gray)"/>
+        <path d="M156 34h12a14 14 0 0 1 14 14v42a14 14 0 0 1-14 14h-12z" fill="url(#dv-gray)"/>
+        <rect x="44" y="34" width="112" height="70" rx="3" fill="url(#dv-dark)"/>
+        <rect x="52" y="40" width="96" height="58" rx="2" fill="url(#dv-glass)"/>
+        <path d="M52 40h46l-28 58H52z" fill="#fff" opacity=".07"/>
+        <circle cx="31" cy="52" r="6.5" fill="#262a31"/><circle cx="31" cy="52" r="4" fill="#3b414b"/>
+        <g fill="#262a31"><circle cx="31" cy="74" r="2.6"/><circle cx="31" cy="86" r="2.6"/><circle cx="25" cy="80" r="2.6"/><circle cx="37" cy="80" r="2.6"/><circle cx="169" cy="46" r="2.6"/><circle cx="169" cy="58" r="2.6"/><circle cx="163" cy="52" r="2.6"/><circle cx="175" cy="52" r="2.6"/></g>
+        <circle cx="169" cy="82" r="6.5" fill="#262a31"/><circle cx="169" cy="82" r="4" fill="#3b414b"/>
+      </g>
+    </symbol>
+  
+    <symbol id="dv-console-hybrid-dark" viewBox="0 0 200 140">
+      <g transform="translate(0 4)">
+        <path d="M40 28H30a12 12 0 0 0-12 12v56a12 12 0 0 0 12 12h10z" fill="url(#dv-dark)"/>
+        <path d="M160 28h10a12 12 0 0 1 12 12v56a12 12 0 0 1-12 12h-10z" fill="url(#dv-dark)"/>
+        <rect x="40" y="28" width="120" height="80" rx="2.5" fill="#1b1e23"/>
+        <rect x="46" y="33" width="108" height="70" rx="2" fill="url(#dv-glass)"/>
+        <path d="M46 33h50l-30 70H46z" fill="#fff" opacity=".07"/>
+        <rect x="40" y="30" width="1.5" height="76" fill="#7fd3ff" opacity=".7"/>
+        <rect x="158.5" y="30" width="1.5" height="76" fill="#ea9a8b" opacity=".8"/>
+        <circle cx="29" cy="48" r="8" fill="none" stroke="#7fd3ff" stroke-width="1.6"/>
+        <circle cx="29" cy="48" r="5.5" fill="#3b414b"/>
+        <circle cx="171" cy="82" r="8" fill="none" stroke="#ea9a8b" stroke-width="1.6"/>
+        <circle cx="171" cy="82" r="5.5" fill="#3b414b"/>
+        <g fill="#3b414b"><circle cx="29" cy="72" r="2.6"/><circle cx="29" cy="84" r="2.6"/><circle cx="23" cy="78" r="2.6"/><circle cx="35" cy="78" r="2.6"/><circle cx="171" cy="42" r="2.6"/><circle cx="171" cy="54" r="2.6"/><circle cx="165" cy="48" r="2.6"/><circle cx="177" cy="48" r="2.6"/></g>
+      </g>
+    </symbol>
+  
+    <symbol id="dv-handheld-clamshell" viewBox="0 0 200 140">
+      <rect x="52" y="12" width="96" height="64" rx="7" fill="url(#dv-blue)"/>
+      <rect x="60" y="18" width="80" height="52" rx="3" fill="#1b1e23"/>
+      <rect x="66" y="22" width="68" height="44" rx="1.5" fill="url(#dv-glass)"/>
+      <path d="M66 22h32l-20 44H66z" fill="#fff" opacity=".07"/>
+      <rect x="52" y="76" width="96" height="6" rx="2" fill="#3e5a7e"/>
+      <path d="M52 82h96l10 26a3 3 0 0 1-3 4H45a3 3 0 0 1-3-4z" fill="url(#dv-blue)"/>
+      <path d="M82 86h36l3 14H79z" fill="url(#dv-glass)"/>
+      <ellipse cx="62" cy="92" rx="6" ry="3" fill="#262a31"/>
+      <g fill="#262a31"><ellipse cx="138" cy="88" rx="2.6" ry="1.4"/><ellipse cx="138" cy="96" rx="2.6" ry="1.4"/><ellipse cx="132" cy="92" rx="2.6" ry="1.4"/><ellipse cx="144" cy="92" rx="2.6" ry="1.4"/></g>
+      <rect x="60" y="101" width="12" height="3" rx="1.5" fill="#262a31"/>
+    </symbol>
+  
+    <symbol id="dv-console-tower-white" viewBox="0 0 200 140">
+      <rect x="76" y="108" width="48" height="4" rx="2" fill="#262a31"/>
+      <rect x="90" y="18" width="20" height="92" fill="url(#dv-dark)"/>
+      <path d="M90 20v90H70c2-34-3-70-10-102 12 2 23 6 30 12z" fill="url(#dv-white)"/>
+      <path d="M110 20v90h20c-2-34 3-70 10-102-12 2-23 6-30 12z" fill="url(#dv-white)"/>
+      <rect x="89.5" y="22" width="1.4" height="86" fill="#7fd3ff" opacity=".75"/>
+      <rect x="109.1" y="22" width="1.4" height="86" fill="#7fd3ff" opacity=".75"/>
+      <path d="M60 8c12 2 23 6 30 12v6C82 20 72 14 62 12z" fill="#fff" opacity=".6"/>
+    </symbol>
+  
+    <symbol id="dv-console-tower-black" viewBox="0 0 200 140">
+      <path d="M70 30l8-10h44l8 10z" fill="#2e333a"/>
+      <ellipse cx="100" cy="25" rx="17" ry="3.2" fill="#0b0d10"/>
+      <ellipse cx="100" cy="25" rx="13" ry="2.2" fill="#3ccf8e" opacity=".55"/>
+      <rect x="70" y="30" width="60" height="82" rx="2" fill="url(#dv-dark)"/>
+      <path d="M70 30h18l-18 50z" fill="#fff" opacity=".05"/>
+      <circle cx="79" cy="40" r="1.8" fill="#f2f4f6"/>
+      <rect x="112" y="40" width="10" height="2" rx="1" fill="#0b0d10"/>
+    </symbol>
+  
+    <symbol id="dv-chip" viewBox="0 0 200 140">
+      <path d="M68 50l8-8h48l8 8z" fill="#fbfcfd"/>
+      <rect x="68" y="50" width="64" height="62" rx="12" fill="url(#dv-white)"/>
+      <circle cx="100" cy="81" r="17" fill="#eef0f3"/>
+      <circle cx="100" cy="81" r="17" fill="none" stroke="#000" stroke-opacity=".08" stroke-width="1.4"/>
+      <circle cx="100" cy="81" r="11" fill="none" stroke="#7fd3ff" stroke-width="1.6" opacity=".85"/>
+      <circle cx="100" cy="58" r="1.8" fill="#3ccf8e"/>
+    </symbol>
+  
+    <symbol id="dv-bulb" viewBox="0 0 200 140">
+      <path d="M100 8a36 36 0 0 1 23 63.7c-5 4.6-8 10-8 17.3H85c0-7.3-3-12.7-8-17.3A36 36 0 0 1 100 8z" fill="url(#dv-bulb-glass)"/>
+      <path d="M92 89V66l-6-10M108 89V66l6-10M86 56c5 4 9 4 14 0s9-4 14 0" fill="none" stroke="#e39b3a" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+      <rect x="85" y="89" width="30" height="14" rx="2" fill="url(#dv-alu)"/>
+      <path d="M86 93.5h28M86 98h28" stroke="#8f959d" stroke-width="1.4"/>
+      <path d="M90 103h20l-3 9h-14z" fill="#3a3f47"/>
+    </symbol>
+  
+    <symbol id="dv-plug" viewBox="0 0 200 140">
+      <path d="M64 42l8-8h56l8 8z" fill="#fbfcfd"/>
+      <rect x="64" y="42" width="72" height="70" rx="16" fill="url(#dv-white)"/>
+      <circle cx="100" cy="74" r="22" fill="#eef0f3"/>
+      <circle cx="100" cy="74" r="22" fill="none" stroke="#000" stroke-opacity=".07" stroke-width="1.4"/>
+      <rect x="88" y="68" width="5" height="12" rx="2" fill="#3a3f47"/>
+      <rect x="107" y="68" width="5" height="12" rx="2" fill="#3a3f47"/>
+      <rect x="94" y="102" width="12" height="3" rx="1.5" fill="#3ccf8e"/>
+    </symbol>
+  
+    <symbol id="dv-vacuum" viewBox="0 0 200 140">
+      <path d="M28 74a72 25 0 0 0 144 0v13a72 25 0 0 1-144 0z" fill="#2a2e35"/>
+      <ellipse cx="100" cy="74" rx="72" ry="25" fill="url(#dv-white)"/>
+      <path d="M85 66v-9a15 5 0 0 1 30 0v9a15 5 0 0 1-30 0z" fill="#3a3f47"/>
+      <ellipse cx="100" cy="57" rx="15" ry="5" fill="#59606a"/>
+      <ellipse cx="100" cy="85" rx="7" ry="2.2" fill="#8a9099"/>
+    </symbol>
+  
+    <symbol id="dv-camera" viewBox="0 0 200 140">
+      <ellipse cx="100" cy="108" rx="26" ry="4" fill="url(#dv-white)"/>
+      <rect x="95" y="80" width="10" height="28" fill="url(#dv-white-h)"/>
+      <rect x="62" y="22" width="76" height="62" rx="28" fill="url(#dv-white)"/>
+      <circle cx="100" cy="53" r="21" fill="#1b1e23"/>
+      <circle cx="100" cy="53" r="11.5" fill="url(#dv-glass)"/>
+      <circle cx="95.5" cy="48.5" r="3" fill="#fff" opacity=".55"/>
+      <circle cx="100" cy="30" r="1.8" fill="#7fd3ff"/>
+    </symbol>
+  
+    <symbol id="dv-printer" viewBox="0 0 200 140">
+      <path d="M62 44l4-26h68l4 26z" fill="#fdfdfd"/>
+      <path d="M72 26h56M72 32h40" stroke="#d3d8de" stroke-width="1.4" stroke-linecap="round"/>
+      <path d="M36 50l10-8h108l10 8z" fill="#e7eaee"/>
+      <rect x="36" y="50" width="128" height="62" rx="5" fill="url(#dv-white)"/>
+      <rect x="56" y="62" width="88" height="6" rx="2" fill="#3a3f47"/>
+      <path d="M62 65h76l4 18H58z" fill="#fff"/>
+      <path d="M62 65h76l4 18H58z" fill="none" stroke="#d9dfe5" stroke-width="1"/>
+      <rect x="128" y="92" width="24" height="10" rx="2" fill="url(#dv-glass)"/>
+      <circle cx="120" cy="97" r="2" fill="#3ccf8e"/>
+    </symbol>
+  
+    <symbol id="dv-question" viewBox="0 0 200 140">
+      <path d="M52 54l14-16h68l14 16z" fill="#e2c08e"/>
+      <path d="M93 38h14l3 16H90z" fill="#c69c62"/>
+      <rect x="52" y="54" width="96" height="58" fill="url(#dv-kraft)"/>
+      <rect x="90" y="54" width="20" height="12" fill="#c69c62"/>
+      <path d="M92 80a8 8 0 1 1 11.5 7.2c-2.6 1.4-3.5 2.8-3.5 6" fill="none" stroke="#7d5c33" stroke-width="4" stroke-linecap="round"/>
+      <circle cx="100" cy="102" r="2.6" fill="#7d5c33"/>
+    </symbol>
+  </defs>
+</svg>

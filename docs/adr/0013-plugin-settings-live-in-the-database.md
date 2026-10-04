@@ -5,4 +5,4 @@ Environment variables only cover what is needed to start (data folder, host, por
 ## Consequences
 
 - Secrets such as the Technitium token are stored in plain text in the database, and therefore in its backups. Fields declared with `repr=False` are treated as secrets: masked in the CLI, never pre-filled in forms, kept when a form leaves them blank.
-- The CLI writes to the database but cannot reload a running server; see `TODO.md`.
+- The CLI writes to the database but cannot reload a running server.

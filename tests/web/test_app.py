@@ -34,6 +34,9 @@ async def test_devices_page_renders_catalogue(client: AsyncClient) -> None:
     assert "New on your network" in response.text
     assert posters_in(response.text) == 2
     assert "esp-31f5e" in response.text
+    assert 'id="dv-chip"' in response.text
+    assert 'href="#dv-chip"' in response.text
+    assert 'class="ground" cx="100" cy="112" rx="32"' in response.text
 
 
 @pytest.mark.usefixtures("seen_device")
@@ -69,6 +72,8 @@ async def test_drawer(client: AsyncClient, seen_device: MacAddress) -> None:
     assert response.status_code == 200
     assert 'id="drawer-name">esp-31f5e' in response.text
     assert "Mark as known" in response.text
+    assert "Forget device" in response.text
+    assert "Hybrid console, two-tone" in response.text
     assert "First found by <b>Demo network</b>" in response.text
 
 
@@ -104,6 +109,23 @@ async def test_acknowledge(client: AsyncClient, seen_device: MacAddress) -> None
 
     assert json.loads(response.headers["HX-Trigger"])["toast"] == "Marked as known"
     assert "Mark as known" not in response.text
+
+
+async def test_forget(client: AsyncClient, seen_device: MacAddress) -> None:
+    response = await client.post(f"/devices/{seen_device}/forget")
+
+    assert response.status_code == 200
+    assert response.text == ""
+    assert json.loads(response.headers["HX-Trigger"]) == {
+        "devices-changed": None,
+        "toast": "Forgot esp-31f5e",
+    }
+    assert (await client.get(f"/devices/{seen_device}")).status_code == 404
+    assert posters_in((await client.get("/")).text) == 0
+
+
+async def test_forget_unknown_device(client: AsyncClient) -> None:
+    assert (await client.post("/devices/aa:bb:cc:dd:ee:ff/forget")).status_code == 404
 
 
 async def test_settings_page_lists_plugins(client: AsyncClient, web_context: WebContext) -> None:

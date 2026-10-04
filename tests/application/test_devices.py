@@ -8,6 +8,7 @@ from network_monitor_tds.application.devices import (
     acknowledge_device,
     describe_device,
     device_detail,
+    forget_device,
     list_devices,
     network_overview,
     relabel_device,
@@ -132,6 +133,38 @@ async def test_unknown_device(database: Database) -> None:
         await relabel_device(database.unit_of_work(), UNKNOWN, no_labels)
     with pytest.raises(DeviceNotFoundError):
         await acknowledge_device(database.unit_of_work(), UNKNOWN)
+    with pytest.raises(DeviceNotFoundError):
+        await forget_device(database.unit_of_work(), UNKNOWN)
+
+
+async def test_forget_device_deletes_it_and_its_history(
+    database: Database, observation: Observation
+) -> None:
+    await ingest(database.unit_of_work(), observation)
+
+    assert await forget_device(database.unit_of_work(), observation.mac) == "esp-31f5e"
+
+    async with database.unit_of_work() as uow:
+        assert await uow.devices.get(observation.mac) is None
+        assert await uow.facts.for_device(observation.mac) == {}
+        assert await uow.detections.for_device(observation.mac) == {}
+        assert await uow.presence.get(observation.mac) is None
+        assert await uow.presence.intervals_since(T0) == {}
+        assert await uow.events.recent(10) == []
+
+
+async def test_forgotten_device_comes_back_as_new(
+    database: Database, observation: Observation
+) -> None:
+    await ingest(database.unit_of_work(), observation)
+    await acknowledge_device(database.unit_of_work(), observation.mac)
+    await forget_device(database.unit_of_work(), observation.mac)
+
+    await ingest(database.unit_of_work(), replace(observation, observed_at=NOW))
+
+    [summary] = await list_devices(database.unit_of_work(), NOW)
+    assert summary.is_new
+    assert summary.device.first_seen == NOW
 
 
 def test_retention_never_cuts_into_the_device_history() -> None:

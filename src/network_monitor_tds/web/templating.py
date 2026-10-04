@@ -4,25 +4,40 @@ from fastapi import Request
 from fastapi.templating import Jinja2Templates
 
 from network_monitor_tds import __version__
-from network_monitor_tds.web.icons import ICONS
-from network_monitor_tds.web.views import category_choices
+from network_monitor_tds.web.drawings import DRAWINGS
+from network_monitor_tds.web.views import category_choices, drawing_groups
 
 TEMPLATES_DIR = Path(__file__).parent / "templates"
 THEME_COOKIE = "nmtds_theme"
 THEMES = (("auto", "Auto"), ("light", "Light"), ("dark", "Dark"))
+CARD_STYLE_COOKIE = "nmtds_cards"
+CARD_STYLES = (("artwork", "Artwork"), ("studio", "Studio"))
 
 
 def theme_of(request: Request) -> str:
-    chosen = request.cookies.get(THEME_COOKIE, "auto")
-    return chosen if chosen in dict(THEMES) else "auto"
+    return _chosen(request, THEME_COOKIE, THEMES)
+
+
+def card_style_of(request: Request) -> str:
+    return _chosen(request, CARD_STYLE_COOKIE, CARD_STYLES)
 
 
 templates = Jinja2Templates(directory=TEMPLATES_DIR)
 templates.env.globals.update(
     version=__version__,
-    icon_paths=ICONS,
+    drawing_groups=drawing_groups(),
     category_choices=category_choices(),
     theme_of=theme_of,
     themes=THEMES,
     theme_cookie=THEME_COOKIE,
+    card_style_of=card_style_of,
+    card_styles=CARD_STYLES,
+    card_style_cookie=CARD_STYLE_COOKIE,
+    drawing_footprints={drawing.name: drawing.footprint for drawing in DRAWINGS},
 )
+
+
+def _chosen(request: Request, cookie: str, choices: tuple[tuple[str, str], ...]) -> str:
+    default = choices[0][0]
+    chosen = request.cookies.get(cookie, default)
+    return chosen if chosen in dict(choices) else default

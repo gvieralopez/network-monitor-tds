@@ -43,6 +43,17 @@ async def test_list_orders_by_mac(database: Database, stored_device: Device) -> 
         assert await uow.devices.list() == [other, stored_device]
 
 
+async def test_delete_removes_only_that_device(database: Database, stored_device: Device) -> None:
+    other = Device.discovered(MacAddress.parse("00:11:32:c4:7e:92"), None, T0)
+    async with database.unit_of_work() as uow:
+        await uow.devices.save(other)
+        await uow.devices.delete(stored_device.mac)
+        await uow.commit()
+
+    async with database.unit_of_work() as uow:
+        assert await uow.devices.list() == [other]
+
+
 async def test_changes_are_discarded_without_commit(database: Database, mac: MacAddress) -> None:
     async with database.unit_of_work() as uow:
         await uow.devices.save(Device.discovered(mac, None, T0))

@@ -1,6 +1,6 @@
 from collections.abc import Sequence
 
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from network_monitor_tds.domain.devices.models import Device
@@ -25,3 +25,6 @@ class SqlDeviceRepository:
         record = await self._session.get(DeviceRecord, device.mac) or DeviceRecord()
         self._session.add(write_device(record, device))
         await self._session.flush()
+
+    async def delete(self, mac: MacAddress) -> None:
+        await self._session.execute(delete(DeviceRecord).where(DeviceRecord.mac == mac))

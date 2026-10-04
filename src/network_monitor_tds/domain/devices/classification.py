@@ -10,12 +10,25 @@ from network_monitor_tds.domain.observations.models import Fact, KnownField
 
 NAME_RULES = (
     ClassificationRule(
+        Category.WEARABLE,
+        fragments=(
+            "applewatch",
+            "galaxywatch",
+            "pixelwatch",
+            "smartwatch",
+            "fitbit",
+            "garmin",
+            "amazfit",
+        ),
+        words=("watch",),
+    ),
+    ClassificationRule(
         Category.TABLET, fragments=("ipad", "galaxytab"), words=("tablet", "tab", "kindle")
     ),
     ClassificationRule(
         Category.PHONE,
         fragments=("iphone", "android", "galaxy", "oneplus", "redmi", "xiaomi", "motorola"),
-        words=("pixel", "moto", "watch"),
+        words=("pixel", "moto"),
     ),
     ClassificationRule(
         Category.COMPUTER,
@@ -23,9 +36,14 @@ NAME_RULES = (
         words=("imac", "mac", "mbp", "pc"),
     ),
     ClassificationRule(
+        Category.GAMING,
+        fragments=("playstation", "xbox", "nintendo", "steamdeck", "rogally", "oculus"),
+        words=("ps3", "ps4", "ps5", "quest"),
+    ),
+    ClassificationRule(
         Category.MEDIA,
-        fragments=("chromecast", "firetv", "appletv", "webos", "bravia", "playstation", "xbox"),
-        words=("tv", "roku", "ps4", "ps5", "nintendo", "sonos", "echo"),
+        fragments=("chromecast", "firetv", "appletv", "webos", "bravia"),
+        words=("tv", "roku", "sonos", "echo"),
     ),
     ClassificationRule(
         Category.PRINTER,
@@ -72,6 +90,8 @@ VENDOR_CLASS_RULES = (
 )
 
 VENDOR_RULES = (
+    ClassificationRule(Category.WEARABLE, fragments=("fitbit", "garmin"), words=()),
+    ClassificationRule(Category.GAMING, fragments=("sonyinteractive", "nintendo"), words=()),
     ClassificationRule(
         Category.IOT,
         fragments=("espressif", "shelly", "allterco", "tuya", "itead", "signify", "roborock"),
@@ -81,11 +101,7 @@ VENDOR_RULES = (
     ClassificationRule(
         Category.CAMERA, fragments=("reolink", "hikvision", "dahua", "axiscomm"), words=()
     ),
-    ClassificationRule(
-        Category.MEDIA,
-        fragments=("sonyinteractive", "nintendo", "roku", "sonos", "amazontechnologies"),
-        words=(),
-    ),
+    ClassificationRule(Category.MEDIA, fragments=("roku", "sonos", "amazontechnologies"), words=()),
     ClassificationRule(Category.PRINTER, fragments=("seikoepson", "brotherind"), words=()),
     ClassificationRule(
         Category.NETWORK, fragments=("ubiquiti", "mikrotik", "fritz"), words=("avm",)
