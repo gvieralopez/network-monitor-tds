@@ -5,7 +5,7 @@ from network_monitor_tds.plugins.builtin.capture.interfaces import resolve_inter
 from network_monitor_tds.plugins.builtin.capture.sniffer import capture
 from network_monitor_tds.plugins.builtin.dhcp.packets import DHCP_FILTER, dhcp_sighting
 from network_monitor_tds.plugins.sdk.base import ListenerPlugin, PluginContext
-from network_monitor_tds.plugins.sdk.models import PluginInfo, PluginSettings
+from network_monitor_tds.plugins.sdk.models import PluginInfo, PluginPurpose, PluginSettings
 
 
 class DhcpSnifferSettings(PluginSettings):
@@ -18,6 +18,7 @@ class DhcpSnifferPlugin(ListenerPlugin[DhcpSnifferSettings]):
         name="DHCP sniffer",
         description="Reads DHCP broadcasts for hostnames and device fingerprints.",
         enabled_by_default=True,
+        purpose=PluginPurpose.PASSIVE_DISCOVERY,
     )
     settings_model: ClassVar[type[DhcpSnifferSettings]] = DhcpSnifferSettings
 

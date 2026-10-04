@@ -23,7 +23,12 @@ from network_monitor_tds.plugins.builtin.capture.models import Sighting
 from network_monitor_tds.plugins.builtin.capture.sniffer import capture
 from network_monitor_tds.plugins.builtin.capture.throttle import Throttle
 from network_monitor_tds.plugins.sdk.base import ListenerPlugin, PluginContext, ScheduledPlugin
-from network_monitor_tds.plugins.sdk.models import PluginInfo, PluginSettings, ScheduledSettings
+from network_monitor_tds.plugins.sdk.models import (
+    PluginInfo,
+    PluginPurpose,
+    PluginSettings,
+    ScheduledSettings,
+)
 
 MAX_SWEEP_ADDRESSES = 1024
 QUIET_FRACTION_OF_INTERVAL = 0.5
@@ -71,6 +76,7 @@ class ArpSweepPlugin(ScheduledPlugin[ArpSweepSettings]):
         description="Asks quiet devices whether they are still there, and the whole subnet "
         "every so often.",
         enabled_by_default=True,
+        purpose=PluginPurpose.ACTIVE_DISCOVERY,
     )
     settings_model: ClassVar[type[ArpSweepSettings]] = ArpSweepSettings
 
@@ -129,6 +135,7 @@ class ArpListenerPlugin(ListenerPlugin[ArpListenerSettings]):
         name="ARP listener",
         description="Watches ARP traffic to catch devices between sweeps.",
         enabled_by_default=True,
+        purpose=PluginPurpose.PASSIVE_DISCOVERY,
     )
     settings_model: ClassVar[type[ArpListenerSettings]] = ArpListenerSettings
 

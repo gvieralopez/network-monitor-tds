@@ -12,6 +12,18 @@ Subclass one of the base classes in `network_monitor_tds.plugins.sdk.base`:
 | `ListenerPlugin` | `async def listen(self, context)` | Continuously; restarted with growing pauses if it crashes. |
 | `EnrichmentPlugin` | `async def enrich(self, context, mac)` | Once for each known device at start, then for each new device. |
 
+## Say what it is for
+
+`PluginInfo.purpose` decides where the plugin is listed on the Settings page:
+
+| Purpose | For plugins that |
+|---|---|
+| `PASSIVE_DISCOVERY` | find devices from traffic they send anyway, without sending anything |
+| `ACTIVE_DISCOVERY` | find devices by asking the network |
+| `INTEGRATION` | read devices from another service, such as a DHCP server |
+| `METADATA` | add details to devices that other plugins found |
+| `DEVELOPMENT` | produce simulated data for trying the app |
+
 ## Report what you find
 
 The context passed to your method has two ways to report:
@@ -36,7 +48,7 @@ from typing import ClassVar
 from network_monitor_tds.domain.network.models import MacAddress
 from network_monitor_tds.domain.plugins.models import PluginId
 from network_monitor_tds.plugins.sdk.base import PluginContext, ScheduledPlugin
-from network_monitor_tds.plugins.sdk.models import PluginInfo, ScheduledSettings
+from network_monitor_tds.plugins.sdk.models import PluginInfo, PluginPurpose, ScheduledSettings
 
 
 class PrinterSettings(ScheduledSettings):
@@ -50,6 +62,7 @@ class PrinterPlugin(ScheduledPlugin[PrinterSettings]):
         name="Office printer",
         description="Reports the office printer, which never answers ARP.",
         enabled_by_default=False,
+        purpose=PluginPurpose.ACTIVE_DISCOVERY,
     )
     settings_model: ClassVar[type[PrinterSettings]] = PrinterSettings
 

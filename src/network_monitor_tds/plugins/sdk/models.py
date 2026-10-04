@@ -15,12 +15,21 @@ class PluginKind(StrEnum):
     ENRICHMENT = "enrichment"
 
 
+class PluginPurpose(StrEnum):
+    PASSIVE_DISCOVERY = "passive_discovery"
+    ACTIVE_DISCOVERY = "active_discovery"
+    INTEGRATION = "integration"
+    METADATA = "metadata"
+    DEVELOPMENT = "development"
+
+
 @dataclass(frozen=True, slots=True)
 class PluginInfo:
     plugin_id: PluginId
     name: str
     description: str
     enabled_by_default: bool
+    purpose: PluginPurpose
 
 
 @dataclass(frozen=True, slots=True)

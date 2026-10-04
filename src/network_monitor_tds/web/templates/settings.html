@@ -22,6 +22,7 @@
     <div class="plist"><div class="plug"><div class="pd">No plugins installed.</div></div></div>
     {% endfor %}
     {% else %}
+    {% include "partials/appearance.html" %}
     {% include "partials/presence.html" %}
     {% include "partials/retention.html" %}
     {% endif %}

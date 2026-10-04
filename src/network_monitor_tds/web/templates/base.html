@@ -1,6 +1,7 @@
 {% from "macros.html" import icon %}
+{% set theme = theme_of(request) %}
 <!doctype html>
-<html lang="en">
+<html lang="en"{% if theme != "auto" %} data-theme="{{ theme }}"{% endif %}>
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">

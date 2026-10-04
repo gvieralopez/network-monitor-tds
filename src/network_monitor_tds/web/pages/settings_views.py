@@ -14,22 +14,33 @@ from network_monitor_tds.domain.retention.models import (
     RetentionPolicy,
 )
 from network_monitor_tds.plugins.host.registry import PluginClass
-from network_monitor_tds.plugins.sdk.models import PluginKind
+from network_monitor_tds.plugins.sdk.models import PluginPurpose
 from network_monitor_tds.web.forms import FormField, format_duration, settings_fields
 from network_monitor_tds.web.views import ago
 
 SWEEP_PLUGIN = PluginId("arp-sweep")
 SWEEPS_BEFORE_OFFLINE = 2
-KIND_GROUPS = {
-    PluginKind.LISTENER: (
-        "Listen passively",
-        "Hear devices as they talk on the network. Nothing is sent.",
+PURPOSE_GROUPS = {
+    PluginPurpose.PASSIVE_DISCOVERY: (
+        "Passive device finders",
+        "Hear devices from the traffic they send anyway. Nothing is sent.",
     ),
-    PluginKind.SCHEDULED: (
-        "Check on a schedule",
-        "Scan the network or ask other services for devices every few minutes.",
+    PluginPurpose.ACTIVE_DISCOVERY: (
+        "Active device finders",
+        "Ask the network who is there, on a schedule.",
     ),
-    PluginKind.ENRICHMENT: ("Enrich devices", "Add details to devices the other plugins found."),
+    PluginPurpose.INTEGRATION: (
+        "Third-party integrations",
+        "Read devices from services you already run.",
+    ),
+    PluginPurpose.METADATA: (
+        "Metadata providers",
+        "Add details to devices the other plugins found.",
+    ),
+    PluginPurpose.DEVELOPMENT: (
+        "Developer tools",
+        "Simulated devices for trying the app without a real network.",
+    ),
 }
 
 
@@ -54,7 +65,7 @@ class PluginCardView:
     plugin_id: str
     name: str
     description: str
-    kind: PluginKind
+    purpose: PluginPurpose
     enabled: bool
     status: StatusView
     fields: tuple[FormField, ...]
@@ -93,7 +104,7 @@ def plugin_card(
         plugin_id=config.plugin_id,
         name=plugin.info.name,
         description=plugin.info.description,
-        kind=plugin.kind,
+        purpose=plugin.info.purpose,
         enabled=config.enabled,
         status=status_view(config.enabled, status, now),
         fields=settings_fields(plugin.settings_model, config.settings, errors),
@@ -102,12 +113,14 @@ def plugin_card(
 
 
 def plugin_groups(cards: Iterable[PluginCardView]) -> tuple[PluginGroupView, ...]:
-    by_kind: dict[PluginKind, list[PluginCardView]] = {kind: [] for kind in KIND_GROUPS}
+    by_purpose: dict[PluginPurpose, list[PluginCardView]] = {
+        purpose: [] for purpose in PURPOSE_GROUPS
+    }
     for card in cards:
-        by_kind[card.kind].append(card)
+        by_purpose[card.purpose].append(card)
     return tuple(
-        PluginGroupView(*KIND_GROUPS[kind], tuple(group))
-        for kind, group in by_kind.items()
+        PluginGroupView(*PURPOSE_GROUPS[purpose], tuple(group))
+        for purpose, group in by_purpose.items()
         if group
     )
 

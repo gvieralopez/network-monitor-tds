@@ -24,6 +24,7 @@ from network_monitor_tds.plugins.sdk.base import (
 from network_monitor_tds.plugins.sdk.models import (
     KnownDevice,
     PluginInfo,
+    PluginPurpose,
     PluginSettings,
     ScheduledSettings,
 )
@@ -35,7 +36,9 @@ calls: dict[str, list[object]] = {}
 
 
 def info(plugin_id: str, enabled: bool) -> PluginInfo:
-    return PluginInfo(PluginId(plugin_id), plugin_id.title(), "Test plugin", enabled)
+    return PluginInfo(
+        PluginId(plugin_id), plugin_id.title(), "Test plugin", enabled, PluginPurpose.DEVELOPMENT
+    )
 
 
 class EmptySettings(PluginSettings):

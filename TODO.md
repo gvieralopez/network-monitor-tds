@@ -12,7 +12,6 @@ The app is feature-complete and released as a docker image tagged 0.2.1.
 - "Forget device" action in the UI.
 - Merge duplicate devices caused by randomized MACs (same hostname or DHCP fingerprint).
 - Custom thumbnails for devices
-- Dark mode / Light mode should be configurable in settings
 - New-device alerts (channel not decided; Telegram is a candidate).
 - More discovery plugins: mDNS/Bonjour, SSDP/UPnP, ping sweep, opt-in nmap port scan.
 - Security audit
