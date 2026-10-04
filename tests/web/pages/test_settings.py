@@ -6,8 +6,9 @@ from httpx import ASGITransport, AsyncClient
 
 from network_monitor_tds.application.models import PluginState, PluginStatus
 from network_monitor_tds.application.plugins import get_plugin_config, sync_plugin_configs
-from network_monitor_tds.application.preferences import load_presence_policy
+from network_monitor_tds.application.preferences import load_presence_policy, load_retention_policy
 from network_monitor_tds.domain.plugins.models import PluginId
+from network_monitor_tds.domain.retention.models import DEFAULT_RETENTION, RetentionPolicy
 from network_monitor_tds.plugins.host.registry import plugin_defaults
 from network_monitor_tds.web.app import create_app
 from network_monitor_tds.web.models import WebContext
@@ -39,6 +40,7 @@ async def test_general_settings_page(client: AsyncClient) -> None:
     assert response.status_code == 200
     assert '<a href="/settings" aria-current="page">General</a>' in response.text
     assert 'name="offline_after" value="10m"' in response.text
+    assert 'name="keep_days" value="90"' in response.text
     assert "Demo network" not in response.text
 
 
@@ -126,3 +128,22 @@ async def test_invalid_presence_is_rejected(client: AsyncClient, value: str) -> 
 
     assert "HX-Trigger" not in response.headers
     assert "Use a duration like" in response.text
+
+
+async def test_save_retention(client: AsyncClient, web_context: WebContext) -> None:
+    response = await client.post("/settings/retention", data={"keep_days": " 30 "})
+
+    assert json.loads(response.headers["HX-Trigger"]) == {"toast": "Saved history settings"}
+    assert 'name="keep_days" value="30"' in response.text
+    assert await load_retention_policy(web_context.unit_of_work()) == RetentionPolicy(30)
+
+
+@pytest.mark.parametrize("value", ["", "soon", "7", "4000"])
+async def test_invalid_retention_is_rejected(
+    client: AsyncClient, web_context: WebContext, value: str
+) -> None:
+    response = await client.post("/settings/retention", data={"keep_days": value})
+
+    assert "HX-Trigger" not in response.headers
+    assert "Use a whole number of days from 14 to 3650" in response.text
+    assert await load_retention_policy(web_context.unit_of_work()) == DEFAULT_RETENTION

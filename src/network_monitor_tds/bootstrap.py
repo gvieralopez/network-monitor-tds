@@ -49,6 +49,7 @@ async def serve(settings: AppSettings) -> None:
         async with asyncio.TaskGroup() as group:
             group.create_task(container.monitor.run_ingestion(), name="ingestion")
             group.create_task(container.monitor.run_presence_checks(asyncio.sleep), name="presence")
+            group.create_task(container.monitor.run_pruning(asyncio.sleep), name="pruning")
             group.create_task(container.host.run(), name="plugins")
             group.create_task(_web_server(container).serve(), name="web")
     finally:

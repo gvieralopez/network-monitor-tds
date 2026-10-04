@@ -11,7 +11,12 @@ from network_monitor_tds.application.plugins import (
     set_plugin_enabled,
     update_plugin_settings,
 )
-from network_monitor_tds.application.preferences import load_presence_policy, save_presence_policy
+from network_monitor_tds.application.preferences import (
+    load_presence_policy,
+    load_retention_policy,
+    save_presence_policy,
+    save_retention_policy,
+)
 from network_monitor_tds.domain.plugins.models import PluginConfig, PluginId
 from network_monitor_tds.domain.presence.policy import PresencePolicy
 from network_monitor_tds.plugins.host.registry import PluginClass
@@ -19,10 +24,14 @@ from network_monitor_tds.web.dependencies import ContextDep
 from network_monitor_tds.web.forms import DURATION_HINT, parse_duration, read_settings_form
 from network_monitor_tds.web.models import WebContext
 from network_monitor_tds.web.pages.settings_views import (
+    RETENTION_HINT,
     PresenceView,
+    RetentionView,
+    parse_retention,
     plugin_card,
     plugin_groups,
     policy_view,
+    retention_view,
     status_view,
     sweep_interval,
 )
@@ -39,10 +48,15 @@ async def general_settings_page(request: Request, context: ContextDep) -> HTMLRe
         config.plugin_id: config for config in await list_plugin_configs(context.unit_of_work())
     }
     policy = await load_presence_policy(context.unit_of_work())
+    retention = await load_retention_policy(context.unit_of_work())
     return templates.TemplateResponse(
         request,
         "settings.html",
-        {"tab": "general", "presence": policy_view(policy, sweep_interval(configs))},
+        {
+            "tab": "general",
+            "presence": policy_view(policy, sweep_interval(configs)),
+            "retention": retention_view(retention),
+        },
     )
 
 
@@ -128,6 +142,17 @@ async def save_presence(
     return _presence(request, view, "Saved presence settings")
 
 
+@router.post("/retention", response_class=HTMLResponse)
+async def save_retention(
+    request: Request, context: ContextDep, keep_days: Annotated[str, Form()] = ""
+) -> HTMLResponse:
+    policy = parse_retention(keep_days)
+    if policy is None:
+        return _retention(request, RetentionView(keep_days, RETENTION_HINT), None)
+    await save_retention_policy(context.unit_of_work(), policy, context.clock.now())
+    return _retention(request, retention_view(policy), "Saved history settings")
+
+
 def _plugin(context: WebContext, plugin_id: str) -> PluginClass:
     plugin = context.plugins.get(PluginId(plugin_id))
     if plugin is None:
@@ -152,6 +177,12 @@ def _card(
 
 def _presence(request: Request, view: PresenceView, toast: str | None) -> HTMLResponse:
     response = templates.TemplateResponse(request, "partials/presence.html", {"presence": view})
+    _trigger(response, toast)
+    return response
+
+
+def _retention(request: Request, view: RetentionView, toast: str | None) -> HTMLResponse:
+    response = templates.TemplateResponse(request, "partials/retention.html", {"retention": view})
     _trigger(response, toast)
     return response
 

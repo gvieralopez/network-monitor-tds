@@ -4,6 +4,7 @@ from datetime import UTC, timedelta
 import pytest
 
 from network_monitor_tds.application.devices import (
+    HISTORY_DAYS,
     acknowledge_device,
     describe_device,
     device_detail,
@@ -17,6 +18,7 @@ from network_monitor_tds.application.models import HourState
 from network_monitor_tds.domain.devices.models import Category, DeviceLabels
 from network_monitor_tds.domain.network.models import MacAddress
 from network_monitor_tds.domain.observations.models import KnownField, Observation
+from network_monitor_tds.domain.retention.models import MIN_KEEP_DAYS
 from tests.conftest import ARP_SWEEP, DHCP_SNIFF, T0, Database
 
 pytestmark = pytest.mark.anyio
@@ -130,3 +132,7 @@ async def test_unknown_device(database: Database) -> None:
         await relabel_device(database.unit_of_work(), UNKNOWN, no_labels)
     with pytest.raises(DeviceNotFoundError):
         await acknowledge_device(database.unit_of_work(), UNKNOWN)
+
+
+def test_retention_never_cuts_into_the_device_history() -> None:
+    assert HISTORY_DAYS <= MIN_KEEP_DAYS

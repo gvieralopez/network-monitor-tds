@@ -1,7 +1,7 @@
 from collections import defaultdict
 from datetime import datetime
 
-from sqlalchemy import or_, select, update
+from sqlalchemy import delete, or_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from network_monitor_tds.domain.network.models import MacAddress
@@ -42,6 +42,14 @@ class SqlPresenceRepository:
             .where(PresenceIntervalRecord.mac == mac, PresenceIntervalRecord.ended_at.is_(None))
             .values(ended_at=end)
         )
+
+    async def delete_intervals_ended_before(self, cutoff: datetime) -> int:
+        deleted = await self._session.scalars(
+            delete(PresenceIntervalRecord)
+            .where(PresenceIntervalRecord.ended_at < cutoff)
+            .returning(PresenceIntervalRecord.id)
+        )
+        return len(deleted.all())
 
     async def intervals_since(self, since: datetime) -> dict[MacAddress, list[PresenceInterval]]:
         records = await self._session.scalars(

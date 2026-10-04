@@ -5,11 +5,13 @@ import pytest
 from network_monitor_tds.application.models import PluginState, PluginStatus
 from network_monitor_tds.domain.plugins.models import PluginConfig, PluginId
 from network_monitor_tds.domain.presence.policy import DEFAULT_POLICY, PresencePolicy
+from network_monitor_tds.domain.retention.models import RetentionPolicy
 from network_monitor_tds.plugins.sdk.models import PluginKind
 from network_monitor_tds.web.pages.settings_views import (
     PluginCardView,
     StatusView,
     Tone,
+    parse_retention,
     plugin_groups,
     policy_view,
     status_view,
@@ -91,3 +93,11 @@ def _card(plugin_id: str, kind: PluginKind) -> PluginCardView:
     return PluginCardView(
         plugin_id, plugin_id, "", kind, True, StatusView("Off", Tone.QUIET), (), False
     )
+
+
+@pytest.mark.parametrize(
+    ("text", "policy"),
+    [("90", RetentionPolicy(90)), (" 14 ", RetentionPolicy(14)), ("13", None), ("-20", None), ("2w", None), ("", None)],
+)  # fmt: skip
+def test_parse_retention(text: str, policy: RetentionPolicy | None) -> None:
+    assert parse_retention(text) == policy

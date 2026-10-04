@@ -8,6 +8,11 @@ from pydantic import TypeAdapter, ValidationError
 from network_monitor_tds.application.models import PluginState, PluginStatus
 from network_monitor_tds.domain.plugins.models import JsonValue, PluginConfig, PluginId
 from network_monitor_tds.domain.presence.policy import PresencePolicy
+from network_monitor_tds.domain.retention.models import (
+    MAX_KEEP_DAYS,
+    MIN_KEEP_DAYS,
+    RetentionPolicy,
+)
 from network_monitor_tds.plugins.host.registry import PluginClass
 from network_monitor_tds.plugins.sdk.models import PluginKind
 from network_monitor_tds.web.forms import FormField, format_duration, settings_fields
@@ -29,6 +34,7 @@ KIND_GROUPS = {
 
 
 DURATION = TypeAdapter(timedelta)
+RETENTION_HINT = f"Use a whole number of days from {MIN_KEEP_DAYS} to {MAX_KEEP_DAYS}"
 
 
 class Tone(StrEnum):
@@ -68,6 +74,12 @@ class PresenceView:
     mobile_offline_after: str
     errors: Mapping[str, str]
     warning: str
+
+
+@dataclass(frozen=True, slots=True)
+class RetentionView:
+    keep_days: str
+    error: str
 
 
 def plugin_card(
@@ -121,6 +133,17 @@ def policy_view(policy: PresencePolicy, sweep_interval: timedelta | None) -> Pre
         {},
         sweep_warning(policy, sweep_interval),
     )
+
+
+def retention_view(policy: RetentionPolicy) -> RetentionView:
+    return RetentionView(str(policy.keep_days), "")
+
+
+def parse_retention(text: str) -> RetentionPolicy | None:
+    try:
+        return RetentionPolicy(keep_days=int(text.strip()))
+    except ValueError:
+        return None
 
 
 def sweep_warning(policy: PresencePolicy, sweep_interval: timedelta | None) -> str:

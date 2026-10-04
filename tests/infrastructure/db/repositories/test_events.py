@@ -24,3 +24,21 @@ async def test_recent_returns_newest_first_up_to_limit(
 
     async with database.unit_of_work() as uow:
         assert await uow.events.recent(2) == [events[2], events[1]]
+
+
+async def test_delete_before_removes_older_events(
+    database: Database, stored_device: Device
+) -> None:
+    old = DeviceEvent(EventKind.DEVICE_DISCOVERED, stored_device.mac, T0)
+    cutoff = DeviceEvent(EventKind.DEVICE_ONLINE, stored_device.mac, T0 + timedelta(hours=1))
+    async with database.unit_of_work() as uow:
+        await uow.events.add(old)
+        await uow.events.add(cutoff)
+        await uow.commit()
+
+    async with database.unit_of_work() as uow:
+        assert await uow.events.delete_before(cutoff.occurred_at) == 1
+        await uow.commit()
+
+    async with database.unit_of_work() as uow:
+        assert await uow.events.recent(10) == [cutoff]

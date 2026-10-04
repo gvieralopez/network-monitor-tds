@@ -1,0 +1,12 @@
+<section id="retention">
+  <h2>History</h2>
+  <p class="lede">Online and offline history and the event log are deleted once they are older than this. Devices are always kept.</p>
+  <form class="netgrid" hx-post="/settings/retention" hx-target="#retention" hx-swap="outerHTML">
+    <div class="field{{ ' has-error' if retention.error }}">
+      <label for="retention-keep_days">Keep history for (days)</label>
+      <input id="retention-keep_days" class="mono" name="keep_days" value="{{ retention.keep_days }}" inputmode="numeric" placeholder="90">
+      {% if retention.error %}<span class="error">{{ retention.error }}</span>{% endif %}
+    </div>
+    <div class="actions"><button type="submit" class="btn primary">Save</button></div>
+  </form>
+</section>

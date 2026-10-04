@@ -62,7 +62,7 @@ Split into stories, done one at a time in this order. Each story ends with `make
 
 ### Story 5: Data retention
 
-- [ ] **Data retention.** Presence intervals and events grow forever. Add a retention setting
+- [x] **Data retention.** Presence intervals and events grow forever. Add a retention setting
       (e.g. 90 days, General tab) and a daily prune job through `application/scheduling.py`.
       Decision: retention prunes only presence intervals and events. Facts and detections stay;
       removing a device is the manual "forget device" action (backlog), so a returning device is

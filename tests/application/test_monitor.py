@@ -1,10 +1,12 @@
 import asyncio
+import logging
 from datetime import timedelta
 
 import pytest
 
 from network_monitor_tds.application.monitor import Monitor
 from network_monitor_tds.application.ports import UnitOfWork
+from network_monitor_tds.domain.devices.models import Device
 from network_monitor_tds.domain.events.models import DeviceEvent, EventKind
 from network_monitor_tds.domain.observations.models import Observation
 from tests.conftest import T0, Database, FixedClock, Stop
@@ -59,6 +61,23 @@ async def test_presence_checks_publish_offline_events(
         await later.run_presence_checks(_stop)
 
     assert publisher.events[-1] == DeviceEvent(EventKind.DEVICE_OFFLINE, observation.mac, T0)
+
+
+async def test_pruning_deletes_old_history(
+    database: Database, stored_device: Device, caplog: pytest.LogCaptureFixture
+) -> None:
+    async with database.unit_of_work() as uow:
+        await uow.events.add(DeviceEvent(EventKind.DEVICE_DISCOVERED, stored_device.mac, T0))
+        await uow.commit()
+    a_year_later = FixedClock(T0 + timedelta(days=365))
+    monitor = Monitor(database.unit_of_work, RecordingPublisher(), a_year_later, 10)
+
+    with caplog.at_level(logging.INFO), pytest.raises(Stop):
+        await monitor.run_pruning(_stop)
+
+    assert "Pruned 0 presence intervals and 1 events older than 90 days" in caplog.text
+    async with database.unit_of_work() as uow:
+        assert await uow.events.recent(10) == []
 
 
 async def _ingest(monitor: Monitor, observation: Observation) -> None:

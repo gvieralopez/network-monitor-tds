@@ -1,6 +1,6 @@
 # Configuration
 
-Only what is needed to start the monitor is configured with environment variables. Everything else (plugins, their settings, presence thresholds) is changed on the Settings page and stored in the database.
+Only what is needed to start the monitor is configured with environment variables. Everything else (plugins, their settings, presence thresholds, history retention) is changed on the Settings page and stored in the database.
 
 | Variable | Default | Meaning |
 |---|---|---|

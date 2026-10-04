@@ -51,3 +51,24 @@ async def test_close_interval_without_open_interval_is_a_no_op(
     async with database.unit_of_work() as uow:
         await uow.presence.close_interval(stored_device.mac, T0)
         assert await uow.presence.intervals_since(T0 - H) == {}
+
+
+async def test_delete_intervals_ended_before_keeps_open_and_recent_ones(
+    database: Database, stored_device: Device
+) -> None:
+    mac = stored_device.mac
+    async with database.unit_of_work() as uow:
+        await uow.presence.open_interval(mac, T0 - 30 * H)
+        await uow.presence.close_interval(mac, T0 - 20 * H)
+        await uow.presence.open_interval(mac, T0 - 10 * H)
+        await uow.presence.close_interval(mac, T0 - 5 * H)
+        await uow.presence.open_interval(mac, T0)
+        await uow.commit()
+
+    async with database.unit_of_work() as uow:
+        assert await uow.presence.delete_intervals_ended_before(T0 - 5 * H) == 1
+        await uow.commit()
+
+    async with database.unit_of_work() as uow:
+        intervals = (await uow.presence.intervals_since(T0 - 40 * H))[mac]
+        assert [interval.start for interval in intervals] == [T0 - 10 * H, T0]

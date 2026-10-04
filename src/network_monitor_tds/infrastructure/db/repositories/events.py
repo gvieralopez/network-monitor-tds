@@ -1,6 +1,7 @@
 from collections.abc import Sequence
+from datetime import datetime
 
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from network_monitor_tds.domain.events.models import DeviceEvent
@@ -23,3 +24,9 @@ class SqlEventRepository:
             .limit(limit)
         )
         return [event_from_record(record) for record in records]
+
+    async def delete_before(self, cutoff: datetime) -> int:
+        deleted = await self._session.scalars(
+            delete(EventRecord).where(EventRecord.occurred_at < cutoff).returning(EventRecord.id)
+        )
+        return len(deleted.all())

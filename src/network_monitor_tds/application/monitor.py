@@ -5,8 +5,9 @@ from datetime import timedelta
 
 from network_monitor_tds.application.ingestion import ingest
 from network_monitor_tds.application.ports import EventPublisher, UnitOfWork
-from network_monitor_tds.application.preferences import load_presence_policy
+from network_monitor_tds.application.preferences import load_presence_policy, load_retention_policy
 from network_monitor_tds.application.presence import expire_presence
+from network_monitor_tds.application.retention import prune_history
 from network_monitor_tds.application.scheduling import SILENT, Sleep, run_periodically
 from network_monitor_tds.domain.observations.models import Observation
 from network_monitor_tds.domain.time import Clock
@@ -15,6 +16,8 @@ logger = logging.getLogger(__name__)
 
 PRESENCE_CHECK_INTERVAL = timedelta(minutes=1)
 PRESENCE_CHECK_TIMEOUT = timedelta(seconds=30)
+PRUNE_INTERVAL = timedelta(days=1)
+PRUNE_TIMEOUT = timedelta(minutes=5)
 
 
 class Monitor:
@@ -51,6 +54,9 @@ class Monitor:
             SILENT,
         )
 
+    async def run_pruning(self, sleep: Sleep) -> None:
+        await run_periodically(self._prune, PRUNE_INTERVAL, PRUNE_TIMEOUT, sleep, logger, SILENT)
+
     async def drain(self) -> None:
         await self._queue.join()
 
@@ -68,3 +74,13 @@ class Monitor:
         events = await expire_presence(self._unit_of_work(), policy, self._clock.now())
         for event in events:
             self._publisher.publish(event)
+
+    async def _prune(self) -> None:
+        policy = await load_retention_policy(self._unit_of_work())
+        result = await prune_history(self._unit_of_work(), policy, self._clock.now())
+        logger.info(
+            "Pruned %d presence intervals and %d events older than %d days",
+            result.intervals,
+            result.events,
+            policy.keep_days,
+        )

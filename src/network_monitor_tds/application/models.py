@@ -74,3 +74,9 @@ class PluginStatus:
 
 
 STOPPED = PluginStatus(state=PluginState.STOPPED, last_success=None, last_error=None)
+
+
+@dataclass(frozen=True, slots=True)
+class PruneResult:
+    intervals: int
+    events: int
