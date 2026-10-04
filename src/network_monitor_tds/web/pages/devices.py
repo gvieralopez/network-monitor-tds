@@ -7,6 +7,7 @@ from fastapi.responses import HTMLResponse
 from network_monitor_tds.application.devices import (
     acknowledge_device,
     device_detail,
+    forget_device,
     list_devices,
     network_overview,
     relabel_device,
@@ -68,6 +69,13 @@ async def acknowledge(request: Request, context: ContextDep, mac: MacDep) -> HTM
     return await _drawer(
         request, context, mac, {"devices-changed": None, "toast": "Marked as known"}
     )
+
+
+@router.post("/devices/{mac}/forget", response_class=HTMLResponse)
+async def forget(context: ContextDep, mac: MacDep) -> HTMLResponse:
+    name = await forget_device(context.unit_of_work(), mac)
+    triggers = {"devices-changed": None, "toast": f"Forgot {name}"}
+    return HTMLResponse("", headers={"HX-Trigger": json.dumps(triggers)})
 
 
 async def _drawer(

@@ -9,7 +9,6 @@ The app is feature-complete and released as a docker image tagged 0.2.1.
 
 ## Later releases
 
-- "Forget device" action in the UI.
 - Merge duplicate devices caused by randomized MACs (same hostname or DHCP fingerprint).
 - Custom thumbnails for devices
 - New-device alerts (channel not decided; Telegram is a candidate).

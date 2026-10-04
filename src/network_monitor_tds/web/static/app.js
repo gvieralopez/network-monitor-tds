@@ -77,10 +77,13 @@
   });
 
   document.body.addEventListener("htmx:afterSwap", (event) => {
-    if (event.detail.target.id === "drawer" && event.detail.target.querySelector(".drawer")) {
-      document.body.style.overflow = "hidden";
-      event.detail.target.querySelector("[data-close].icon-btn")?.focus();
+    if (event.detail.target.id !== "drawer") return;
+    if (!event.detail.target.querySelector(".drawer")) {
+      closeDrawer();
+      return;
     }
+    document.body.style.overflow = "hidden";
+    event.detail.target.querySelector("[data-close].icon-btn")?.focus();
   });
 
   document.body.addEventListener("toast", (event) => toast(event.detail.value));

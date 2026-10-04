@@ -79,5 +79,14 @@
         </div>
       </form>
     </section>
+
+    <section class="section forget">
+      <h3>Forget device</h3>
+      <p class="hint">Deletes its labels, details and history. If it is still on the network, it comes back as a new device.</p>
+      <div class="actions">
+        <button type="button" class="btn danger" hx-post="/devices/{{ card.mac }}/forget" hx-target="#drawer"
+          hx-confirm="Forget {{ card.name }}? Its labels and history will be deleted.">Forget device</button>
+      </div>
+    </section>
   </div>
 </aside>

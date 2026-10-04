@@ -115,6 +115,15 @@ async def acknowledge_device(uow: UnitOfWork, mac: MacAddress) -> Device:
     return device
 
 
+async def forget_device(uow: UnitOfWork, mac: MacAddress) -> str:
+    async with uow:
+        device = await _get(uow, mac)
+        name = resolve_name(mac, device.labels, await uow.facts.for_device(mac)).value
+        await uow.devices.delete(mac)
+        await uow.commit()
+    return name
+
+
 def _hour_start(moment: datetime) -> datetime:
     return moment.replace(minute=0, second=0, microsecond=0)
 

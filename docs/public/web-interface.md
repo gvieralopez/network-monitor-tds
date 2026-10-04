@@ -38,6 +38,8 @@ Click a card to open its panel:
 
 Press **Mark as known** to remove the NEW tag without changing anything else.
 
+Press **Forget device** at the bottom of the panel to delete a device you no longer own, together with its labels, details and history. This cannot be undone. If the device is still on the network, it shows up again as a new device the next time it is seen.
+
 ## Settings
 
 The Settings page has two tabs. **General** holds the theme (Auto, Light or Dark, saved in each browser), the presence thresholds and how long history is kept. **Plugins** lists every plugin, grouped by what it is for (passive and active device finders, third-party integrations, metadata providers, developer tools), with a switch, its current status and its settings. Changes apply immediately. See [Discovery plugins](plugins.md) and [How online and offline work](presence.md).
