@@ -35,5 +35,6 @@ DEVICES = (
     _device("5c:62:8b:a1:e4:30", "192.168.1.71", Routine.ALWAYS, AT_START, {KnownField.DHCP_HOSTNAME: "Tapo-L530", KnownField.VENDOR: "TP-Link"}),
     _device("50:ec:50:3d:88:c7", "192.168.1.72", Routine.ALWAYS, AT_START, {KnownField.DHCP_HOSTNAME: "roborock-vacuum-s7", KnownField.VENDOR: "Roborock Technology"}),
     _device("24:0a:c4:9f:31:5e", "192.168.1.143", Routine.ALWAYS, timedelta(minutes=2), {KnownField.VENDOR: "Espressif Inc."}),
+    _device("4a:91:c3:6e:05:b8", "192.168.1.33", Routine.PHONE, AT_START, {KnownField.MDNS_NAME: "Galaxy-Watch6.local"}),
     _device("6e:b0:47:15:da:23", "192.168.1.144", Routine.PHONE, timedelta(minutes=5), {KnownField.DHCP_HOSTNAME: "android-7f3a2c9e", KnownField.DHCP_VENDOR_CLASS: "android-dhcp-14"}),
 )  # fmt: skip

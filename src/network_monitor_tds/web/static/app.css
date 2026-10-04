@@ -17,7 +17,8 @@
   --scrim: rgba(14, 20, 26, .32);
   /* Category identity: fixed categorical order, always paired with icon + label */
   --cat-network: #2a78d6; --cat-phone: #eb6834; --cat-computer: #1baf7a; --cat-iot: #eda100;
-  --cat-media: #e87ba4; --cat-camera: #008300; --cat-server: #4a3aa7; --cat-neutral: #7d8894;
+  --cat-media: #e87ba4; --cat-camera: #008300; --cat-server: #4a3aa7;
+  --cat-gaming: #0e94a8; --cat-neutral: #7d8894;
   --glow: rgba(47, 91, 211, .10);
   --font-ui: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-mono: "Geist Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
@@ -29,7 +30,7 @@
     --on: #3ccf8e; --on-soft: #10301f; --off: #5c6874; --new: #f0b44a; --new-soft: #382a0f;
     --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35); --scrim: rgba(0,0,0,.55);
     --cat-network: #3987e5; --cat-phone: #d95926; --cat-computer: #199e70; --cat-iot: #c98500;
-    --cat-media: #d55181; --cat-camera: #2f9e44; --cat-server: #9085e9; --cat-neutral: #6b7784; --glow: rgba(134, 163, 255, .10);
+    --cat-media: #d55181; --cat-camera: #2f9e44; --cat-server: #9085e9; --cat-gaming: #22b3c7; --cat-neutral: #6b7784; --glow: rgba(134, 163, 255, .10);
     color-scheme: dark;
   }
 }
@@ -39,7 +40,7 @@
   --on: #3ccf8e; --on-soft: #10301f; --off: #5c6874; --new: #f0b44a; --new-soft: #382a0f;
   --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35); --scrim: rgba(0,0,0,.55);
     --cat-network: #3987e5; --cat-phone: #d95926; --cat-computer: #199e70; --cat-iot: #c98500;
-    --cat-media: #d55181; --cat-camera: #2f9e44; --cat-server: #9085e9; --cat-neutral: #6b7784; --glow: rgba(134, 163, 255, .10);
+    --cat-media: #d55181; --cat-camera: #2f9e44; --cat-server: #9085e9; --cat-gaming: #22b3c7; --cat-neutral: #6b7784; --glow: rgba(134, 163, 255, .10);
   color-scheme: dark;
 }
 

@@ -1,8 +1,8 @@
 <section id="presence">
   <h2>Presence</h2>
-  <p class="lede">When a device stops answering, wait this long before marking it offline. Phones and tablets sleep their Wi-Fi, so they get more time.</p>
+  <p class="lede">When a device stops answering, wait this long before marking it offline. Phones, tablets and wearables sleep their Wi-Fi, so they get more time.</p>
   <form class="netgrid" hx-post="/settings/presence" hx-target="#presence" hx-swap="outerHTML">
-    {% for name, label, value in [("offline_after", "Mark offline after", presence.offline_after), ("mobile_offline_after", "Phones and tablets", presence.mobile_offline_after)] %}
+    {% for name, label, value in [("offline_after", "Mark offline after", presence.offline_after), ("mobile_offline_after", "Phones, tablets and wearables", presence.mobile_offline_after)] %}
     <div class="field{{ ' has-error' if presence.errors.get(name) }}">
       <label for="presence-{{ name }}">{{ label }}</label>
       <input id="presence-{{ name }}" class="mono" name="{{ name }}" value="{{ value }}" placeholder="10m">

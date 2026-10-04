@@ -21,7 +21,7 @@ The best name found without the user's help, from lease hostnames, DHCP hostname
 _Avoid_: Hostname (one of its sources, not the same thing)
 
 **Category**:
-The kind of device: network, server, computer, phone, tablet, media, smart home, camera, printer or unknown.
+The kind of device: network, server, computer, phone, tablet, wearable, media, gaming, smart home, camera, printer or unknown.
 _Avoid_: Type, class
 
 **Vendor**:

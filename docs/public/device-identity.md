@@ -18,7 +18,7 @@ Local suffixes such as `.local`, `.lan` and `.home.arpa` are removed, and DHCP h
 
 ## Categories
 
-Categories are network, server, computer, phone, tablet, media, smart home, camera, printer and unknown. The category is guessed from, in order: hostnames (`iPhone`, `ThinkPad`, `shellyplug`, `DiskStation` …), mDNS services (`_googlecast`, `_ipp` …), the DHCP vendor class (`android-dhcp`, `MSFT`), and the manufacturer. Manufacturers that mostly make PC network cards or motherboards (Intel, GIGA-BYTE, ASUSTek, Hon Hai …) count as computers, so a server built from PC parts shows as a computer until you choose "server". Smartwatches count as phones, which gives them the longer offline threshold. Anything the rules do not recognise is "unknown". Choosing a category yourself always wins.
+Categories are network, server, computer, phone, tablet, wearable, media, gaming, smart home, camera, printer and unknown. The category is guessed from, in order: hostnames (`iPhone`, `ThinkPad`, `shellyplug`, `DiskStation` …), mDNS services (`_googlecast`, `_ipp` …), the DHCP vendor class (`android-dhcp`, `MSFT`), and the manufacturer. Manufacturers that mostly make PC network cards or motherboards (Intel, GIGA-BYTE, ASUSTek, Hon Hai …) count as computers, so a server built from PC parts shows as a computer until you choose "server". Smartwatches and fitness trackers are wearables and share the longer offline threshold with phones and tablets. Game consoles, handhelds like the Steam Deck and VR headsets are gaming, not media. Anything the rules do not recognise is "unknown". Choosing a category yourself always wins.
 
 ## Randomized MAC addresses
 

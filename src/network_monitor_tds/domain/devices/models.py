@@ -17,7 +17,9 @@ class Category(StrEnum):
     COMPUTER = "computer"
     PHONE = "phone"
     TABLET = "tablet"
+    WEARABLE = "wearable"
     MEDIA = "media"
+    GAMING = "gaming"
     IOT = "iot"
     CAMERA = "camera"
     PRINTER = "printer"
@@ -25,7 +27,7 @@ class Category(StrEnum):
 
     @property
     def is_mobile(self) -> bool:
-        return self in {Category.PHONE, Category.TABLET}
+        return self in {Category.PHONE, Category.TABLET, Category.WEARABLE}
 
 
 class Fallback(StrEnum):

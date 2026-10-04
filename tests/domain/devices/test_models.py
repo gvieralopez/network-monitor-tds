@@ -21,6 +21,8 @@ from tests.conftest import NAIVE, T0
     [
         (Category.PHONE, True),
         (Category.TABLET, True),
+        (Category.WEARABLE, True),
+        (Category.GAMING, False),
         (Category.SERVER, False),
         (Category.UNKNOWN, False),
     ],
