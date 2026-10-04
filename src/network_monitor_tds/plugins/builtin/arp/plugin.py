@@ -6,7 +6,7 @@ from typing import ClassVar
 from pydantic import Field, field_validator
 
 from network_monitor_tds.domain.plugins.models import PluginId
-from network_monitor_tds.plugins.builtin.arp.packets import arp_sighting
+from network_monitor_tds.plugins.builtin.arp.packets import ARP_FILTER, arp_sighting
 from network_monitor_tds.plugins.builtin.arp.sweep import sweep
 from network_monitor_tds.plugins.builtin.capture.errors import NetworkTooLargeError
 from network_monitor_tds.plugins.builtin.capture.interfaces import (
@@ -86,7 +86,7 @@ class ArpListenerPlugin(ListenerPlugin[ArpListenerSettings]):
 
     async def listen(self, context: PluginContext) -> None:
         throttle = Throttle(self.settings.report_every)
-        async for packet in capture("arp", resolve_interface(self.settings.interface)):
+        async for packet in capture(ARP_FILTER, resolve_interface(self.settings.interface)):
             sighting = arp_sighting(packet)
             if sighting is not None and throttle.allow(sighting.mac, context.clock.now()):
                 await context.sighting(sighting.mac, sighting.ip, sighting.fields)

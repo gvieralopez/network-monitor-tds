@@ -49,7 +49,7 @@ Split into stories, done one at a time in this order. Each story ends with `make
 
 ### Story 3: Shared packet capture
 
-- [ ] **One shared packet capture.** The ARP listener and DHCP sniffer each open their own raw
+- [x] **One shared packet capture.** The ARP listener and DHCP sniffer each open their own raw
       socket. Replace with one capture per interface that fans packets out to listeners, building
       on `plugins/builtin/capture/`. Pure refactor: no behaviour change, must survive live plugin
       reload.

@@ -5,10 +5,11 @@ from scapy.packet import Packet
 
 from network_monitor_tds.domain.network.errors import InvalidMacAddressError
 from network_monitor_tds.domain.network.models import MacAddress
-from network_monitor_tds.plugins.builtin.capture.models import Sighting
+from network_monitor_tds.plugins.builtin.capture.models import PacketFilter, Sighting
 
 UNSPECIFIED = IPv4Address(0)
 ZERO_MAC = MacAddress("00:00:00:00:00:00")
+ARP_FILTER = PacketFilter("arp", lambda packet: ARP in packet)
 
 
 def arp_sighting(packet: Packet) -> Sighting | None:

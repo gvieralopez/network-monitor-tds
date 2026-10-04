@@ -6,12 +6,13 @@ from scapy.packet import Packet
 
 from network_monitor_tds.domain.network.models import MacAddress
 from network_monitor_tds.domain.observations.models import KnownField
-from network_monitor_tds.plugins.builtin.capture.models import Sighting
+from network_monitor_tds.plugins.builtin.capture.models import PacketFilter, Sighting
 
 BOOT_REQUEST = 1
 MAC_LENGTH = 6
 OPTION_PAIR = 2
 UNSPECIFIED = IPv4Address(0)
+DHCP_FILTER = PacketFilter("udp and (port 67 or port 68)", lambda packet: BOOTP in packet)
 
 type DhcpOptions = dict[str, object]
 

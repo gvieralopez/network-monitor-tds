@@ -10,6 +10,7 @@ from scapy.packet import Packet
 from network_monitor_tds.domain.network.models import MacAddress
 from network_monitor_tds.domain.observations.models import ObservationKind
 from network_monitor_tds.plugins.builtin.arp import plugin
+from network_monitor_tds.plugins.builtin.arp.packets import ARP_FILTER
 from network_monitor_tds.plugins.builtin.arp.plugin import (
     ArpListenerPlugin,
     ArpListenerSettings,
@@ -17,7 +18,7 @@ from network_monitor_tds.plugins.builtin.arp.plugin import (
     ArpSweepSettings,
 )
 from network_monitor_tds.plugins.builtin.capture.errors import NetworkTooLargeError
-from network_monitor_tds.plugins.builtin.capture.models import Sighting
+from network_monitor_tds.plugins.builtin.capture.models import PacketFilter, Sighting
 from tests.conftest import RecordingEmit, plugin_context
 
 pytestmark = pytest.mark.anyio
@@ -82,8 +83,8 @@ async def test_listener_reports_throttled_sightings(monkeypatch: pytest.MonkeyPa
         Ether() / ARP(hwsrc=str(SELF.mac), psrc="192.168.1.107"),
     ]
 
-    async def fake_capture(bpf_filter: str, interface: str) -> AsyncIterator[Packet]:
-        assert (bpf_filter, interface) == ("arp", "eth1")
+    async def fake_capture(packet_filter: PacketFilter, interface: str) -> AsyncIterator[Packet]:
+        assert (packet_filter, interface) == (ARP_FILTER, "eth1")
         for packet in packets:
             yield packet
 

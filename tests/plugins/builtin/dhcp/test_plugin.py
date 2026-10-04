@@ -4,12 +4,10 @@ import pytest
 from scapy.layers.l2 import Ether
 from scapy.packet import Packet
 
+from network_monitor_tds.plugins.builtin.capture.models import PacketFilter
 from network_monitor_tds.plugins.builtin.dhcp import plugin
-from network_monitor_tds.plugins.builtin.dhcp.plugin import (
-    DHCP_FILTER,
-    DhcpSnifferPlugin,
-    DhcpSnifferSettings,
-)
+from network_monitor_tds.plugins.builtin.dhcp.packets import DHCP_FILTER
+from network_monitor_tds.plugins.builtin.dhcp.plugin import DhcpSnifferPlugin, DhcpSnifferSettings
 from tests.conftest import RecordingEmit, plugin_context
 from tests.plugins.builtin.dhcp.test_packets import PIXEL, REQUEST
 
@@ -17,8 +15,8 @@ pytestmark = pytest.mark.anyio
 
 
 async def test_sniffer_reports_client_requests(monkeypatch: pytest.MonkeyPatch) -> None:
-    async def fake_capture(bpf_filter: str, interface: str) -> AsyncIterator[Packet]:
-        assert (bpf_filter, interface) == (DHCP_FILTER, "wlan0")
+    async def fake_capture(packet_filter: PacketFilter, interface: str) -> AsyncIterator[Packet]:
+        assert (packet_filter, interface) == (DHCP_FILTER, "wlan0")
         yield REQUEST
         yield Ether()
 

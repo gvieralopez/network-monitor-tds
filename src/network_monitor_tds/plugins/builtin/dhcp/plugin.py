@@ -3,11 +3,9 @@ from typing import ClassVar
 from network_monitor_tds.domain.plugins.models import PluginId
 from network_monitor_tds.plugins.builtin.capture.interfaces import resolve_interface
 from network_monitor_tds.plugins.builtin.capture.sniffer import capture
-from network_monitor_tds.plugins.builtin.dhcp.packets import dhcp_sighting
+from network_monitor_tds.plugins.builtin.dhcp.packets import DHCP_FILTER, dhcp_sighting
 from network_monitor_tds.plugins.sdk.base import ListenerPlugin, PluginContext
 from network_monitor_tds.plugins.sdk.models import PluginInfo, PluginSettings
-
-DHCP_FILTER = "udp and (port 67 or port 68)"
 
 
 class DhcpSnifferSettings(PluginSettings):
