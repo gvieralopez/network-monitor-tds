@@ -1,6 +1,7 @@
 from ipaddress import IPv4Address, IPv4Network
 
 from scapy.arch import get_if_addr, get_if_hwaddr
+from scapy.config import conf
 from scapy.route import Route
 
 from network_monitor_tds.domain.network.models import MacAddress
@@ -13,7 +14,11 @@ HOST_PREFIX = 32
 
 
 def resolve_interface(configured: str) -> str:
-    return configured or str(Route().route(UNSPECIFIED)[0])
+    return configured or str(_route_table().route(UNSPECIFIED)[0])
+
+
+def refresh_routes() -> None:
+    _route_table().resync()
 
 
 def interface_placeholder() -> str:
@@ -29,7 +34,7 @@ def subnet_placeholder() -> str:
 
 
 def interface_network(interface: str) -> IPv4Network:
-    for net, mask, gateway, route_interface, address, _metric in Route().routes:
+    for net, mask, gateway, route_interface, address, _metric in _route_table().routes:
         if route_interface != interface or gateway != UNSPECIFIED:
             continue
         network = IPv4Network(f"{IPv4Address(net)}/{IPv4Address(mask)}", strict=False)
@@ -44,3 +49,7 @@ def own_sighting(interface: str) -> Sighting:
         ip=IPv4Address(get_if_addr(interface)),
         fields={},
     )
+
+
+def _route_table() -> Route:
+    return conf.route

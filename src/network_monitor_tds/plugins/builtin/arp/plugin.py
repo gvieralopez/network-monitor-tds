@@ -19,6 +19,7 @@ from network_monitor_tds.plugins.builtin.capture.interfaces import (
     interface_network,
     interface_placeholder,
     own_sighting,
+    refresh_routes,
     resolve_interface,
     subnet_placeholder,
 )
@@ -102,6 +103,10 @@ class ArpSweepPlugin(ScheduledPlugin[ArpSweepSettings]):
         self._last_full_sweep: datetime | None = None
 
     async def run(self, context: PluginContext) -> None:
+        now = context.clock.now()
+        full = self._full_sweep_due(now)
+        if full:
+            await asyncio.to_thread(refresh_routes)
         interface = resolve_interface(self.settings.interface)
         network = (
             IPv4Network(self.settings.subnet)
@@ -110,8 +115,6 @@ class ArpSweepPlugin(ScheduledPlugin[ArpSweepSettings]):
         )
         if network.num_addresses > MAX_SWEEP_ADDRESSES:
             raise NetworkTooLargeError(network, MAX_SWEEP_ADDRESSES)
-        now = context.clock.now()
-        full = self._full_sweep_due(now)
         targets = network if full else await self._quiet_targets(context, network, now)
         replies = await self._ask(targets, interface)
         if full:

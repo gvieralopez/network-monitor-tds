@@ -41,7 +41,14 @@ CHATTY_PHONE = KnownDevice(
 
 
 @pytest.fixture
-def swept(monkeypatch: pytest.MonkeyPatch) -> list[SweepTargets]:
+def refreshes(monkeypatch: pytest.MonkeyPatch) -> list[None]:
+    calls: list[None] = []
+    monkeypatch.setattr(plugin, "refresh_routes", lambda: calls.append(None))
+    return calls
+
+
+@pytest.fixture
+def swept(monkeypatch: pytest.MonkeyPatch, refreshes: list[None]) -> list[SweepTargets]:
     targets: list[SweepTargets] = []
 
     def fake_sweep(asked: SweepTargets, interface: str, timeout: float) -> list[Sighting]:
@@ -99,6 +106,16 @@ async def test_sweep_asks_quiet_devices_between_full_sweeps(
         await sweeper.run(_context(minute, [QUIET_TV, CHATTY_PHONE], RecordingEmit()))
 
     assert swept == asked
+
+
+@pytest.mark.usefixtures("swept")
+async def test_sweep_refreshes_routes_only_before_full_sweeps(refreshes: list[None]) -> None:
+    sweeper = ArpSweepPlugin(ArpSweepSettings())
+
+    for minute in [0, 5, 10, 30]:
+        await sweeper.run(_context(minute, [QUIET_TV], RecordingEmit()))
+
+    assert len(refreshes) == 2
 
 
 @pytest.mark.parametrize(("minutes_ago", "asked"), [(3, True), (2, False)])
