@@ -1,6 +1,6 @@
 import logging
 
-__version__ = "0.3.2-beta0"
+__version__ = "0.3.2"
 
 logging.basicConfig(level=logging.INFO)
 logging.getLogger("alembic").setLevel(logging.WARNING)
