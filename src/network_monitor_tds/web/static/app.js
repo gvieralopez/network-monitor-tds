@@ -108,5 +108,19 @@
     window.addEventListener("scroll", () => toolbar.classList.toggle("stuck", window.scrollY > 90), { passive: true });
   }
 
+  // Chromium keeps left pages in the back/forward cache with their streams open; a few of
+  // those exhaust its six connections per host and the next page waits until one times out.
+  const streams = new Set();
+  const createEventSource = htmx.createEventSource;
+  htmx.createEventSource = (url) => {
+    const stream = createEventSource(url);
+    streams.add(stream);
+    return stream;
+  };
+  window.addEventListener("pagehide", () => streams.forEach((stream) => stream.close()));
+  window.addEventListener("pageshow", (event) => {
+    if (event.persisted) location.reload();
+  });
+
   window.addEventListener("load", () => setTimeout(() => document.body.classList.remove("intro"), 1200));
 })();
