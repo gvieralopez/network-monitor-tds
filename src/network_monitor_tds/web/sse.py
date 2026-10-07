@@ -11,6 +11,9 @@ from network_monitor_tds.web.models import WebContext
 
 PING_SECONDS = 15
 
+# Firefox reports the stream open only once body bytes arrive, not on the headers.
+CONNECTED = ServerSentEvent(comment="connected")
+
 router = APIRouter()
 
 
@@ -21,6 +24,7 @@ async def events(context: ContextDep) -> EventSourceResponse:
 
 async def device_events(context: WebContext) -> AsyncIterator[ServerSentEvent]:
     async with context.events.subscribe() as events:
+        yield CONNECTED
         async for event in events:
             try:
                 name = await describe_device(context.unit_of_work(), event.mac)
