@@ -1,7 +1,7 @@
 from ipaddress import IPv4Address, IPv4Network
-from typing import ClassVar
 
 import pytest
+from scapy.config import conf
 
 from network_monitor_tds.domain.network.models import MacAddress
 from network_monitor_tds.plugins.builtin.capture import interfaces
@@ -23,15 +23,22 @@ ROUTES = [
 
 
 class FakeRoute:
-    routes = ROUTES
+    def __init__(self) -> None:
+        self.routes = ROUTES
+        self.resyncs = 0
 
     def route(self, _destination: str) -> tuple[str, str, str]:
         return ("wlan0", "192.168.1.107", "192.168.1.1")
 
+    def resync(self) -> None:
+        self.resyncs += 1
+
 
 @pytest.fixture(autouse=True)
-def fake_routes(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(interfaces, "Route", FakeRoute)
+def fake_routes(monkeypatch: pytest.MonkeyPatch) -> FakeRoute:
+    table = FakeRoute()
+    monkeypatch.setattr(conf, "route", table)
+    return table
 
 
 @pytest.mark.parametrize(("configured", "resolved"), [("", "wlan0"), ("eth1", "eth1")])
@@ -48,6 +55,12 @@ def test_interface_network_without_subnet_fails() -> None:
         interfaces.interface_network("eth9")
 
 
+def test_refresh_routes_resyncs_the_cached_table(fake_routes: FakeRoute) -> None:
+    interfaces.refresh_routes()
+
+    assert fake_routes.resyncs == 1
+
+
 def test_own_sighting(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(interfaces, "get_if_hwaddr", lambda _name: "04:68:74:5c:e3:fb")
     monkeypatch.setattr(interfaces, "get_if_addr", lambda _name: "192.168.1.107")
@@ -62,13 +75,7 @@ def test_placeholders_name_the_default_interface_and_its_subnet() -> None:
     assert interfaces.subnet_placeholder() == "192.168.1.0/24, from wlan0"
 
 
-def test_subnet_placeholder_is_empty_without_a_subnet(monkeypatch: pytest.MonkeyPatch) -> None:
-    class NoSubnet:
-        routes: ClassVar[list[tuple[int, int, str, str, str, int]]] = []
-
-        def route(self, _destination: str) -> tuple[str, str, str]:
-            return ("wlan0", "192.168.1.107", "192.168.1.1")
-
-    monkeypatch.setattr(interfaces, "Route", NoSubnet)
+def test_subnet_placeholder_is_empty_without_a_subnet(fake_routes: FakeRoute) -> None:
+    fake_routes.routes = []
 
     assert interfaces.subnet_placeholder() == ""

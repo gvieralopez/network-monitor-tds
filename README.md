@@ -98,7 +98,10 @@ See [DEVELOPMENT.md](DEVELOPMENT.md) for the full workflow and [AGENTS.md](AGENT
 
 ## Credits
 
-Built by [Gustavo Viera López](https://github.com/gvieralopez) with **[Claude](https://claude.com/claude-code)**, which did much of the heavy lifting. Started from [Cookie Pyrate](https://github.com/gvieralopez/cookie-pyrate), inspired by [NetAlertX](https://github.com/netalertx/NetAlertX).
+- Built and mantained by [Gustavo Viera López](https://github.com/gvieralopez) 
+- Together with **[Claude](https://claude.com/claude-code)**, which did much of the heavy lifting.
+- Started from [Cookie Pyrate](https://github.com/gvieralopez/cookie-pyrate) project template.
+- Inspired by [NetAlertX](https://github.com/netalertx/NetAlertX).
 
 ## License
 
