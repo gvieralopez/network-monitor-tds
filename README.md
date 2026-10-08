@@ -25,7 +25,7 @@
 
 See every device on your network, what it is, and when it comes and goes. Devices are found by listening to the network and by regular sweeps. Each one gets a name and a category automatically.
 
-![Devices page](docs/images/devices.png)
+![Opening a device, naming it, picking its drawing, then grouping and sorting the devices](docs/images/demo.gif)
 
 ## Features
 
@@ -33,12 +33,11 @@ See every device on your network, what it is, and when it comes and goes. Device
 - **Live.** Cards update by themselves when devices come online, go offline or appear for the first time.
 - **Twelve categories**, worked out from hostnames, mDNS services, DHCP vendor classes and the manufacturer: network, server, computer, phone, tablet, wearable, media, gaming, smart home, camera, printer and unknown.
 - **Device catalogue.** Status, IP, vendor and a 24-hour activity strip for every device. Search, filter by status, category or new devices, group into rows by category, status or vendor, and sort.
-- **Device panel.** A popup with an overview tab (a 14-day hourly presence heatmap, and which plugins found the device and what each learned) and a manage tab for your own name, category and drawing. Forget a device you no longer own.
+- **Device panel.** Click a card and it grows into a panel. *Overview* shows the device's details, which plugins found it and what each learned, and a 14-day hourly presence heatmap. *Manage* holds your own name and category, saved as you change them, and lets you forget a device you no longer own.
+- **Drawing picker.** The pencil on a device's drawing turns the panel over to show every drawing, with those of its category recommended first and a search to find any other.
 - **Plugins.** ARP sweep, ARP listener, DHCP sniffer, offline MAC vendor lookup, Technitium DHCP leases, and a demo network. Switch them on and off and edit their settings under **Settings → Sources**, without restarting. Third-party plugins install as ordinary Python packages.
 - **Simple to run.** One process, one SQLite file, automatic database upgrades with backups, and a JSON API.
 - **Drawings and card styles.** Every device gets a drawing of the kind of device it is. *Artwork* cards put it on a pattern in its category's colour, generated from the MAC address so no two devices look alike; *Studio* cards put it on a plain backdrop. Light and dark themes for both.
-
-![Device panel](docs/images/device-panel.png)
 
 ## Quick start
 
@@ -99,6 +98,7 @@ See [DEVELOPMENT.md](DEVELOPMENT.md) for the full workflow and [AGENTS.md](AGENT
 ## Credits
 
 - Built and mantained by [Gustavo Viera López](https://github.com/gvieralopez) 
+- With contributions from [Jorge Morgado Vega](https://github.com/jmorgadov).
 - Together with **[Claude](https://claude.com/claude-code)**, which did much of the heavy lifting.
 - Started from [Cookie Pyrate](https://github.com/gvieralopez/cookie-pyrate) project template.
 - Inspired by [NetAlertX](https://github.com/netalertx/NetAlertX).
