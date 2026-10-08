@@ -71,7 +71,7 @@
   <div class="d-body manage" id="panel-manage" role="tabpanel" aria-labelledby="tab-manage" {% if tab != "manage" %}hidden{% endif %}>
     <section class="section">
       <h3>Your labels</h3>
-      <form class="edit" id="labels-form" hx-post="/devices/{{ card.mac }}/labels" hx-target="#dialog">
+      <form class="edit" id="labels-form" data-save="/devices/{{ card.mac }}/labels">
         <div class="field">
           <label for="label-name">Name</label>
           <input id="label-name" name="name" value="{{ dialog.labels_name }}" placeholder="{{ dialog.detected_name }}" maxlength="100">
@@ -79,15 +79,14 @@
         <div class="field">
           <label for="label-category">Category</label>
           <select id="label-category" name="category">
-            <option value="" data-category="{{ dialog.detected_category_value }}" data-drawing="{{ category_drawings[dialog.detected_category_value] }}" {% if not dialog.labels_category %}selected{% endif %}>Automatic ({{ dialog.detected_category }})</option>
+            <option value="" data-category="{{ dialog.detected_category_value }}" data-color="{{ category_colors[dialog.detected_category_value] }}" {% if not dialog.labels_category %}selected{% endif %}>Automatic ({{ dialog.detected_category }})</option>
             {% for value, label in category_choices %}
-            <option value="{{ value }}" data-category="{{ value }}" data-drawing="{{ category_drawings[value] }}" {% if dialog.labels_category == value %}selected{% endif %}>{{ label }}</option>
+            <option value="{{ value }}" data-category="{{ value }}" data-color="{{ category_colors[value] }}" {% if dialog.labels_category == value %}selected{% endif %}>{{ label }}</option>
             {% endfor %}
           </select>
         </div>
         <div class="actions">
-          <button type="submit" class="btn primary">Save</button>
-          <button type="submit" class="btn ghost" hx-post="/devices/{{ card.mac }}/labels" hx-vals='{"name": "", "category": "", "icon": ""}'>Reset to detected</button>
+          <button type="button" class="btn ghost" hx-post="/devices/{{ card.mac }}/labels" hx-target="#dialog" hx-vals='{"name": "", "category": "", "icon": ""}'>Reset to detected</button>
         </div>
       </form>
     </section>
@@ -129,7 +128,7 @@
     <p class="hint" data-no-match hidden>No drawings match.</p>
   </div>
   <div class="b-foot">
-    <span class="hint">Save on the Manage tab to keep your choice.</span>
+    <span class="hint">Your choice is saved straight away.</span>
     <button type="button" class="btn primary" data-unflip>Done</button>
   </div>
 </div>

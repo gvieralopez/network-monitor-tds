@@ -4,7 +4,7 @@ from fastapi import Request
 from fastapi.templating import Jinja2Templates
 
 from network_monitor_tds import __version__
-from network_monitor_tds.web.drawings import CATEGORY_DRAWINGS, DRAWINGS
+from network_monitor_tds.web.drawings import CATEGORY_COLORS, DRAWINGS
 from network_monitor_tds.web.pages.board import GROUPINGS, SORTINGS, Grouping, Sorting
 from network_monitor_tds.web.views import category_choices, drawing_choices
 
@@ -37,7 +37,7 @@ templates = Jinja2Templates(directory=TEMPLATES_DIR)
 templates.env.globals.update(
     version=__version__,
     drawing_choices=drawing_choices(),
-    category_drawings=CATEGORY_DRAWINGS,
+    category_colors=CATEGORY_COLORS,
     category_choices=category_choices(),
     theme_of=theme_of,
     themes=THEMES,

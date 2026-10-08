@@ -12,6 +12,8 @@
 
   function closeDialog() {
     const root = document.getElementById("dialog");
+    const form = root.querySelector("#labels-form[data-dirty]");
+    if (form) saveLabels(form);
     const flipped = root.querySelector(".dialog.flipped");
     if (flipped) {
       flipDialog(flipped, false);
@@ -41,6 +43,29 @@
   function markHero(poster) {
     document.querySelectorAll(".poster.is-hero").forEach((other) => other.classList.remove("is-hero"));
     poster?.classList.add("is-hero");
+  }
+
+  // Labels save as they change, without re-rendering the dialog, so the picker stays open.
+  function saveLabels(form) {
+    delete form.dataset.dirty;
+    fetch(form.dataset.save, { method: "POST", body: new URLSearchParams(new FormData(form)) })
+      .then((response) => {
+        if (!response.ok) throw new Error(response.statusText);
+        document.body.dispatchEvent(new Event("devices-changed"));
+        toast("Saved");
+      })
+      .catch(() => toast("Could not save"));
+  }
+
+  function chooseCategory(dialog, option) {
+    dialog.style.setProperty("--cat", `var(--cat-${option.dataset.color})`);
+    const picker = dialog.querySelector("[data-drawings]");
+    arrangeDrawings(picker);
+    const [first] = [...picker.querySelectorAll(`.tile[data-category="${option.dataset.category}"]`)]
+      .sort((a, b) => a.dataset.order - b.dataset.order);
+    first.querySelector("input").checked = true;
+    previewDrawing(dialog, first);
+    saveLabels(dialog.querySelector("#labels-form"));
   }
 
   function flipDialog(dialog, flipped) {
@@ -84,9 +109,6 @@
     const query = picker.querySelector("[data-drawing-search]").value.trim().toLowerCase();
     const dialog = picker.closest(".dialog");
     const option = dialog.querySelector('select[name="category"]').selectedOptions[0];
-    if (!picker.querySelector('input[name="icon"]:checked')) {
-      previewDrawing(dialog, picker.querySelector(`.tile[data-name="${option.dataset.drawing}"]`));
-    }
     const ranked = [...picker.querySelectorAll(".tile")]
       .map((tile) => ({ tile, score: drawingScore(tile, query) }))
       .sort((a, b) => b.score - a.score || a.tile.dataset.order - b.tile.dataset.order);
@@ -149,15 +171,24 @@
 
   document.addEventListener("input", (event) => {
     if (event.target.matches("[data-drawing-search]")) arrangeDrawings(event.target.closest("[data-drawings]"));
+    if (event.target.matches('#labels-form input[name="name"]')) event.target.form.dataset.dirty = "";
+  });
+
+  document.addEventListener("submit", (event) => {
+    if (event.target.id !== "labels-form") return;
+    event.preventDefault();
+    saveLabels(event.target);
   });
 
   document.addEventListener("change", (event) => {
-    if (event.target.matches('.dialog select[name="category"]')) {
-      arrangeDrawings(event.target.closest(".dialog").querySelector("[data-drawings]"));
+    if (event.target.matches('#labels-form select[name="category"]')) {
+      chooseCategory(event.target.closest(".dialog"), event.target.selectedOptions[0]);
     }
     if (event.target.matches('.dialog input[name="icon"]')) {
       previewDrawing(event.target.closest(".dialog"), event.target.closest(".tile"));
+      saveLabels(event.target.form);
     }
+    if (event.target.matches('#labels-form input[name="name"]')) saveLabels(event.target.form);
     const picker = event.target.closest?.("[data-cookie]");
     if (!picker) return;
     const { cookie, attribute } = picker.dataset;
