@@ -39,6 +39,7 @@ DRAWINGS = (
     Drawing("plug", "Smart plug", Category.IOT, 36),
     Drawing("vacuum", "Robot vacuum", Category.IOT, 72),
     Drawing("water-heater", "Water heater", Category.IOT, 18),
+    Drawing("car", "Car", Category.IOT, 83),
     Drawing("camera", "Indoor camera", Category.CAMERA, 26),
     Drawing("printer", "Printer", Category.PRINTER, 64),
     Drawing("question", "Unknown", Category.UNKNOWN, 48),
