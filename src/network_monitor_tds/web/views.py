@@ -14,7 +14,6 @@ from network_monitor_tds.web.drawings import (
     CATEGORY_DRAWINGS,
     CATEGORY_LABELS,
     DRAWINGS,
-    Drawing,
 )
 from network_monitor_tds.web.pages.board import vendor_label
 
@@ -54,10 +53,11 @@ class CardView:
 
 
 @dataclass(frozen=True, slots=True)
-class DrawingGroupView:
+class DrawingChoiceView:
+    name: str
     label: str
-    color: str
-    drawings: tuple[Drawing, ...]
+    category: str
+    terms: str
 
 
 @dataclass(frozen=True, slots=True)
@@ -95,7 +95,7 @@ class HeatRowView:
 
 
 @dataclass(frozen=True, slots=True)
-class DrawerView:
+class DialogView:
     card: CardView
     first_seen: str
     first_found_by: str
@@ -105,6 +105,7 @@ class DrawerView:
     detected_name: str
     name_origin: str
     detected_category: str
+    detected_category_value: str
     labels_name: str
     labels_category: str
     labels_icon: str
@@ -177,12 +178,13 @@ def chart_view(series: Sequence[int], ceiling: int) -> ChartView:
     )
 
 
-def drawer_view(
+def dialog_view(
     detail: DeviceDetail, plugin_names: Mapping[PluginId, str], now: datetime
-) -> DrawerView:
+) -> DialogView:
     summary, device = detail.summary, detail.summary.device
     card = card_view(summary, now)
     detected_name = resolve_name(device.mac, NO_LABELS, detail.facts)
+    detected_category = classify(detail.facts).value
     discoveries = tuple(
         DiscoveryView(
             name=plugin_names.get(detection.source, detection.source),
@@ -191,7 +193,7 @@ def drawer_view(
         )
         for index, detection in enumerate(detail.detections)
     )
-    return DrawerView(
+    return DialogView(
         card=card,
         first_seen=device.first_seen.astimezone().strftime("%-d %b, %H:%M"),
         first_found_by=discoveries[0].name if discoveries else "Unknown",
@@ -205,7 +207,8 @@ def drawer_view(
         uptime=percentage(detail.uptime_last_7_days),
         detected_name=detected_name.value,
         name_origin=ORIGIN_LABELS.get(detected_name.origin, detected_name.origin.value),
-        detected_category=CATEGORY_LABELS[classify(detail.facts).value],
+        detected_category=CATEGORY_LABELS[detected_category],
+        detected_category_value=detected_category.value,
         labels_name=device.labels.name or "",
         labels_category=device.labels.category.value if device.labels.category else "",
         labels_icon=device.labels.icon or "",
@@ -223,14 +226,17 @@ def category_choices() -> tuple[tuple[str, str], ...]:
     return tuple((category.value, CATEGORY_LABELS[category]) for category in Category)
 
 
-def drawing_groups() -> tuple[DrawingGroupView, ...]:
+def drawing_choices() -> tuple[DrawingChoiceView, ...]:
     return tuple(
-        DrawingGroupView(
-            label=CATEGORY_LABELS[category],
-            color=CATEGORY_COLORS[category],
-            drawings=tuple(drawing for drawing in DRAWINGS if drawing.category is category),
+        DrawingChoiceView(
+            name=drawing.name,
+            label=drawing.label,
+            category=drawing.category.value,
+            terms=" ".join(
+                (drawing.label, drawing.name.replace("-", " "), CATEGORY_LABELS[drawing.category])
+            ).lower(),
         )
-        for category in Category
+        for drawing in DRAWINGS
     )
 
 

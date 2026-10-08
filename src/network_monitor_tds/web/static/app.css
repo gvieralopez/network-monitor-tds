@@ -1,4 +1,4 @@
-/* Layout: quiet header + sticky filter bar over an auto-fill card grid; a side drawer for one device. */
+/* Layout: quiet header + sticky filter bar over an auto-fill card grid; a centred dialog for one device. */
 :root {
   --bg: #f2f4f6;
   --surface: #ffffff;
@@ -238,14 +238,28 @@ header.top { display: flex; align-items: center; justify-content: space-between;
 .meta-foot { display: flex; justify-content: space-between; gap: 8px; font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
 .is-off .meta .name { color: color-mix(in srgb, var(--fg) 72%, var(--bg)); }
 
-/* Drawer banner reuses the artwork */
-.d-art { aspect-ratio: 16 / 7; flex: none; }
-.d-art .thumb { width: 40%; bottom: 8%; }
+/* Dialog banner reuses the artwork */
+.d-art { --banner: clamp(96px, 15dvh, 140px); aspect-ratio: auto; height: var(--banner); flex: none; }
+.d-art .thumb { width: auto; height: 84%; aspect-ratio: 200 / 140; bottom: 5%; left: 16px; transform: none; }
+.d-ip { position: absolute; right: 20px; bottom: 16px; color: #fff; font: 13px var(--font-mono); text-shadow: 0 1px 3px rgba(0, 0, 0, .35); }
+[data-cards="studio"] .d-ip { color: var(--studio-ink); text-shadow: none; opacity: .8; }
 .d-art .icon-btn { position: absolute; right: 12px; top: 12px; background: rgba(8, 12, 20, .42); color: #fff; }
 .d-art .icon-btn:hover { background: rgba(8, 12, 20, .6); color: #fff; }
-.d-title { padding: 16px 20px 14px; border-bottom: 1px solid var(--line); }
+.d-head {
+  display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 0 20px;
+  padding: 10px 24px 0; border-bottom: 1px solid var(--line); flex: none;
+}
+.d-title { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; min-width: 0; padding-bottom: 10px; }
 .d-title h2 { margin: 0; font-size: 20px; font-weight: 600; overflow-wrap: anywhere; }
-.d-title .status { font-size: 13px; color: var(--muted); margin-top: 4px; }
+.d-state {
+  display: inline-flex; align-items: center; gap: 7px; padding: 3px 10px 3px 8px; border-radius: 999px;
+  font-size: 12.5px; font-weight: 500; background: var(--surface-2); color: var(--muted);
+}
+.d-state .dot { background: transparent; border: 1.5px solid var(--off); }
+.d-state .dot::after { display: none; }
+.d-state.on { background: var(--on-soft); color: var(--on); }
+.d-state.on .dot { background: var(--on); border: 0; }
+.d-state.on .dot::after { display: block; }
 
 @media (max-width: 560px) {
   .shelf { grid-auto-columns: 74%; }
@@ -305,19 +319,106 @@ footer.foot a { color: inherit; text-decoration-color: var(--line); text-underli
 footer.foot a:hover { color: var(--fg); }
 footer.foot .ver { font-family: var(--font-mono); }
 
-/* Drawer */
-.scrim { position: fixed; inset: 0; background: var(--scrim); z-index: 20; }
-.drawer {
-  position: fixed; top: 0; right: 0; bottom: 0; z-index: 21; width: min(460px, 100%);
-  background: var(--surface); border-left: 1px solid var(--line); box-shadow: var(--shadow);
-  display: flex; flex-direction: column; animation: slide .2s ease-out;
-  padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px);
+/* Dialog: one fixed size whatever the tab, so switching tabs never makes it jump */
+html { scrollbar-gutter: stable; }
+html:has(#dialog .dialog) { overflow: hidden; }
+.scrim { position: fixed; inset: 0; background: var(--scrim); z-index: 20; backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px); }
+.dialog {
+  position: fixed; left: 50%; top: 50%; translate: -50% -50%; z-index: 21;
+  width: min(920px, max(60vw, 640px), calc(100vw - 24px));
+  height: min(640px, max(62dvh, 480px), calc(100dvh - 24px));
+  perspective: 2200px; view-transition-name: device-dialog;
 }
-@keyframes slide { from { transform: translateX(24px); opacity: .6; } }
+/* The dialog is a card: the drawing picker lives on its back and the card turns right to left */
+.flipper { position: relative; height: 100%; transform-style: preserve-3d; transition: transform .7s cubic-bezier(.3, .7, .2, 1); }
+.dialog.flipped .flipper { transform: rotateY(-180deg); }
+.face {
+  position: absolute; inset: 0; display: flex; flex-direction: column; overflow: hidden;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 16px;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, .28), var(--shadow);
+  backface-visibility: hidden; -webkit-backface-visibility: hidden;
+}
+.face.back { transform: rotateY(180deg); }
+/* The pencil sits at the bottom right of the drawing itself, worked out from its footprint */
+.d-edit {
+  position: absolute; z-index: 1; display: none; place-items: center; width: 30px; height: 30px; padding: 0;
+  left: calc(16px + var(--banner) * .84 * 200 / 140 * (100 + var(--fp)) / 200 - 12px);
+  bottom: calc(var(--banner) * .218 - 8px);
+  border: 0; border-radius: 50%; background: var(--surface); color: var(--accent); cursor: pointer;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, .3);
+}
+.d-edit svg { width: 16px; height: 16px; }
+.d-edit:hover { background: var(--accent); color: var(--surface); }
+.dialog:has(#tab-manage[aria-selected="true"]) .d-edit { display: grid; animation: pop-in .3s cubic-bezier(.2, .8, .3, 1.4); }
+@keyframes pop-in { from { opacity: 0; transform: scale(.4); } }
+.b-head { display: flex; flex-direction: column; gap: 12px; padding: 14px 20px; border-bottom: 1px solid var(--line); flex: none; }
+.b-title { display: flex; align-items: center; gap: 6px; }
+.b-title .icon-btn { margin-left: -8px; }
+.b-title h2 { margin: 0; font-size: 18px; font-weight: 600; }
+.b-head .search { flex: none; height: 38px; background: var(--bg); }
+.b-head .search:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
+.b-body { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; padding: 16px 20px 20px; }
+.b-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 20px; border-top: 1px solid var(--line); flex: none; }
+.b-foot .hint { font-size: 12.5px; color: var(--muted); }
+
+/* Hero: the opened card morphs into the dialog in three layers (card box, artwork, drawing).
+   The incoming layer is always opaque and the outgoing one fades out on top, so nothing turns
+   see-through halfway; the drawing is the same picture on both ends, so it only scales. The
+   artwork is the destination's from the first frame (the banner unscaled and clipped by the
+   growing box, or the card's scaled down into place), with the badges hidden so none of them
+   get stretched. */
+.dialog .d-art { view-transition-name: device-art; }
+.dialog .d-art .thumb { view-transition-name: device-drawing; }
+.poster.is-hero { view-transition-name: device-dialog; }
+.poster.is-hero .art { view-transition-name: device-art; }
+.poster.is-hero .thumb { view-transition-name: device-drawing; }
+html:has(#dialog .dialog) .poster.is-hero, html:has(#dialog .dialog) .poster.is-hero :is(.art, .thumb) { view-transition-name: none; }
+::view-transition-group(device-dialog), ::view-transition-group(device-art), ::view-transition-group(device-drawing) {
+  animation-duration: .45s; animation-timing-function: cubic-bezier(.2, .8, .2, 1);
+}
+::view-transition-group(device-dialog) { overflow: clip; border-radius: 14px; }
+::view-transition-group(device-art) { border-radius: 14px 14px 0 0; }
+::view-transition-old(device-dialog), ::view-transition-new(device-dialog) { width: 100%; height: 100%; object-fit: none; object-position: top center; }
+::view-transition-group(device-art) { overflow: clip; }
+::view-transition-old(device-art), ::view-transition-new(device-art) {
+  width: 100%; height: 100%; object-fit: none; object-position: center; animation: none; mix-blend-mode: normal;
+}
+::view-transition-old(device-art) { opacity: 0; }
+html.closing::view-transition-new(device-art) { object-fit: cover; }
+::view-transition-old(device-art):only-child { opacity: 1; animation: vt-out .2s ease-out forwards; }
+html:active-view-transition :is(.poster.is-hero, .dialog) .art > :is(.art-status, .art-new, .art-ip, .icon-btn, .d-ip, .d-edit) { visibility: hidden; }
+::view-transition-new(device-dialog), ::view-transition-new(device-drawing) { animation: none; mix-blend-mode: normal; }
+::view-transition-old(device-dialog) { z-index: 1; mix-blend-mode: normal; animation: vt-out .2s ease-out forwards; }
+::view-transition-old(device-drawing) { animation: none; opacity: 0; }
+html:has(.poster.is-hero.is-off, #dialog .d-art.off)::view-transition-group(device-drawing) { filter: saturate(.12) brightness(.82); }
+::view-transition-new(device-dialog):only-child { animation: dialog-in .36s cubic-bezier(.2, .8, .2, 1); }
+::view-transition-old(device-dialog):only-child { animation: dialog-out .22s ease-in forwards; }
+::view-transition-old(device-drawing):only-child { opacity: 1; animation: vt-out .2s ease-out forwards; }
+@keyframes vt-out { to { opacity: 0; } }
+@keyframes dialog-in { from { opacity: 0; transform: scale(.94); } }
+@keyframes dialog-out { to { opacity: 0; transform: scale(.96); } }
+@keyframes panel-in { from { opacity: 0; transform: translateY(4px); } }
+@supports not (view-transition-name: none) {
+  .dialog { animation: dialog-in .3s cubic-bezier(.2, .8, .2, 1); }
+}
+
+.d-tabs { display: flex; gap: 4px; }
+.d-tabs [role="tab"] {
+  border: 0; border-bottom: 2px solid transparent; margin-bottom: -1px; background: none; cursor: pointer;
+  padding: 10px 12px; color: var(--muted); font-weight: 500;
+}
+.d-tabs [role="tab"]:hover { color: var(--fg); }
+.d-tabs [role="tab"][aria-selected="true"] { color: var(--fg); border-bottom-color: var(--accent); }
+.d-tabs [role="tab"]:focus-visible { outline-offset: -2px; border-radius: 6px 6px 0 0; }
 .icon-btn { margin-left: auto; flex: none; border: 0; background: transparent; width: 34px; height: 34px; border-radius: 8px; cursor: pointer; color: var(--muted); display: grid; place-items: center; }
 .icon-btn:hover { background: var(--surface-2); color: var(--fg); }
 .icon-btn svg { width: 18px; height: 18px; }
-.d-body { overflow-y: auto; padding: 18px 20px 28px; display: flex; flex-direction: column; gap: 24px; }
+.d-body { flex: 1; min-height: 0; overflow-y: auto; padding: 20px 24px 28px; display: flex; flex-direction: column; gap: 24px; animation: panel-in .2s ease-out; }
+.d-body.overview { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); align-content: start; gap: 20px 32px; }
+.d-body.overview .wide { grid-column: 1 / -1; }
+.d-col { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+.d-body.manage { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); align-content: start; gap: 24px 40px; }
+.d-body[hidden] { display: none; }
 .notice {
   display: flex; align-items: center; gap: 12px; justify-content: space-between; flex-wrap: wrap;
   background: var(--new-soft); color: var(--new); border-radius: 8px; padding: 10px 12px; font-size: 13px;
@@ -332,15 +433,16 @@ dl.facts dd { margin: 0; overflow-wrap: anywhere; }
 
 .heat-meta { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; font-size: 13px; color: var(--muted); margin-bottom: 10px; }
 .heat-meta b { color: var(--fg); font-weight: 600; }
-.heat { display: grid; grid-template-columns: 3.6rem repeat(24, minmax(0, 1fr)); gap: 3px 2px; align-items: center; }
-.heat .lbl { font: 11px var(--font-mono); color: var(--muted); white-space: nowrap; }
-.heat .ax { font: 10.5px var(--font-mono); color: var(--muted); grid-column: span 6; }
-.heat .c { height: 12px; border-radius: 2px; background: var(--surface-2); }
+.heat { display: grid; grid-template-columns: 3.2rem repeat(24, minmax(0, 1fr)); gap: 2px; align-items: center; }
+.heat .lbl { font: 10px/1 var(--font-mono); color: var(--muted); white-space: nowrap; }
+.heat .ax { font: 10px/1 var(--font-mono); color: var(--muted); grid-column: span 6; align-self: end; height: 14px; }
+.heat .c { aspect-ratio: 1; border-radius: 2px; background: var(--surface-2); }
 .heat .c.on { background: var(--on); }
-.heat .c.na { background: transparent; box-shadow: inset 0 0 0 1px var(--surface-2); }
-.legend { display: flex; gap: 14px; margin-top: 10px; font-size: 12px; color: var(--muted); }
+.heat .c.na, .legend i.na { background: color-mix(in srgb, var(--surface-2) 40%, transparent); }
+.legend { display: flex; gap: 14px; font-size: 12px; color: var(--muted); }
 .legend span { display: inline-flex; align-items: center; gap: 6px; }
-.legend i { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+.legend i { width: 10px; height: 10px; border-radius: 2px; display: inline-block; background: var(--surface-2); }
+.legend i.on { background: var(--on); }
 
 form.edit { display: flex; flex-direction: column; gap: 14px; }
 .field { display: flex; flex-direction: column; gap: 6px; }
@@ -358,10 +460,9 @@ form.edit { display: flex; flex-direction: column; gap: 14px; }
 .field input, .field select {
   height: 38px; padding: 0 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); min-width: 0;
 }
-.drawings { display: flex; flex-direction: column; gap: 14px; }
 .dgroup { display: flex; flex-direction: column; gap: 6px; }
 .dgroup-name { display: flex; align-items: center; gap: 7px; font-size: 11.5px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
-.dgroup-name::before { content: ""; width: 9px; height: 9px; border-radius: 3px; background: var(--cat); }
+.dgroup[hidden], .tile[hidden] { display: none; }
 .tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(88px, 1fr)); gap: 6px; }
 .actions { display: flex; gap: 8px; flex-wrap: wrap; }
 .btn {
@@ -384,12 +485,13 @@ form.edit { display: flex; flex-direction: column; gap: 14px; }
   .hero { grid-template-columns: 1fr; }
 }
 @media (max-width: 560px) {
+  .heat { gap: 2px 1px; }
   .hero-num { font-size: 52px; }
   .row1 .seg { flex: 1; } .row1 .seg button { flex: 1; }
-  .heat { grid-template-columns: 3.2rem repeat(24, minmax(0, 1fr)); gap: 3px 1px; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
+  ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
 }
 
 /* Server-rendered controls: radios, checkboxes and links styled like the mockup's buttons */
@@ -410,7 +512,7 @@ a { color: inherit; }
 .pill.new { color: var(--new); }
 .nav a { display: inline-flex; align-items: center; height: 30px; padding: 0 12px; border-radius: 7px; color: var(--muted); font-weight: 500; text-decoration: none; }
 .nav a[aria-current="page"] { background: var(--surface); color: var(--fg); box-shadow: 0 1px 2px rgba(0, 0, 0, .08); }
-.field .tile {
+.tile {
   position: relative; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px 4px 7px;
   border: 1px solid var(--line); border-radius: 8px; background: var(--bg); cursor: pointer;
   font-size: 11.5px; font-weight: 400; line-height: 1.25; text-align: center; color: var(--muted); min-width: 0;

@@ -29,16 +29,23 @@ The page address changes with your filters, so a filtered view can be bookmarked
 
 ![Device panel](../images/device-panel.png)
 
-Click a card to open its panel:
+Click a card to open its panel. It has two tabs.
+
+**Overview** shows what is known about the device:
 
 - **Presence, last 14 days**: one row per day, one square per hour, today at the top. Hours before the device was first seen show as "no data".
+- **Details**: IP and MAC address, vendor, category, the detected name and where it came from, and the detected type.
 - **Discovered by**: the plugin that found the device first, and every plugin that has reported it since. Hover a plugin to see what it learned.
-- **Details**: IP and MAC address, vendor, the detected name and where it came from, and the detected type.
-- **Your labels**: your own name, category and drawing. The drawings are grouped by category; for example, consoles come in several shapes and colours. Leave a field on automatic to keep using what was detected. Saving also marks the device as known.
 
 Press **Mark as known** to remove the NEW tag without changing anything else.
 
-Press **Forget device** at the bottom of the panel to delete a device you no longer own, together with its labels, details and history. This cannot be undone. If the device is still on the network, it shows up again as a new device the next time it is seen.
+**Manage** holds your own name and category for the device, and changes save as you make them. The category decides which group the card is shown in and its colour; changing it also switches the drawing to the first one recommended for that category. To pick another drawing, press the pencil next to the drawing on the banner: the panel turns over to show every drawing, with those of the chosen category recommended first. You can pick any drawing; search by name to find one, for example "console" for the several shapes and colours of consoles. The name is saved when you leave the field or close the panel; leave it empty to use the detected name. Press **Reset to detected** to go back to the detected name, category and drawing. Saving also marks the device as known.
+
+![Drawing picker](../images/device-drawings.png)
+
+Press **Forget device** at the bottom of the Manage tab to delete a device you no longer own, together with its labels, details and history. This cannot be undone. If the device is still on the network, it shows up again as a new device the next time it is seen.
+
+Press Escape, the close button or anywhere outside the panel to close it.
 
 ## Settings
 

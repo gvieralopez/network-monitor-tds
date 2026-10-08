@@ -94,19 +94,42 @@ async def test_devices_page_rejects_invalid_filters(client: AsyncClient) -> None
     assert response.status_code == 422
 
 
-async def test_drawer(client: AsyncClient, seen_device: MacAddress) -> None:
+async def test_dialog(client: AsyncClient, seen_device: MacAddress) -> None:
     response = await client.get(f"/devices/{seen_device}")
 
     assert response.status_code == 200
-    assert 'id="drawer-name">esp-31f5e' in response.text
+    assert 'id="dialog-name">esp-31f5e' in response.text
+    assert 'id="tab-overview" aria-controls="panel-overview" aria-selected="true"' in response.text
     assert "Mark as known" in response.text
     assert "Forget device" in response.text
     assert "Hybrid console, two-tone" in response.text
     assert "First found by <b>Demo network</b>" in response.text
 
 
+@pytest.mark.parametrize(
+    ("labels", "recommended", "other"),
+    [({}, "bulb", "router"), ({"category": "network"}, "router", "bulb")],
+)
+async def test_dialog_recommends_the_drawings_of_the_chosen_category(
+    client: AsyncClient,
+    seen_device: MacAddress,
+    labels: dict[str, str],
+    recommended: str,
+    other: str,
+) -> None:
+    if labels:
+        await client.post(f"/devices/{seen_device}/labels", data=labels)
+
+    html = (await client.get(f"/devices/{seen_device}")).text
+    recommendations = html[html.index("data-recommended") : html.index("data-others")]
+
+    assert f'data-name="{recommended}"' in recommendations
+    assert f'data-name="{other}"' not in recommendations
+    assert html.count(f'data-name="{other}"') == 1
+
+
 @pytest.mark.parametrize("path", ["/devices/aa:bb:cc:dd:ee:ff", "/devices/not-a-mac"])
-async def test_drawer_for_unknown_device(client: AsyncClient, path: str) -> None:
+async def test_dialog_for_unknown_device(client: AsyncClient, path: str) -> None:
     assert (await client.get(path)).status_code == 404
 
 
@@ -118,7 +141,8 @@ async def test_save_labels(client: AsyncClient, seen_device: MacAddress) -> None
 
     assert response.status_code == 200
     assert json.loads(response.headers["HX-Trigger"]) == {"devices-changed": None, "toast": "Saved"}
-    assert 'id="drawer-name">Garden sensor' in response.text
+    assert 'id="dialog-name">Garden sensor' in response.text
+    assert 'id="tab-manage" aria-controls="panel-manage" aria-selected="true"' in response.text
     assert "Mark as known" not in response.text
     page = await client.get("/", params={"q": "garden"})
     assert posters_in(page.text) == 1

@@ -1,4 +1,5 @@
 import json
+from enum import StrEnum
 from typing import Annotated
 
 from fastapi import APIRouter, Form, Query, Request
@@ -19,9 +20,14 @@ from network_monitor_tds.web.models import WebContext
 from network_monitor_tds.web.pages.board import BoardQuery, build_board
 from network_monitor_tds.web.pages.schemas import LabelsForm
 from network_monitor_tds.web.templating import grouping_of, sorting_of, templates
-from network_monitor_tds.web.views import card_view, drawer_view, hero_view
+from network_monitor_tds.web.views import card_view, dialog_view, hero_view
 
 router = APIRouter()
+
+
+class DialogTab(StrEnum):
+    OVERVIEW = "overview"
+    MANAGE = "manage"
 
 
 @router.get("/", response_class=HTMLResponse)
@@ -52,8 +58,8 @@ async def devices_page(
 
 
 @router.get("/devices/{mac}", response_class=HTMLResponse)
-async def device_drawer(request: Request, context: ContextDep, mac: MacDep) -> HTMLResponse:
-    return await _drawer(request, context, mac, {})
+async def device_dialog(request: Request, context: ContextDep, mac: MacDep) -> HTMLResponse:
+    return await _dialog(request, context, mac, DialogTab.OVERVIEW, {})
 
 
 @router.post("/devices/{mac}/labels", response_class=HTMLResponse)
@@ -61,15 +67,15 @@ async def save_labels(
     request: Request, context: ContextDep, mac: MacDep, form: Annotated[LabelsForm, Form()]
 ) -> HTMLResponse:
     await relabel_device(context.unit_of_work(), mac, form.to_labels())
-    return await _drawer(request, context, mac, {"devices-changed": None, "toast": "Saved"})
+    triggers = {"devices-changed": None, "toast": "Saved"}
+    return await _dialog(request, context, mac, DialogTab.MANAGE, triggers)
 
 
 @router.post("/devices/{mac}/acknowledge", response_class=HTMLResponse)
 async def acknowledge(request: Request, context: ContextDep, mac: MacDep) -> HTMLResponse:
     await acknowledge_device(context.unit_of_work(), mac)
-    return await _drawer(
-        request, context, mac, {"devices-changed": None, "toast": "Marked as known"}
-    )
+    triggers = {"devices-changed": None, "toast": "Marked as known"}
+    return await _dialog(request, context, mac, DialogTab.OVERVIEW, triggers)
 
 
 @router.post("/devices/{mac}/forget", response_class=HTMLResponse)
@@ -85,13 +91,19 @@ def _with_browser_defaults(query: BoardQuery, request: Request) -> BoardQuery:
     return query.model_copy(update=missing)
 
 
-async def _drawer(
-    request: Request, context: WebContext, mac: MacAddress, triggers: dict[str, str | None]
+async def _dialog(
+    request: Request,
+    context: WebContext,
+    mac: MacAddress,
+    tab: DialogTab,
+    triggers: dict[str, str | None],
 ) -> HTMLResponse:
     now = context.clock.now()
     detail = await device_detail(context.unit_of_work(), mac, now, context.timezone)
     response = templates.TemplateResponse(
-        request, "partials/drawer.html", {"drawer": drawer_view(detail, context.plugin_names, now)}
+        request,
+        "partials/dialog.html",
+        {"dialog": dialog_view(detail, context.plugin_names, now), "tab": tab},
     )
     if triggers:
         response.headers["HX-Trigger"] = json.dumps(triggers)

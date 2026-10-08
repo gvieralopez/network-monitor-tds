@@ -10,9 +10,125 @@
     toastTimer = setTimeout(() => { box.hidden = true; }, 3200);
   }
 
-  function closeDrawer() {
-    document.getElementById("drawer").innerHTML = "";
-    document.body.style.overflow = "";
+  function closeDialog() {
+    const root = document.getElementById("dialog");
+    const form = root.querySelector("#labels-form[data-dirty]");
+    if (form) saveLabels(form);
+    const flipped = root.querySelector(".dialog.flipped");
+    if (flipped) {
+      flipDialog(flipped, false);
+      if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        afterFlip(flipped, closeDialog);
+        return;
+      }
+    }
+    const mac = root.querySelector(".dialog")?.dataset.mac;
+    const close = () => {
+      root.innerHTML = "";
+      markHero(document.querySelector(`.poster[data-mac="${mac}"]`));
+    };
+    if (!mac || !document.startViewTransition) {
+      close();
+      return;
+    }
+    document.documentElement.classList.add("closing");
+    document.startViewTransition(close).finished.finally(() => {
+      document.documentElement.classList.remove("closing");
+      markHero(null);
+    });
+  }
+
+  // The marked poster shares its view-transition names with the dialog, so the browser morphs
+  // one into the other when the dialog opens or closes.
+  function markHero(poster) {
+    document.querySelectorAll(".poster.is-hero").forEach((other) => other.classList.remove("is-hero"));
+    poster?.classList.add("is-hero");
+  }
+
+  // Labels save as they change, without re-rendering the dialog, so the picker stays open.
+  function saveLabels(form) {
+    delete form.dataset.dirty;
+    fetch(form.dataset.save, { method: "POST", body: new URLSearchParams(new FormData(form)) })
+      .then((response) => {
+        if (!response.ok) throw new Error(response.statusText);
+        document.body.dispatchEvent(new Event("devices-changed"));
+        toast("Saved");
+      })
+      .catch(() => toast("Could not save"));
+  }
+
+  function chooseCategory(dialog, option) {
+    dialog.style.setProperty("--cat", `var(--cat-${option.dataset.color})`);
+    const picker = dialog.querySelector("[data-drawings]");
+    arrangeDrawings(picker);
+    const [first] = [...picker.querySelectorAll(`.tile[data-category="${option.dataset.category}"]`)]
+      .sort((a, b) => a.dataset.order - b.dataset.order);
+    first.querySelector("input").checked = true;
+    previewDrawing(dialog, first);
+    saveLabels(dialog.querySelector("#labels-form"));
+  }
+
+  function flipDialog(dialog, flipped) {
+    dialog.classList.toggle("flipped", flipped);
+    dialog.querySelector(".face.front").inert = flipped;
+    dialog.querySelector(".face.back").inert = !flipped;
+    dialog.querySelector(flipped ? "[data-drawing-search]" : "[data-flip]").focus({ preventScroll: true });
+  }
+
+  function afterFlip(dialog, callback) {
+    const flipper = dialog.querySelector(".flipper");
+    flipper.addEventListener("transitionend", function done(event) {
+      if (event.target !== flipper) return;
+      flipper.removeEventListener("transitionend", done);
+      callback();
+    });
+  }
+
+  function previewDrawing(dialog, tile) {
+    const source = tile.querySelector("svg");
+    const thumb = dialog.querySelector(".d-art .thumb");
+    const footprint = source.querySelector(".ground").getAttribute("rx");
+    thumb.querySelector("use").setAttribute("href", source.querySelector("use").getAttribute("href"));
+    thumb.querySelector(".ground").setAttribute("rx", footprint);
+    dialog.querySelector("[data-flip]").style.setProperty("--fp", footprint);
+  }
+
+  function selectTab(tab) {
+    tab.closest('[role="tablist"]').querySelectorAll('[role="tab"]').forEach((other) => {
+      const selected = other === tab;
+      other.setAttribute("aria-selected", String(selected));
+      other.tabIndex = selected ? 0 : -1;
+      document.getElementById(other.getAttribute("aria-controls")).hidden = !selected;
+    });
+    tab.focus();
+  }
+
+  // Drawings for the chosen category are recommended, never enforced: every drawing stays
+  // selectable, and a search ranks them all by how well their label matches.
+  function arrangeDrawings(picker) {
+    const query = picker.querySelector("[data-drawing-search]").value.trim().toLowerCase();
+    const dialog = picker.closest(".dialog");
+    const option = dialog.querySelector('select[name="category"]').selectedOptions[0];
+    const ranked = [...picker.querySelectorAll(".tile")]
+      .map((tile) => ({ tile, score: drawingScore(tile, query) }))
+      .sort((a, b) => b.score - a.score || a.tile.dataset.order - b.tile.dataset.order);
+    for (const { tile, score } of ranked) {
+      tile.hidden = score < 0;
+      const recommended = tile.dataset.category === option.dataset.category;
+      picker.querySelector(recommended ? "[data-recommended]" : "[data-others]").append(tile);
+    }
+    picker.querySelectorAll(".dgroup").forEach((group) => {
+      group.hidden = !group.querySelector(".tile:not([hidden])");
+    });
+    picker.querySelector("[data-no-match]").hidden = ranked.some(({ score }) => score >= 0);
+  }
+
+  function drawingScore(tile, query) {
+    if (!query) return 0;
+    const label = tile.dataset.label;
+    if (label.startsWith(query)) return 3;
+    if (label.split(/[\s,]+/).some((word) => word.startsWith(query))) return 2;
+    return tile.dataset.terms.includes(query) ? 1 : -1;
   }
 
   function setLive(state, label) {
@@ -41,7 +157,11 @@
   }
 
   document.addEventListener("click", (event) => {
-    if (event.target.closest("[data-close]")) closeDrawer();
+    if (event.target.closest("[data-close]")) closeDialog();
+    if (event.target.closest("[data-flip]")) flipDialog(event.target.closest(".dialog"), true);
+    if (event.target.closest("[data-unflip]")) flipDialog(event.target.closest(".dialog"), false);
+    const tab = event.target.closest('[role="tab"]');
+    if (tab) selectTab(tab);
     const arrow = event.target.closest("[data-scroll]");
     if (arrow) {
       const shelf = arrow.closest(".shelf-sec").querySelector(".shelf");
@@ -49,7 +169,26 @@
     }
   });
 
+  document.addEventListener("input", (event) => {
+    if (event.target.matches("[data-drawing-search]")) arrangeDrawings(event.target.closest("[data-drawings]"));
+    if (event.target.matches('#labels-form input[name="name"]')) event.target.form.dataset.dirty = "";
+  });
+
+  document.addEventListener("submit", (event) => {
+    if (event.target.id !== "labels-form") return;
+    event.preventDefault();
+    saveLabels(event.target);
+  });
+
   document.addEventListener("change", (event) => {
+    if (event.target.matches('#labels-form select[name="category"]')) {
+      chooseCategory(event.target.closest(".dialog"), event.target.selectedOptions[0]);
+    }
+    if (event.target.matches('.dialog input[name="icon"]')) {
+      previewDrawing(event.target.closest(".dialog"), event.target.closest(".tile"));
+      saveLabels(event.target.form);
+    }
+    if (event.target.matches('#labels-form input[name="name"]')) saveLabels(event.target.form);
     const picker = event.target.closest?.("[data-cookie]");
     if (!picker) return;
     const { cookie, attribute } = picker.dataset;
@@ -62,7 +201,16 @@
   });
 
   document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape" && document.querySelector("#drawer .drawer")) closeDrawer();
+    const flipped = document.querySelector("#dialog .dialog.flipped");
+    if (event.key === "Escape" && flipped) flipDialog(flipped, false);
+    else if (event.key === "Escape" && document.querySelector("#dialog .dialog")) closeDialog();
+    if (event.key === "Enter" && event.target.matches("[data-drawing-search]")) event.preventDefault();
+    const tab = event.target.closest?.('[role="tab"]');
+    const step = { ArrowRight: 1, ArrowLeft: -1 }[event.key];
+    if (tab && step) {
+      const tabs = [...tab.parentElement.children];
+      selectTab(tabs[(tabs.indexOf(tab) + step + tabs.length) % tabs.length]);
+    }
   });
 
   document.addEventListener("pointermove", (event) => {
@@ -78,14 +226,11 @@
     }
   });
 
+  document.body.addEventListener("htmx:beforeTransition", (event) => markHero(event.target.closest(".poster")));
+
   document.body.addEventListener("htmx:afterSwap", (event) => {
-    if (event.detail.target.id !== "drawer") return;
-    if (!event.detail.target.querySelector(".drawer")) {
-      closeDrawer();
-      return;
-    }
-    document.body.style.overflow = "hidden";
-    event.detail.target.querySelector("[data-close].icon-btn")?.focus();
+    if (event.detail.target.id !== "dialog") return;
+    event.detail.target.querySelector('[role="tab"][aria-selected="true"]')?.focus();
   });
 
   document.body.addEventListener("toast", (event) => toast(event.detail.value));
