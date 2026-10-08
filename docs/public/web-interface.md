@@ -20,7 +20,7 @@ Offline devices are shown in grey.
 - **Search** matches names, IP addresses, MAC addresses, vendors and categories.
 - **All / Online / Offline** filters by status.
 - The **chips** below filter by category, or show only new devices.
-- **Group** arranges devices in rows by category, status or vendor, or in one grid with "None". Devices waiting for review also get their own "New on your network" row.
+- **Group** shows every device in one grid with "None", the default, or arranges them in rows by category, status or vendor. When grouped, devices waiting for review also get their own "New on your network" row.
 - **Sort** orders by new-then-online, name, IP address or last seen.
 
 The page address changes with your filters, so a filtered view can be bookmarked. The page updates by itself when devices come, go or appear for the first time, and shows a short notification. The dot next to "Live" in the header shows whether live updates are connected.

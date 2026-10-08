@@ -26,7 +26,7 @@ def card_style_of(request: Request) -> str:
 
 
 def grouping_of(request: Request) -> Grouping:
-    return Grouping(_chosen(request, GROUPING_COOKIE, GROUPINGS, Grouping.CATEGORY))
+    return Grouping(_chosen(request, GROUPING_COOKIE, GROUPINGS, Grouping.NONE))
 
 
 def sorting_of(request: Request) -> Sorting:

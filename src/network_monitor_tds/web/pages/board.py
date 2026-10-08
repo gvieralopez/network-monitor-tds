@@ -55,7 +55,7 @@ class BoardQuery(BaseModel):
     status: StatusFilter = StatusFilter.ALL
     new: bool = False
     category: list[Category] = []
-    group: Grouping = Grouping.CATEGORY
+    group: Grouping = Grouping.NONE
     sort: Sorting = Sorting.SMART
 
     @property

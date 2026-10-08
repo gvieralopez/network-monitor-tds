@@ -102,7 +102,7 @@ def test_grouping(grouping: Grouping, expected: list[str]) -> None:
 
 
 def test_category_shelves_carry_their_category() -> None:
-    shelves = build_board(DEVICES, BoardQuery()).shelves
+    shelves = build_board(DEVICES, BoardQuery(group=Grouping.CATEGORY)).shelves
 
     assert [shelf.category for shelf in shelves] == [
         None,

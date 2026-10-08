@@ -32,8 +32,8 @@ async def test_devices_page_renders_catalogue(client: AsyncClient) -> None:
 
     assert response.status_code == 200
     assert "Network Monitor" in response.text
-    assert "New on your network" in response.text
-    assert posters_in(response.text) == 2
+    assert "New on your network" not in response.text
+    assert posters_in(response.text) == 1
     assert "esp-31f5e" in response.text
     assert 'id="dv-chip"' in response.text
     assert 'href="#dv-chip"' in response.text
@@ -44,10 +44,10 @@ async def test_devices_page_renders_catalogue(client: AsyncClient) -> None:
 @pytest.mark.parametrize(
     ("params", "posters"),
     [
-        ({"q": "esp"}, 2),
+        ({"q": "esp"}, 1),
         ({"q": "nothing"}, 0),
         ({"status": "offline"}, 0),
-        ({"group": "none"}, 1),
+        ({"group": "category"}, 2),
         ({"group": "status", "sort": "ip"}, 1),
         ({"category": ["iot"], "new": "true", "group": "vendor"}, 2),
     ],
@@ -65,7 +65,7 @@ async def test_devices_page_filters(
 @pytest.mark.parametrize(
     ("cookies", "params", "group", "sort"),
     [
-        ({}, {}, "category", "smart"),
+        ({}, {}, "none", "smart"),
         ({GROUPING_COOKIE: "vendor", SORTING_COOKIE: "seen"}, {}, "vendor", "seen"),
         (
             {GROUPING_COOKIE: "vendor", SORTING_COOKIE: "seen"},
@@ -73,7 +73,7 @@ async def test_devices_page_filters(
             "status",
             "seen",
         ),
-        ({GROUPING_COOKIE: "sideways"}, {}, "category", "smart"),
+        ({GROUPING_COOKIE: "sideways"}, {}, "none", "smart"),
     ],
 )
 async def test_devices_page_opens_with_the_browser_defaults(
