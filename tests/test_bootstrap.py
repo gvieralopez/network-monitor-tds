@@ -10,7 +10,7 @@ from network_monitor_tds.domain.plugins.models import PluginId
 from network_monitor_tds.infrastructure.db.migrator import prepare_database
 from network_monitor_tds.plugins.host.registry import plugin_defaults
 from network_monitor_tds.settings import AppSettings
-from tests.conftest import wait_until
+from tests.conftest import stop
 
 pytestmark = pytest.mark.anyio
 
@@ -42,12 +42,11 @@ async def test_serve_monitors_the_demo_network(
                 await asyncio.sleep(0.05)
                 await count_devices()
     finally:
-        server.cancel()
+        await stop(server)
         await container.engine.dispose()
 
     assert device_count > 0
     assert (data_dir / "nmtds.db").exists()
-    await wait_until(server.done)
 
 
 class StoppingServer:

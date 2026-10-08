@@ -9,7 +9,7 @@ from network_monitor_tds.application.ports import UnitOfWork
 from network_monitor_tds.domain.devices.models import Device
 from network_monitor_tds.domain.events.models import DeviceEvent, EventKind
 from network_monitor_tds.domain.observations.models import Observation
-from tests.conftest import T0, Database, FixedClock, Stop
+from tests.conftest import T0, Database, FixedClock, Stop, stop
 
 pytestmark = pytest.mark.anyio
 
@@ -84,7 +84,7 @@ async def _ingest(monitor: Monitor, observation: Observation) -> None:
     worker = asyncio.create_task(monitor.run_ingestion())
     await monitor.emit(observation)
     await monitor.drain()
-    worker.cancel()
+    await stop(worker)
 
 
 def _broken_unit_of_work() -> UnitOfWork:

@@ -28,7 +28,7 @@ from network_monitor_tds.plugins.sdk.models import (
     PluginSettings,
     ScheduledSettings,
 )
-from tests.conftest import T0, Database, FixedClock, fast_sleep, no_known_devices, wait_until
+from tests.conftest import T0, Database, FixedClock, fast_sleep, no_known_devices, stop, wait_until
 
 pytestmark = pytest.mark.anyio
 
@@ -121,7 +121,7 @@ async def test_runs_enabled_plugins_by_kind(database: Database, mac: MacAddress)
     bus.publish(DeviceEvent(EventKind.DEVICE_ONLINE, mac, T0))
     bus.publish(DeviceEvent(EventKind.DEVICE_DISCOVERED, mac, T0))
     await wait_until(lambda: calls["enricher"] == [mac])
-    task.cancel()
+    await stop(task)
 
     assert set(calls["ticker"]) == {"tick"}
     assert calls["dormant"] == []
@@ -133,13 +133,13 @@ async def test_enrichment_backfills_known_devices(
     task = asyncio.create_task(host(database, InMemoryEventBus(10)).run())
 
     await wait_until(lambda: calls["enricher"] == [stored_device.mac])
-    task.cancel()
+    await stop(task)
 
 
 async def test_creates_default_configs(database: Database) -> None:
     task = asyncio.create_task(host(database, InMemoryEventBus(10)).run())
     await wait_until(lambda: len(calls["ticker"]) >= 1)
-    task.cancel()
+    await stop(task)
 
     async with database.unit_of_work() as uow:
         configs = {config.plugin_id: config.enabled for config in await uow.plugin_configs.list()}
@@ -160,7 +160,7 @@ async def test_uses_stored_settings_and_enabled_flags(database: Database) -> Non
 
     task = asyncio.create_task(host(database, InMemoryEventBus(10)).run())
     await wait_until(lambda: len(calls["ticker"]) >= 1 and len(calls["dormant"]) >= 1)
-    task.cancel()
+    await stop(task)
 
     assert calls["ticker"][0] == "custom"
 
@@ -173,7 +173,7 @@ async def test_skips_plugins_with_invalid_settings(
 
     task = asyncio.create_task(host(database, InMemoryEventBus(10)).run())
     await wait_until(lambda: len(calls["listener"]) >= 1)
-    task.cancel()
+    await stop(task)
 
     assert calls["ticker"] == []
     assert "Plugin ticker has invalid settings" in caplog.text
@@ -204,7 +204,7 @@ async def test_reload_restarts_one_plugin_with_new_settings(database: Database) 
     await plugin_host.reload(PluginId("ticker"))
     stopped_at = len(calls["ticker"])
     await asyncio.sleep(0.05)
-    task.cancel()
+    await stop(task)
 
     assert len(calls["ticker"]) == stopped_at
     assert plugin_host.status(PluginId("ticker")).state is PluginState.STOPPED
@@ -232,7 +232,7 @@ async def test_invalid_settings_are_reported_as_failing(database: Database) -> N
 
     task = asyncio.create_task(plugin_host.run())
     await wait_until(lambda: len(calls["listener"]) >= 1)
-    task.cancel()
+    await stop(task)
 
     status = plugin_host.status(PluginId("ticker"))
     assert status.state is PluginState.FAILING
