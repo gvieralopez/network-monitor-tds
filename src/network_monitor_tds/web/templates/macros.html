@@ -30,9 +30,9 @@
 {%- endmacro %}
 
 {% macro poster(card, index) -%}
-<button type="button" class="poster{{ '' if card.online else ' is-off' }}{{ ' is-new' if card.is_new }}"
+<button type="button" data-mac="{{ card.mac }}" class="poster{{ '' if card.online else ' is-off' }}{{ ' is-new' if card.is_new }}"
         style="--cat:var(--cat-{{ card.color }});--i:{{ index }}"
-        hx-get="/devices/{{ card.mac }}" hx-target="#drawer" hx-swap="innerHTML">
+        hx-get="/devices/{{ card.mac }}" hx-target="#dialog" hx-swap="innerHTML transition:true">
   {% call artwork(card) %}
     <span class="art-status"><i class="dot" style="--i:{{ index }}"></i>{{ card.status }}</span>
     {% if card.is_new %}<span class="art-new">NEW</span>{% endif %}

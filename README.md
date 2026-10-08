@@ -33,7 +33,7 @@ See every device on your network, what it is, and when it comes and goes. Device
 - **Live.** Cards update by themselves when devices come online, go offline or appear for the first time.
 - **Twelve categories**, worked out from hostnames, mDNS services, DHCP vendor classes and the manufacturer: network, server, computer, phone, tablet, wearable, media, gaming, smart home, camera, printer and unknown.
 - **Device catalogue.** Status, IP, vendor and a 24-hour activity strip for every device. Search, filter by status, category or new devices, group into rows by category, status or vendor, and sort.
-- **Device panel.** A 14-day hourly presence heatmap, which plugins found the device and what each learned, and your own name, category and drawing. Forget a device you no longer own.
+- **Device panel.** A popup with an overview tab (a 14-day hourly presence heatmap, and which plugins found the device and what each learned) and a manage tab for your own name, category and drawing. Forget a device you no longer own.
 - **Plugins.** ARP sweep, ARP listener, DHCP sniffer, offline MAC vendor lookup, Technitium DHCP leases, and a demo network. Switch them on and off and edit their settings under **Settings → Sources**, without restarting. Third-party plugins install as ordinary Python packages.
 - **Simple to run.** One process, one SQLite file, automatic database upgrades with backups, and a JSON API.
 - **Drawings and card styles.** Every device gets a drawing of the kind of device it is. *Artwork* cards put it on a pattern in its category's colour, generated from the MAC address so no two devices look alike; *Studio* cards put it on a plain backdrop. Light and dark themes for both.

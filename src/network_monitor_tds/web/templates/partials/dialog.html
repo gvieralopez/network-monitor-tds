@@ -1,0 +1,125 @@
+{% from "macros.html" import artwork, drawing %}
+{% macro drawing_tile(item, index) -%}
+<label class="tile" data-name="{{ item.name }}" data-category="{{ item.category }}" data-label="{{ item.label | lower }}" data-terms="{{ item.terms }}" data-order="{{ index }}"><input type="radio" name="icon" value="{{ item.name }}" {% if item.name == dialog.labels_icon %}checked{% endif %}>{{ drawing(item.name) }}<span>{{ item.label }}</span></label>
+{%- endmacro %}
+{% set card = dialog.card %}
+{% set recommended = dialog.labels_category or dialog.detected_category_value %}
+<div class="scrim" data-close></div>
+<div class="dialog" role="dialog" aria-modal="true" aria-labelledby="dialog-name" data-mac="{{ card.mac }}" style="--cat:var(--cat-{{ card.color }})">
+  {% call artwork(card, " d-art" ~ ("" if card.online else " off")) %}
+    <span class="d-ip">{{ card.ip }}</span>
+    <button type="button" class="icon-btn" data-close aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+  {% endcall %}
+  <div class="d-head">
+    <div class="d-title">
+      <h2 id="dialog-name">{{ card.name }}</h2>
+      <span class="d-state{{ ' on' if card.online }}"><i class="dot"></i>{{ "Online" if card.online else "Last seen " ~ card.status }}</span>
+    </div>
+    <div class="d-tabs" role="tablist" aria-label="Device sections">
+      {% for value, label in [("overview", "Overview"), ("manage", "Manage")] %}
+      <button type="button" role="tab" id="tab-{{ value }}" aria-controls="panel-{{ value }}" aria-selected="{{ 'true' if tab == value else 'false' }}" tabindex="{{ 0 if tab == value else -1 }}">{{ label }}</button>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="d-body overview" id="panel-overview" role="tabpanel" aria-labelledby="tab-overview" {% if tab != "overview" %}hidden{% endif %}>
+    {% if card.is_new %}
+    <div class="notice wide"><span>First seen {{ dialog.first_seen }}. Not reviewed yet.</span>
+      <button type="button" class="btn" hx-post="/devices/{{ card.mac }}/acknowledge" hx-target="closest .notice" hx-swap="delete">Mark as known</button></div>
+    {% endif %}
+
+    <div class="d-col">
+    <section class="section">
+      <h3>Details</h3>
+      <dl class="facts">
+        <dt>IP address</dt><dd class="mono">{{ card.ip }}</dd>
+        <dt>MAC address</dt><dd class="mono">{{ card.mac }}</dd>
+        <dt>Vendor</dt><dd>{{ card.vendor }}</dd>
+        <dt>Category</dt><dd>{{ card.category }}</dd>
+        <dt>Detected name</dt><dd>{{ dialog.detected_name }}<span class="tag">{{ dialog.name_origin }}</span></dd>
+        <dt>Detected type</dt><dd>{{ dialog.detected_category }}</dd>
+        <dt>First seen</dt><dd>{{ dialog.first_seen }}</dd>
+      </dl>
+    </section>
+
+    <section class="section">
+      <h3>Discovered by</h3>
+      <p class="disc-line">First found by <b>{{ dialog.first_found_by }}</b> <span>· {{ dialog.first_seen }}</span></p>
+      <div class="disc-chips">
+        {% for discovery in dialog.discoveries %}<span class="disc-chip{{ ' first' if discovery.first }}" title="{{ discovery.details }}">{{ discovery.name }}</span>{% endfor %}
+      </div>
+    </section>
+
+    </div>
+
+    <section class="section">
+      <h3>Presence, last 14 days</h3>
+      <div class="heat-meta"><span>Online <b>{{ dialog.uptime }}%</b> of the last 7 days</span>
+        <span class="legend"><span><i class="on"></i>Online</span><span><i></i>Offline</span><span><i class="na"></i>No data</span></span></div>
+      <div class="heat">
+        <span></span>{% for hour in ["00", "06", "12", "18"] %}<span class="ax">{{ hour }}</span>{% endfor %}
+        {% for row in dialog.rows %}
+        <span class="lbl">{{ row.label }}</span>{% for state in row.hours %}<span class="c {{ 'on' if state == 'online' else ('na' if state == 'unknown') }}" title="{{ row.label }}, {{ '%02d' % loop.index0 }}:00 {{ state }}"></span>{% endfor %}
+        {% endfor %}
+      </div>
+    </section>
+  </div>
+
+  <div class="d-body manage" id="panel-manage" role="tabpanel" aria-labelledby="tab-manage" {% if tab != "manage" %}hidden{% endif %}>
+    <form class="edit" hx-post="/devices/{{ card.mac }}/labels" hx-target="#dialog">
+      <div class="edit-row">
+        <div class="field">
+          <label for="label-name">Name</label>
+          <input id="label-name" name="name" value="{{ dialog.labels_name }}" placeholder="{{ dialog.detected_name }}" maxlength="100">
+          <span class="hint">Leave empty to use the detected name.</span>
+        </div>
+        <div class="field">
+          <label for="label-category">Category</label>
+          <select id="label-category" name="category">
+            <option value="" data-category="{{ dialog.detected_category_value }}" data-drawing="{{ category_drawings[dialog.detected_category_value] }}" {% if not dialog.labels_category %}selected{% endif %}>Automatic ({{ dialog.detected_category }})</option>
+            {% for value, label in category_choices %}
+            <option value="{{ value }}" data-category="{{ value }}" data-drawing="{{ category_drawings[value] }}" {% if dialog.labels_category == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+          <span class="hint">Decides the group and colour of its card.</span>
+        </div>
+      </div>
+      <fieldset class="field">
+        <legend class="label">Drawing</legend>
+        <div class="drawings" data-drawings>
+          <label class="search">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+            <input type="search" placeholder="Search drawings" aria-label="Search drawings" autocomplete="off" data-drawing-search>
+          </label>
+          <div class="dgroup">
+            <span class="dgroup-name">Recommended</span>
+            <div class="tiles" data-recommended>
+              <label class="tile" data-auto data-label="automatic" data-terms="automatic default detected" data-order="-1"><input type="radio" name="icon" value="" {% if not dialog.labels_icon %}checked{% endif %}>{{ drawing(category_drawings[recommended]) }}<span>Automatic</span></label>
+              {% for item in drawing_choices %}{% if item.category == recommended %}{{ drawing_tile(item, loop.index0) }}{% endif %}{% endfor %}
+            </div>
+          </div>
+          <div class="dgroup">
+            <span class="dgroup-name">All drawings</span>
+            <div class="tiles" data-others>
+              {% for item in drawing_choices %}{% if item.category != recommended %}{{ drawing_tile(item, loop.index0) }}{% endif %}{% endfor %}
+            </div>
+          </div>
+          <p class="hint" data-no-match hidden>No drawings match.</p>
+        </div>
+      </fieldset>
+      <div class="actions sticky">
+        <button type="submit" class="btn primary">Save</button>
+        <button type="submit" class="btn ghost" hx-post="/devices/{{ card.mac }}/labels" hx-vals='{"name": "", "category": "", "icon": ""}'>Reset to detected</button>
+      </div>
+    </form>
+
+    <section class="section forget">
+      <h3>Forget device</h3>
+      <p class="hint">Deletes its labels, details and history. If it is still on the network, it comes back as a new device.</p>
+      <div class="actions">
+        <button type="button" class="btn danger" hx-post="/devices/{{ card.mac }}/forget" hx-target="#dialog"
+          hx-confirm="Forget {{ card.name }}? Its labels and history will be deleted.">Forget device</button>
+      </div>
+    </section>
+  </div>
+</div>

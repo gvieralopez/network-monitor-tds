@@ -4,9 +4,9 @@ from fastapi import Request
 from fastapi.templating import Jinja2Templates
 
 from network_monitor_tds import __version__
-from network_monitor_tds.web.drawings import DRAWINGS
+from network_monitor_tds.web.drawings import CATEGORY_DRAWINGS, DRAWINGS
 from network_monitor_tds.web.pages.board import GROUPINGS, SORTINGS, Grouping, Sorting
-from network_monitor_tds.web.views import category_choices, drawing_groups
+from network_monitor_tds.web.views import category_choices, drawing_choices
 
 TEMPLATES_DIR = Path(__file__).parent / "templates"
 THEME_COOKIE = "nmtds_theme"
@@ -36,7 +36,8 @@ def sorting_of(request: Request) -> Sorting:
 templates = Jinja2Templates(directory=TEMPLATES_DIR)
 templates.env.globals.update(
     version=__version__,
-    drawing_groups=drawing_groups(),
+    drawing_choices=drawing_choices(),
+    category_drawings=CATEGORY_DRAWINGS,
     category_choices=category_choices(),
     theme_of=theme_of,
     themes=THEMES,

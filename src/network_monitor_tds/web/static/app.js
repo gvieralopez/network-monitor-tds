@@ -10,9 +10,69 @@
     toastTimer = setTimeout(() => { box.hidden = true; }, 3200);
   }
 
-  function closeDrawer() {
-    document.getElementById("drawer").innerHTML = "";
-    document.body.style.overflow = "";
+  function closeDialog() {
+    const root = document.getElementById("dialog");
+    const mac = root.querySelector(".dialog")?.dataset.mac;
+    const close = () => {
+      root.innerHTML = "";
+      markHero(document.querySelector(`.poster[data-mac="${mac}"]`));
+    };
+    if (!mac || !document.startViewTransition) {
+      close();
+      return;
+    }
+    document.documentElement.classList.add("closing");
+    document.startViewTransition(close).finished.finally(() => {
+      document.documentElement.classList.remove("closing");
+      markHero(null);
+    });
+  }
+
+  // The marked poster shares its view-transition names with the dialog, so the browser morphs
+  // one into the other when the dialog opens or closes.
+  function markHero(poster) {
+    document.querySelectorAll(".poster.is-hero").forEach((other) => other.classList.remove("is-hero"));
+    poster?.classList.add("is-hero");
+  }
+
+  function selectTab(tab) {
+    tab.closest('[role="tablist"]').querySelectorAll('[role="tab"]').forEach((other) => {
+      const selected = other === tab;
+      other.setAttribute("aria-selected", String(selected));
+      other.tabIndex = selected ? 0 : -1;
+      document.getElementById(other.getAttribute("aria-controls")).hidden = !selected;
+    });
+    tab.focus();
+  }
+
+  // Drawings for the chosen category are recommended, never enforced: every drawing stays
+  // selectable, and a search ranks them all by how well their label matches.
+  function arrangeDrawings(picker) {
+    const query = picker.querySelector("[data-drawing-search]").value.trim().toLowerCase();
+    const option = picker.closest("form").querySelector('select[name="category"]').selectedOptions[0];
+    const automatic = picker.querySelector("[data-auto]");
+    const preview = picker.querySelector(`.tile[data-name="${option.dataset.drawing}"] svg`);
+    automatic.querySelector("svg").replaceWith(preview.cloneNode(true));
+    const ranked = [...picker.querySelectorAll(".tile")]
+      .map((tile) => ({ tile, score: drawingScore(tile, query) }))
+      .sort((a, b) => b.score - a.score || a.tile.dataset.order - b.tile.dataset.order);
+    for (const { tile, score } of ranked) {
+      tile.hidden = score < 0;
+      const recommended = tile === automatic || tile.dataset.category === option.dataset.category;
+      picker.querySelector(recommended ? "[data-recommended]" : "[data-others]").append(tile);
+    }
+    picker.querySelectorAll(".dgroup").forEach((group) => {
+      group.hidden = !group.querySelector(".tile:not([hidden])");
+    });
+    picker.querySelector("[data-no-match]").hidden = ranked.some(({ score }) => score >= 0);
+  }
+
+  function drawingScore(tile, query) {
+    if (!query) return 0;
+    const label = tile.dataset.label;
+    if (label.startsWith(query)) return 3;
+    if (label.split(/[\s,]+/).some((word) => word.startsWith(query))) return 2;
+    return tile.dataset.terms.includes(query) ? 1 : -1;
   }
 
   function setLive(state, label) {
@@ -41,7 +101,9 @@
   }
 
   document.addEventListener("click", (event) => {
-    if (event.target.closest("[data-close]")) closeDrawer();
+    if (event.target.closest("[data-close]")) closeDialog();
+    const tab = event.target.closest('[role="tab"]');
+    if (tab) selectTab(tab);
     const arrow = event.target.closest("[data-scroll]");
     if (arrow) {
       const shelf = arrow.closest(".shelf-sec").querySelector(".shelf");
@@ -49,7 +111,14 @@
     }
   });
 
+  document.addEventListener("input", (event) => {
+    if (event.target.matches("[data-drawing-search]")) arrangeDrawings(event.target.closest("[data-drawings]"));
+  });
+
   document.addEventListener("change", (event) => {
+    if (event.target.matches('.dialog select[name="category"]')) {
+      arrangeDrawings(event.target.form.querySelector("[data-drawings]"));
+    }
     const picker = event.target.closest?.("[data-cookie]");
     if (!picker) return;
     const { cookie, attribute } = picker.dataset;
@@ -62,7 +131,14 @@
   });
 
   document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape" && document.querySelector("#drawer .drawer")) closeDrawer();
+    if (event.key === "Escape" && document.querySelector("#dialog .dialog")) closeDialog();
+    if (event.key === "Enter" && event.target.matches("[data-drawing-search]")) event.preventDefault();
+    const tab = event.target.closest?.('[role="tab"]');
+    const step = { ArrowRight: 1, ArrowLeft: -1 }[event.key];
+    if (tab && step) {
+      const tabs = [...tab.parentElement.children];
+      selectTab(tabs[(tabs.indexOf(tab) + step + tabs.length) % tabs.length]);
+    }
   });
 
   document.addEventListener("pointermove", (event) => {
@@ -78,14 +154,11 @@
     }
   });
 
+  document.body.addEventListener("htmx:beforeTransition", (event) => markHero(event.target.closest(".poster")));
+
   document.body.addEventListener("htmx:afterSwap", (event) => {
-    if (event.detail.target.id !== "drawer") return;
-    if (!event.detail.target.querySelector(".drawer")) {
-      closeDrawer();
-      return;
-    }
-    document.body.style.overflow = "hidden";
-    event.detail.target.querySelector("[data-close].icon-btn")?.focus();
+    if (event.detail.target.id !== "dialog") return;
+    event.detail.target.querySelector('[role="tab"][aria-selected="true"]')?.focus();
   });
 
   document.body.addEventListener("toast", (event) => toast(event.detail.value));

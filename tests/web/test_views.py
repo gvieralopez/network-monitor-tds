@@ -8,15 +8,15 @@ from network_monitor_tds.application.models import NetworkOverview
 from network_monitor_tds.domain.devices.models import Category, DeviceLabels
 from network_monitor_tds.domain.network.models import MacAddress
 from network_monitor_tds.domain.observations.models import KnownField
-from network_monitor_tds.web.drawings import CATEGORY_LABELS, DRAWINGS
+from network_monitor_tds.web.drawings import DRAWINGS
 from network_monitor_tds.web.models import WebContext
 from network_monitor_tds.web.views import (
     ago,
     card_view,
     category_choices,
     chart_view,
-    drawer_view,
-    drawing_groups,
+    dialog_view,
+    drawing_choices,
     hero_view,
     percentage,
 )
@@ -63,11 +63,15 @@ def test_category_choices_cover_every_category() -> None:
     assert [value for value, _ in category_choices()] == [category.value for category in Category]
 
 
-def test_drawing_groups_list_every_drawing_once_in_category_order() -> None:
-    groups = drawing_groups()
+def test_drawing_choices_list_every_drawing_in_catalogue_order() -> None:
+    assert [choice.name for choice in drawing_choices()] == [d.name for d in DRAWINGS]
 
-    assert [group.label for group in groups] == [CATEGORY_LABELS[category] for category in Category]
-    assert [d.name for group in groups for d in group.drawings] == [d.name for d in DRAWINGS]
+
+def test_drawing_choices_are_searchable_by_label_name_and_category() -> None:
+    choice = next(choice for choice in drawing_choices() if choice.name == "console-hybrid-duo")
+
+    assert choice.terms == "hybrid console, two-tone console hybrid duo gaming"
+    assert choice.category == Category.GAMING.value
 
 
 @pytest.mark.anyio
@@ -86,19 +90,19 @@ async def test_card_and_drawer_views(
     assert (offline.status, offline.seen) == ("2 h ago", "seen 2 h ago")
 
     detail = await device_detail(database.unit_of_work(), seen_device, NOW, UTC)
-    drawer = drawer_view(detail, web_context.plugin_names, NOW)
-    assert drawer.first_found_by == DEMO_INFO.name
-    assert drawer.discoveries[0].details == "dhcp hostname: esp-31f5e"
-    assert (drawer.detected_name, drawer.name_origin, drawer.detected_category) == (
+    dialog = dialog_view(detail, web_context.plugin_names, NOW)
+    assert dialog.first_found_by == DEMO_INFO.name
+    assert dialog.discoveries[0].details == "dhcp hostname: esp-31f5e"
+    assert (dialog.detected_name, dialog.name_origin, dialog.detected_category) == (
         "esp-31f5e", "DHCP", "Smart home"
     )  # fmt: skip
-    assert (drawer.labels_name, drawer.labels_category, drawer.labels_icon) == ("", "", "")
-    assert drawer.automatic_icon == "chip"
-    assert len(drawer.rows) == 14
+    assert (dialog.labels_name, dialog.labels_category, dialog.labels_icon) == ("", "", "")
+    assert dialog.automatic_icon == "chip"
+    assert len(dialog.rows) == 14
 
 
 @pytest.mark.anyio
-async def test_drawer_keeps_detected_values_next_to_labels(
+async def test_dialog_keeps_detected_values_next_to_labels(
     database: Database, seen_device: MacAddress, web_context: WebContext
 ) -> None:
     async with database.unit_of_work() as uow:
@@ -110,12 +114,12 @@ async def test_drawer_keeps_detected_values_next_to_labels(
         await uow.commit()
 
     detail = await device_detail(database.unit_of_work(), seen_device, NOW, UTC)
-    drawer = drawer_view(detail, {}, NOW)
+    dialog = dialog_view(detail, {}, NOW)
 
-    assert drawer.card.name == "Garden sensor"
-    assert drawer.detected_name == "esp-31f5e"
-    assert drawer.detected_category == "Smart home"
-    assert (drawer.labels_category, drawer.labels_icon) == ("camera", "camera")
-    assert drawer.automatic_icon == "camera"
-    assert drawer.first_found_by == "demo"
+    assert dialog.card.name == "Garden sensor"
+    assert dialog.detected_name == "esp-31f5e"
+    assert (dialog.detected_category, dialog.detected_category_value) == ("Smart home", "iot")
+    assert (dialog.labels_category, dialog.labels_icon) == ("camera", "camera")
+    assert dialog.automatic_icon == "camera"
+    assert dialog.first_found_by == "demo"
     assert KnownField.DHCP_HOSTNAME in detail.facts
