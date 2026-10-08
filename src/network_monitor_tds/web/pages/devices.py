@@ -17,7 +17,13 @@ from network_monitor_tds.domain.network.models import MacAddress
 from network_monitor_tds.web.dependencies import ContextDep, MacDep
 from network_monitor_tds.web.drawings import CATEGORY_COLORS, CATEGORY_LABELS
 from network_monitor_tds.web.models import WebContext
-from network_monitor_tds.web.pages.board import BoardQuery, build_board
+from network_monitor_tds.web.pages.board import (
+    NATURAL_ORDERS,
+    ORDER_LABELS,
+    SORTINGS,
+    BoardQuery,
+    build_board,
+)
 from network_monitor_tds.web.pages.schemas import LabelsForm
 from network_monitor_tds.web.templating import grouping_of, sorting_of, templates
 from network_monitor_tds.web.views import card_view, dialog_view, hero_view
@@ -53,6 +59,9 @@ async def devices_page(
             "category_labels": CATEGORY_LABELS,
             "category_colors": CATEGORY_COLORS,
             "new_count": sum(summary.is_new for summary in summaries),
+            "natural_orders": NATURAL_ORDERS,
+            "order_labels": ORDER_LABELS,
+            "sort_labels": dict(SORTINGS),
         },
     )
 
@@ -87,8 +96,12 @@ async def forget(context: ContextDep, mac: MacDep) -> HTMLResponse:
 
 def _with_browser_defaults(query: BoardQuery, request: Request) -> BoardQuery:
     defaults = {"group": grouping_of(request), "sort": sorting_of(request)}
-    missing = {name: value for name, value in defaults.items() if name not in request.query_params}
-    return query.model_copy(update=missing)
+    unchosen = {
+        name: value
+        for name, value in defaults.items()
+        if request.query_params.get(name) != getattr(query, name)
+    }
+    return query.model_copy(update=unchosen)
 
 
 async def _dialog(

@@ -25,14 +25,14 @@
 
 See every device on your network, what it is, and when it comes and goes. Devices are found by listening to the network and by regular sweeps. Each one gets a name and a category automatically.
 
-![Opening a device, naming it, picking its drawing, then grouping and sorting the devices](docs/images/demo.gif)
+![Filtering, grouping and sorting the devices, then renaming a device and picking its drawing](docs/images/demo.gif)
 
 ## Features
 
 - **Passive first.** New devices are noticed within seconds from their own DHCP and ARP traffic. Active ARP sweeps ask only devices that have gone quiet every 5 minutes, and the whole subnet every 30, so quiet phones and IoT devices are not woken up constantly.
 - **Live.** Cards update by themselves when devices come online, go offline or appear for the first time.
 - **Twelve categories**, worked out from hostnames, mDNS services, DHCP vendor classes and the manufacturer: network, server, computer, phone, tablet, wearable, media, gaming, smart home, camera, printer and unknown.
-- **Device catalogue.** Status, IP, vendor and a 24-hour activity strip for every device. Search, filter by status, category or new devices, group into rows by category, status or vendor, and sort.
+- **Device catalogue.** Status, IP, vendor and a 24-hour activity strip for every device. Search, filter by status, category or new devices, group into rows by category or vendor, and sort by last seen, name, IP address or first seen, either way round.
 - **Device panel.** Click a card and it grows into a panel. *Overview* shows the device's details, which plugins found it and what each learned, and a 14-day hourly presence heatmap. *Manage* holds your own name and category, saved as you change them, and lets you forget a device you no longer own.
 - **Drawing picker.** The pencil on a device's drawing turns the panel over to show every drawing, with those of its category recommended first and a search to find any other.
 - **Plugins.** ARP sweep, ARP listener, DHCP sniffer, offline MAC vendor lookup, Technitium DHCP leases, and a demo network. Switch them on and off and edit their settings under **Settings → Sources**, without restarting. Third-party plugins install as ordinary Python packages.
@@ -82,10 +82,11 @@ Open <http://127.0.0.1:8000>. To monitor your real network, turn the demo off an
 
 ## Roadmap
 
+- Add support for multiple languages.
+- Security audit.  
 - Merge duplicate devices caused by randomized MACs (same hostname or DHCP fingerprint).
 - New-device alerts (channel not decided; Telegram is a candidate).
 - More discovery plugins: mDNS/Bonjour, SSDP/UPnP, ping sweep, opt-in nmap port scan.
-- Security audit.
 
 ## Development
 

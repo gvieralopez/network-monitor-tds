@@ -319,5 +319,21 @@
       <circle cx="163" cy="44" r="4" fill="#262a31"/>
       <g fill="#262a31"><circle cx="157" cy="62" r="2.6"/><circle cx="169" cy="62" r="2.6"/><circle cx="157" cy="72" r="2.6"/><circle cx="169" cy="72" r="2.6"/><circle cx="163" cy="84" r="2.6"/></g>
     </symbol>
+
+    <symbol id="dv-car" viewBox="0 0 200 140">
+      <path d="M22 102c-3 0-5-2-5-6V79c0-4 2-6 6-7l21-20c2-2 4-3 7-3h58c3 0 5 1 7 3l20 19 36 5c7 1 11 5 11 11v10c0 3-2 5-5 5h-12a18 18 0 0 0-36 0H70a18 18 0 0 0-36 0z" fill="url(#dv-blue)"/>
+      <path d="M51 49h58c3 0 5 1 7 3l4 4H40l4-4c2-2 4-3 7-3z" fill="#fff" opacity=".12"/>
+      <path d="M31 71l17-15h36v15zM90 56h19l17 15H90z" fill="url(#dv-glass)"/>
+      <path d="M48 56h36v4L41 66z" fill="#fff" opacity=".06"/>
+      <path d="M87 74v24M123 74v24" stroke="#000" stroke-opacity=".12" stroke-width="1.4" stroke-linecap="round"/>
+      <path d="M124 71l7-4 2 6h-9z" fill="#262a31"/>
+      <path d="M167 80l10 1.5c2 .3 3.5 1.8 3.5 4h-10.5c-2 0-3-1-3-2.5z" fill="#eef0f3"/>
+      <rect x="17" y="78" width="5" height="9" rx="1.5" fill="url(#dv-coral)"/>
+      <rect x="70" y="97" width="60" height="5" fill="#2a2e35"/>
+      <g fill="#262a31"><circle cx="52" cy="97" r="15"/><circle cx="148" cy="97" r="15"/></g>
+      <g fill="url(#dv-alu)"><circle cx="52" cy="97" r="9"/><circle cx="148" cy="97" r="9"/></g>
+      <g fill="#3b414b"><circle cx="52" cy="97" r="3"/><circle cx="148" cy="97" r="3"/></g>
+      <circle cx="33" cy="80" r="2" fill="#3ccf8e"/>
+    </symbol>
   </defs>
 </svg>

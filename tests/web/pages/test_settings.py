@@ -54,9 +54,9 @@ async def test_general_settings_page(client: AsyncClient) -> None:
 @pytest.mark.parametrize(
     ("cookies", "group", "sort"),
     [
-        ({}, "category", "smart"),
+        ({}, "none", "seen"),
         ({GROUPING_COOKIE: "vendor", SORTING_COOKIE: "seen"}, "vendor", "seen"),
-        ({GROUPING_COOKIE: "sideways", SORTING_COOKIE: "random"}, "category", "smart"),
+        ({GROUPING_COOKIE: "status", SORTING_COOKIE: "smart"}, "none", "seen"),
     ],
 )
 async def test_appearance_settings_page(

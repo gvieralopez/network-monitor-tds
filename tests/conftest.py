@@ -1,6 +1,7 @@
 import asyncio
 import logging
 from collections.abc import AsyncIterator, Callable, Iterator
+from contextlib import suppress
 from dataclasses import dataclass, replace
 from datetime import UTC, datetime, timedelta
 from ipaddress import IPv4Address
@@ -131,6 +132,14 @@ async def wait_until(condition: Callable[[], bool]) -> None:
     async with asyncio.timeout(5):
         while not condition():
             await asyncio.sleep(0.005)
+
+
+# A cancelled task can still be inside a database call; waiting for it lets that call finish
+# before the database fixture disposes of the engine underneath it.
+async def stop(task: asyncio.Task[None]) -> None:
+    task.cancel()
+    with suppress(asyncio.CancelledError):
+        await task
 
 
 @pytest.fixture

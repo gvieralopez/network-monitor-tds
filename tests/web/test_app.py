@@ -32,8 +32,8 @@ async def test_devices_page_renders_catalogue(client: AsyncClient) -> None:
 
     assert response.status_code == 200
     assert "Network Monitor" in response.text
-    assert "New on your network" in response.text
-    assert posters_in(response.text) == 2
+    assert "New on your network" not in response.text
+    assert posters_in(response.text) == 1
     assert "esp-31f5e" in response.text
     assert 'id="dv-chip"' in response.text
     assert 'href="#dv-chip"' in response.text
@@ -44,12 +44,12 @@ async def test_devices_page_renders_catalogue(client: AsyncClient) -> None:
 @pytest.mark.parametrize(
     ("params", "posters"),
     [
-        ({"q": "esp"}, 2),
+        ({"q": "esp"}, 1),
         ({"q": "nothing"}, 0),
         ({"status": "offline"}, 0),
-        ({"group": "none"}, 1),
-        ({"group": "status", "sort": "ip"}, 1),
-        ({"category": ["iot"], "new": "true", "group": "vendor"}, 2),
+        ({"group": "category"}, 1),
+        ({"group": "vendor", "sort": "ip", "order": "desc"}, 1),
+        ({"category": ["iot"], "new": "true", "group": "vendor"}, 1),
     ],
 )
 async def test_devices_page_filters(
@@ -63,21 +63,22 @@ async def test_devices_page_filters(
 
 @pytest.mark.usefixtures("seen_device")
 @pytest.mark.parametrize(
-    ("cookies", "params", "group", "sort"),
+    ("cookies", "params", "group", "sort", "order"),
     [
-        ({}, {}, "category", "smart"),
-        ({GROUPING_COOKIE: "vendor", SORTING_COOKIE: "seen"}, {}, "vendor", "seen"),
-        (
-            {GROUPING_COOKIE: "vendor", SORTING_COOKIE: "seen"},
-            {"group": "status"},
-            "status",
-            "seen",
-        ),
-        ({GROUPING_COOKIE: "sideways"}, {}, "category", "smart"),
+        ({}, {}, "none", "seen", "desc"),
+        ({GROUPING_COOKIE: "vendor", SORTING_COOKIE: "name"}, {}, "vendor", "name", "asc"),
+        ({GROUPING_COOKIE: "vendor", SORTING_COOKIE: "name"}, {"group": "category", "order": "desc"}, "category", "name", "desc"),
+        ({GROUPING_COOKIE: "vendor", SORTING_COOKIE: "name"}, {"group": "status", "sort": "smart"}, "vendor", "name", "asc"),
+        ({GROUPING_COOKIE: "sideways", SORTING_COOKIE: "smart"}, {}, "none", "seen", "desc"),
     ],
-)
+)  # fmt: skip
 async def test_devices_page_opens_with_the_browser_defaults(
-    client: AsyncClient, cookies: dict[str, str], params: dict[str, str], group: str, sort: str
+    client: AsyncClient,
+    cookies: dict[str, str],
+    params: dict[str, str],
+    group: str,
+    sort: str,
+    order: str,
 ) -> None:
     for name, value in cookies.items():
         client.cookies.set(name, value)
@@ -85,7 +86,32 @@ async def test_devices_page_opens_with_the_browser_defaults(
     response = await client.get("/", params=params)
 
     assert f'<option value="{group}" selected>' in response.text
-    assert f'<option value="{sort}" selected>' in response.text
+    assert re.search(rf'<option value="{sort}"[^>]* selected>', response.text)
+    assert f'name="order" value="{order}"' in response.text
+    assert f'data-sort-order data-order="{order}"' in response.text
+
+
+@pytest.mark.usefixtures("seen_device")
+@pytest.mark.parametrize(
+    ("params", "chips", "count"),
+    [
+        ({}, [], '<span class="count" id="filter-count" hidden>0</span>'),
+        ({"q": "esp"}, [], '<span class="count" id="filter-count" hidden>0</span>'),
+        (
+            {"status": "online", "category": ["iot"]},
+            ['data-unset="status" data-value="online"', 'data-unset="category" data-value="iot"'],
+            '<span class="count" id="filter-count">2</span>',
+        ),
+    ],
+)
+async def test_devices_page_shows_applied_filters(
+    client: AsyncClient, params: dict[str, str | list[str]], chips: list[str], count: str
+) -> None:
+    response = await client.get("/", params=params)
+
+    assert count in response.text
+    assert response.text.count("data-unset=") == len(chips)
+    assert all(chip in response.text for chip in chips)
 
 
 async def test_devices_page_rejects_invalid_filters(client: AsyncClient) -> None:
