@@ -131,6 +131,40 @@
     return tile.dataset.terms.includes(query) ? 1 : -1;
   }
 
+  // Each sort starts in its natural direction; the order button reverses it.
+  function setSortOrder(order) {
+    const label = document.getElementById("sort").selectedOptions[0].dataset[order];
+    const button = document.querySelector("[data-sort-order]");
+    document.getElementById("order").value = order;
+    button.dataset.order = order;
+    button.title = label;
+    button.setAttribute("aria-label", `Order: ${label}`);
+    button.querySelector(".label").textContent = label;
+  }
+
+  function togglePanel(button) {
+    const open = button.getAttribute("aria-expanded") !== "true";
+    closePanels();
+    button.setAttribute("aria-expanded", String(open));
+    document.getElementById(button.getAttribute("aria-controls")).hidden = !open;
+  }
+
+  function closePanels() {
+    document.querySelectorAll("[data-panel]").forEach((button) => {
+      button.setAttribute("aria-expanded", "false");
+      document.getElementById(button.getAttribute("aria-controls")).hidden = true;
+    });
+  }
+
+  function removeFilter(chip) {
+    const { unset, value } = chip.dataset;
+    const input = document.querySelector(
+      unset === "status" ? '#filters input[name="status"][value="all"]' : `#filters input[name="${unset}"][value="${value}"]`,
+    );
+    input.checked = unset === "status";
+    input.dispatchEvent(new Event("change", { bubbles: true }));
+  }
+
   function setLive(state, label) {
     const live = document.getElementById("live");
     live.classList.remove("connected", "lost");
@@ -162,6 +196,16 @@
     if (event.target.closest("[data-unflip]")) flipDialog(event.target.closest(".dialog"), false);
     const tab = event.target.closest('[role="tab"]');
     if (tab) selectTab(tab);
+    const panelButton = event.target.closest("[data-panel]");
+    if (panelButton) togglePanel(panelButton);
+    else if (!event.target.closest(".panel")) closePanels();
+    const filterChip = event.target.closest("[data-unset]");
+    if (filterChip) removeFilter(filterChip);
+    if (event.target.closest("[data-sort-order]")) {
+      const order = document.getElementById("order");
+      setSortOrder(order.value === "asc" ? "desc" : "asc");
+      order.dispatchEvent(new Event("change", { bubbles: true }));
+    }
     const arrow = event.target.closest("[data-scroll]");
     if (arrow) {
       const shelf = arrow.closest(".shelf-sec").querySelector(".shelf");
@@ -200,10 +244,16 @@
     toast(`${picker.getAttribute("aria-label")}: ${choice.textContent.trim()}`);
   });
 
+  // Captured so the order is reset before htmx sends the form on the same change.
+  document.addEventListener("change", (event) => {
+    if (event.target.id === "sort") setSortOrder(event.target.selectedOptions[0].dataset.order);
+  }, true);
+
   document.addEventListener("keydown", (event) => {
     const flipped = document.querySelector("#dialog .dialog.flipped");
     if (event.key === "Escape" && flipped) flipDialog(flipped, false);
     else if (event.key === "Escape" && document.querySelector("#dialog .dialog")) closeDialog();
+    else if (event.key === "Escape") closePanels();
     if (event.key === "Enter" && event.target.matches("[data-drawing-search]")) event.preventDefault();
     const tab = event.target.closest?.('[role="tab"]');
     const step = { ArrowRight: 1, ArrowLeft: -1 }[event.key];

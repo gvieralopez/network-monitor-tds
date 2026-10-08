@@ -1,13 +1,13 @@
 {% from "macros.html" import poster %}
 <div id="board">
   {% if not board.shelves %}
-  <div class="posters"><div class="empty">No devices match these filters.<br><a class="btn" href="/?group={{ query.group }}&amp;sort={{ query.sort }}">Clear filters</a></div></div>
+  <div class="posters"><div class="empty">No devices match these filters.<br><a class="btn" href="/?group={{ query.group }}&amp;sort={{ query.sort }}&amp;order={{ query.direction }}">Clear filters</a></div></div>
   {% elif query.group == "none" %}
   <div class="posters">{% for summary in board.shelves[0].devices %}{{ poster(cards[summary.device.mac | string], loop.index0) }}{% endfor %}</div>
   {% else %}
   {% set ns = namespace(index=0) %}
   {% for shelf in board.shelves %}
-  <section class="shelf-sec{{ ' spot' if shelf.spotlight }}">
+  <section class="shelf-sec">
     <div class="ghead">
       {% if shelf.category %}<span class="swatch" style="--cat:var(--cat-{{ category_colors[shelf.category] }})"></span>{% endif %}
       <h2>{{ shelf.title }}</h2>

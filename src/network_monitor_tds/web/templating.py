@@ -30,7 +30,7 @@ def grouping_of(request: Request) -> Grouping:
 
 
 def sorting_of(request: Request) -> Sorting:
-    return Sorting(_chosen(request, SORTING_COOKIE, SORTINGS, Sorting.SMART))
+    return Sorting(_chosen(request, SORTING_COOKIE, SORTINGS, Sorting.SEEN))
 
 
 templates = Jinja2Templates(directory=TEMPLATES_DIR)

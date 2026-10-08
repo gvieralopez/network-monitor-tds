@@ -7,42 +7,69 @@
 
 <form class="toolbar" id="filters" action="/" method="get"
       hx-get="/" hx-target="#board" hx-select="#board" hx-swap="outerHTML"
-      hx-select-oob="#chips,#hero" hx-replace-url="true"
+      hx-select-oob="#chips,#hero,#filter-count,#applied,#view-label" hx-replace-url="true"
       hx-trigger="change, input changed delay:250ms from:#q, devices-changed from:body, sse:device throttle:2s">
   <div class="wrap">
-    <div class="row1">
+    {% set clear_url = "/?group=" ~ query.group ~ "&sort=" ~ query.sort ~ "&order=" ~ query.direction %}
+    <div class="bar">
       <label class="search" for="q">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
         <input id="q" name="q" type="search" value="{{ query.q }}" placeholder="Search name, IP, MAC or vendor" autocomplete="off">
       </label>
-      <div class="seg" role="radiogroup" aria-label="Status">
-        {% for value, label in [("all", "All"), ("online", "Online"), ("offline", "Offline")] %}
-        <label><input type="radio" name="status" value="{{ value }}" {% if query.status == value %}checked{% endif %}>{{ label }}</label>
-        {% endfor %}
+      <button type="button" class="tbtn" data-panel aria-controls="filter-panel" aria-expanded="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16l-6 8v5l-4 2v-7z"/></svg>
+        <span class="label">Filters</span>
+        <span class="count" id="filter-count"{% if not query.applied %} hidden{% endif %}>{{ query.applied | length }}</span>
+      </button>
+      <button type="button" class="tbtn" data-panel aria-controls="view-panel" aria-expanded="false" aria-label="Group and sort">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>
+        <span id="view-label"><span class="label">{{ sort_labels[query.sort] }}</span> <span class="arrow">{{ "↓" if query.direction == "desc" else "↑" }}</span></span>
+      </button>
+      <div class="panel" id="filter-panel" hidden>
+        <h3>Status</h3>
+        <div class="seg" role="radiogroup" aria-label="Status">
+          {% for value, label in [("all", "All"), ("online", "Online"), ("offline", "Offline")] %}
+          <label><input type="radio" name="status" value="{{ value }}" {% if query.status == value %}checked{% endif %}>{{ label }}</label>
+          {% endfor %}
+        </div>
+        <h3>Show only</h3>
+        <div class="chips" id="chips">
+          {% if new_count or query.new %}
+          <label class="chip newchip"><input type="checkbox" name="new" value="true" {% if query.new %}checked{% endif %}>New <span class="n">{{ new_count }}</span></label>
+          {% endif %}
+          {% for category, count in category_counts.items() %}
+          <label class="chip"><input type="checkbox" name="category" value="{{ category }}" {% if category in query.category %}checked{% endif %}>{{ category_labels[category] }} <span class="n">{{ count }}</span></label>
+          {% endfor %}
+        </div>
       </div>
-      <label class="sort" for="group">Group
+      <div class="panel view-panel" id="view-panel" hidden>
+        <label for="group">Group by</label>
         <select id="group" name="group">
           {% for value, label in groupings %}
           <option value="{{ value }}" {% if query.group == value %}selected{% endif %}>{{ label }}</option>
           {% endfor %}
         </select>
-      </label>
-      <label class="sort" for="sort">Sort
-        <select id="sort" name="sort">
-          {% for value, label in sortings %}
-          <option value="{{ value }}" {% if query.sort == value %}selected{% endif %}>{{ label }}</option>
-          {% endfor %}
-        </select>
-      </label>
+        <label for="sort">Sort by</label>
+        <div class="sortbox">
+          <select id="sort" name="sort">
+            {% for value, label in sortings %}
+            <option value="{{ value }}" data-order="{{ natural_orders[value] }}" data-asc="{{ order_labels[value]['asc'] }}" data-desc="{{ order_labels[value]['desc'] }}" {% if query.sort == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+          <input type="hidden" id="order" name="order" value="{{ query.direction }}">
+          {% set order_label = order_labels[query.sort][query.direction] %}
+          <button type="button" class="sortdir" data-sort-order data-order="{{ query.direction }}" title="{{ order_label }}" aria-label="Order: {{ order_label }}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"/></svg>
+            <span class="label">{{ order_label }}</span>
+          </button>
+        </div>
+      </div>
     </div>
-    <div class="chips" id="chips">
-      {% if new_count or query.new %}
-      <label class="chip newchip"><input type="checkbox" name="new" value="true" {% if query.new %}checked{% endif %}>New <span class="n">{{ new_count }}</span></label>
-      {% endif %}
-      {% for category, count in category_counts.items() %}
-      <label class="chip"><input type="checkbox" name="category" value="{{ category }}" {% if category in query.category %}checked{% endif %}>{{ category_labels[category] }} <span class="n">{{ count }}</span></label>
+    <div class="applied" id="applied"{% if not query.applied %} hidden{% endif %}>
+      {% for applied in query.applied %}
+      <button type="button" class="chip" data-unset="{{ applied.field }}" data-value="{{ applied.value }}" aria-label="Remove filter: {{ applied.label }}">{{ applied.label }} <span aria-hidden="true">✕</span></button>
       {% endfor %}
-      {% if query.is_filtered %}<a class="chip clear" href="/?group={{ query.group }}&amp;sort={{ query.sort }}">Clear filters</a>{% endif %}
+      <a class="chip clear" href="{{ clear_url }}">Clear all</a>
     </div>
   </div>
 </form>
