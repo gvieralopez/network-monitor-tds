@@ -12,6 +12,14 @@
 
   function closeDialog() {
     const root = document.getElementById("dialog");
+    const flipped = root.querySelector(".dialog.flipped");
+    if (flipped) {
+      flipDialog(flipped, false);
+      if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        afterFlip(flipped, closeDialog);
+        return;
+      }
+    }
     const mac = root.querySelector(".dialog")?.dataset.mac;
     const close = () => {
       root.innerHTML = "";
@@ -35,6 +43,31 @@
     poster?.classList.add("is-hero");
   }
 
+  function flipDialog(dialog, flipped) {
+    dialog.classList.toggle("flipped", flipped);
+    dialog.querySelector(".face.front").inert = flipped;
+    dialog.querySelector(".face.back").inert = !flipped;
+    dialog.querySelector(flipped ? "[data-drawing-search]" : "[data-flip]").focus({ preventScroll: true });
+  }
+
+  function afterFlip(dialog, callback) {
+    const flipper = dialog.querySelector(".flipper");
+    flipper.addEventListener("transitionend", function done(event) {
+      if (event.target !== flipper) return;
+      flipper.removeEventListener("transitionend", done);
+      callback();
+    });
+  }
+
+  function previewDrawing(dialog, tile) {
+    const source = tile.querySelector("svg");
+    const thumb = dialog.querySelector(".d-art .thumb");
+    const footprint = source.querySelector(".ground").getAttribute("rx");
+    thumb.querySelector("use").setAttribute("href", source.querySelector("use").getAttribute("href"));
+    thumb.querySelector(".ground").setAttribute("rx", footprint);
+    dialog.querySelector("[data-flip]").style.setProperty("--fp", footprint);
+  }
+
   function selectTab(tab) {
     tab.closest('[role="tablist"]').querySelectorAll('[role="tab"]').forEach((other) => {
       const selected = other === tab;
@@ -49,16 +82,17 @@
   // selectable, and a search ranks them all by how well their label matches.
   function arrangeDrawings(picker) {
     const query = picker.querySelector("[data-drawing-search]").value.trim().toLowerCase();
-    const option = picker.closest("form").querySelector('select[name="category"]').selectedOptions[0];
-    const automatic = picker.querySelector("[data-auto]");
-    const preview = picker.querySelector(`.tile[data-name="${option.dataset.drawing}"] svg`);
-    automatic.querySelector("svg").replaceWith(preview.cloneNode(true));
+    const dialog = picker.closest(".dialog");
+    const option = dialog.querySelector('select[name="category"]').selectedOptions[0];
+    if (!picker.querySelector('input[name="icon"]:checked')) {
+      previewDrawing(dialog, picker.querySelector(`.tile[data-name="${option.dataset.drawing}"]`));
+    }
     const ranked = [...picker.querySelectorAll(".tile")]
       .map((tile) => ({ tile, score: drawingScore(tile, query) }))
       .sort((a, b) => b.score - a.score || a.tile.dataset.order - b.tile.dataset.order);
     for (const { tile, score } of ranked) {
       tile.hidden = score < 0;
-      const recommended = tile === automatic || tile.dataset.category === option.dataset.category;
+      const recommended = tile.dataset.category === option.dataset.category;
       picker.querySelector(recommended ? "[data-recommended]" : "[data-others]").append(tile);
     }
     picker.querySelectorAll(".dgroup").forEach((group) => {
@@ -102,6 +136,8 @@
 
   document.addEventListener("click", (event) => {
     if (event.target.closest("[data-close]")) closeDialog();
+    if (event.target.closest("[data-flip]")) flipDialog(event.target.closest(".dialog"), true);
+    if (event.target.closest("[data-unflip]")) flipDialog(event.target.closest(".dialog"), false);
     const tab = event.target.closest('[role="tab"]');
     if (tab) selectTab(tab);
     const arrow = event.target.closest("[data-scroll]");
@@ -117,7 +153,10 @@
 
   document.addEventListener("change", (event) => {
     if (event.target.matches('.dialog select[name="category"]')) {
-      arrangeDrawings(event.target.form.querySelector("[data-drawings]"));
+      arrangeDrawings(event.target.closest(".dialog").querySelector("[data-drawings]"));
+    }
+    if (event.target.matches('.dialog input[name="icon"]')) {
+      previewDrawing(event.target.closest(".dialog"), event.target.closest(".tile"));
     }
     const picker = event.target.closest?.("[data-cookie]");
     if (!picker) return;
@@ -131,7 +170,9 @@
   });
 
   document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape" && document.querySelector("#dialog .dialog")) closeDialog();
+    const flipped = document.querySelector("#dialog .dialog.flipped");
+    if (event.key === "Escape" && flipped) flipDialog(flipped, false);
+    else if (event.key === "Escape" && document.querySelector("#dialog .dialog")) closeDialog();
     if (event.key === "Enter" && event.target.matches("[data-drawing-search]")) event.preventDefault();
     const tab = event.target.closest?.('[role="tab"]');
     const step = { ArrowRight: 1, ArrowLeft: -1 }[event.key];

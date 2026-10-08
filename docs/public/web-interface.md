@@ -39,7 +39,7 @@ Click a card to open its panel. It has two tabs.
 
 Press **Mark as known** to remove the NEW tag without changing anything else.
 
-**Manage** holds your own name, category and drawing for the device. The category decides which group the card is shown in and its colour. The drawings of the chosen category are shown first as recommendations, but you can pick any drawing; search by name to find one, for example "console" for the several shapes and colours of consoles. Leave a field on automatic to keep using what was detected. Saving also marks the device as known.
+**Manage** holds your own name and category for the device. The category decides which group the card is shown in and its colour. To change the drawing, press the pencil next to the drawing on the banner: the panel turns over to show every drawing, with those of the chosen category recommended first. You can pick any drawing; search by name to find one, for example "console" for the several shapes and colours of consoles. Press **Done** to turn back and **Save** to keep your changes. Until you pick one, the device uses the drawing of its category. Leave the name empty or the category on automatic to keep using what was detected, or press **Reset to detected** to go back to the detected name, category and drawing. Saving also marks the device as known.
 
 Press **Forget device** at the bottom of the Manage tab to delete a device you no longer own, together with its labels, details and history. This cannot be undone. If the device is still on the network, it shows up again as a new device the next time it is seen.
 

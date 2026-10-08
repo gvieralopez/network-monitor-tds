@@ -1,13 +1,16 @@
 {% from "macros.html" import artwork, drawing %}
 {% macro drawing_tile(item, index) -%}
-<label class="tile" data-name="{{ item.name }}" data-category="{{ item.category }}" data-label="{{ item.label | lower }}" data-terms="{{ item.terms }}" data-order="{{ index }}"><input type="radio" name="icon" value="{{ item.name }}" {% if item.name == dialog.labels_icon %}checked{% endif %}>{{ drawing(item.name) }}<span>{{ item.label }}</span></label>
+<label class="tile" data-name="{{ item.name }}" data-category="{{ item.category }}" data-label="{{ item.label | lower }}" data-terms="{{ item.terms }}" data-order="{{ index }}"><input type="radio" form="labels-form" name="icon" value="{{ item.name }}" {% if item.name == dialog.labels_icon %}checked{% endif %}>{{ drawing(item.name) }}<span>{{ item.label }}</span></label>
 {%- endmacro %}
 {% set card = dialog.card %}
 {% set recommended = dialog.labels_category or dialog.detected_category_value %}
 <div class="scrim" data-close></div>
 <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="dialog-name" data-mac="{{ card.mac }}" style="--cat:var(--cat-{{ card.color }})">
+<div class="flipper">
+<div class="face front">
   {% call artwork(card, " d-art" ~ ("" if card.online else " off")) %}
     <span class="d-ip">{{ card.ip }}</span>
+    <button type="button" class="d-edit" data-flip aria-label="Change drawing" style="--fp:{{ drawing_footprints[card.icon] }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16v4z"/><path d="m13.5 6.5 4 4"/></svg></button>
     <button type="button" class="icon-btn" data-close aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
   {% endcall %}
   <div class="d-head">
@@ -66,12 +69,12 @@
   </div>
 
   <div class="d-body manage" id="panel-manage" role="tabpanel" aria-labelledby="tab-manage" {% if tab != "manage" %}hidden{% endif %}>
-    <form class="edit" hx-post="/devices/{{ card.mac }}/labels" hx-target="#dialog">
-      <div class="edit-row">
+    <section class="section">
+      <h3>Your labels</h3>
+      <form class="edit" id="labels-form" hx-post="/devices/{{ card.mac }}/labels" hx-target="#dialog">
         <div class="field">
           <label for="label-name">Name</label>
           <input id="label-name" name="name" value="{{ dialog.labels_name }}" placeholder="{{ dialog.detected_name }}" maxlength="100">
-          <span class="hint">Leave empty to use the detected name.</span>
         </div>
         <div class="field">
           <label for="label-category">Category</label>
@@ -81,37 +84,13 @@
             <option value="{{ value }}" data-category="{{ value }}" data-drawing="{{ category_drawings[value] }}" {% if dialog.labels_category == value %}selected{% endif %}>{{ label }}</option>
             {% endfor %}
           </select>
-          <span class="hint">Decides the group and colour of its card.</span>
         </div>
-      </div>
-      <fieldset class="field">
-        <legend class="label">Drawing</legend>
-        <div class="drawings" data-drawings>
-          <label class="search">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-            <input type="search" placeholder="Search drawings" aria-label="Search drawings" autocomplete="off" data-drawing-search>
-          </label>
-          <div class="dgroup">
-            <span class="dgroup-name">Recommended</span>
-            <div class="tiles" data-recommended>
-              <label class="tile" data-auto data-label="automatic" data-terms="automatic default detected" data-order="-1"><input type="radio" name="icon" value="" {% if not dialog.labels_icon %}checked{% endif %}>{{ drawing(category_drawings[recommended]) }}<span>Automatic</span></label>
-              {% for item in drawing_choices %}{% if item.category == recommended %}{{ drawing_tile(item, loop.index0) }}{% endif %}{% endfor %}
-            </div>
-          </div>
-          <div class="dgroup">
-            <span class="dgroup-name">All drawings</span>
-            <div class="tiles" data-others>
-              {% for item in drawing_choices %}{% if item.category != recommended %}{{ drawing_tile(item, loop.index0) }}{% endif %}{% endfor %}
-            </div>
-          </div>
-          <p class="hint" data-no-match hidden>No drawings match.</p>
+        <div class="actions">
+          <button type="submit" class="btn primary">Save</button>
+          <button type="submit" class="btn ghost" hx-post="/devices/{{ card.mac }}/labels" hx-vals='{"name": "", "category": "", "icon": ""}'>Reset to detected</button>
         </div>
-      </fieldset>
-      <div class="actions sticky">
-        <button type="submit" class="btn primary">Save</button>
-        <button type="submit" class="btn ghost" hx-post="/devices/{{ card.mac }}/labels" hx-vals='{"name": "", "category": "", "icon": ""}'>Reset to detected</button>
-      </div>
-    </form>
+      </form>
+    </section>
 
     <section class="section forget">
       <h3>Forget device</h3>
@@ -122,4 +101,37 @@
       </div>
     </section>
   </div>
+</div>
+<div class="face back" data-drawings inert>
+  <div class="b-head">
+    <div class="b-title">
+      <button type="button" class="icon-btn" data-unflip aria-label="Back to {{ card.name }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5m6-6-6 6 6 6"/></svg></button>
+      <h2>Choose a drawing</h2>
+    </div>
+    <label class="search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input type="search" placeholder="Search drawings" aria-label="Search drawings" autocomplete="off" data-drawing-search>
+    </label>
+  </div>
+  <div class="b-body">
+    <div class="dgroup">
+      <span class="dgroup-name">Recommended</span>
+      <div class="tiles" data-recommended>
+        {% for item in drawing_choices %}{% if item.category == recommended %}{{ drawing_tile(item, loop.index0) }}{% endif %}{% endfor %}
+      </div>
+    </div>
+    <div class="dgroup">
+      <span class="dgroup-name">All drawings</span>
+      <div class="tiles" data-others>
+        {% for item in drawing_choices %}{% if item.category != recommended %}{{ drawing_tile(item, loop.index0) }}{% endif %}{% endfor %}
+      </div>
+    </div>
+    <p class="hint" data-no-match hidden>No drawings match.</p>
+  </div>
+  <div class="b-foot">
+    <span class="hint">Save on the Manage tab to keep your choice.</span>
+    <button type="button" class="btn primary" data-unflip>Done</button>
+  </div>
+</div>
+</div>
 </div>
