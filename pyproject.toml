@@ -3,9 +3,10 @@ name = "network_monitor_tds"
 version = "0.3.6-beta0"
 description = "A network monitor that doesn't sucks"
 readme = "README.md"
-requires-python = ">=3.14"
+requires-python = ">=3.15"
 authors = [
     { name = "Gustavo Viera López", email = "gvieralopez@gmail.com" },
+    { name = "Jorge Morgado Vega", email = "jorge.morgadov@gmail.com" },
 ]
 license = { text = "MIT" }
 
@@ -25,16 +26,20 @@ dependencies = [
     "uvicorn[standard]>=0.54.0",
 ]
 
+[project.urls]
+Repository = "https://github.com/gvieralopez/network-monitor-tds"
+Issues = "https://github.com/gvieralopez/network-monitor-tds/issues"
+
 [dependency-groups]
 dev = [
-    "mypy",
-    "pre-commit",
-    "pytest",
-    "pytest-cov",
-    "pytest-dotenv",
-    "ruff",
-    "ebump",
-    "pytest-timeout",
+    "mypy>=2.4",
+    "pre-commit>=4.7",
+    "pytest>=9.1",
+    "pytest-cov>=7.1",
+    "pytest-env>=1.8",
+    "ruff>=0.17",
+    "ebump>=0.2.2",
+    "pytest-timeout>=2.4",
 ]
 
 
@@ -59,7 +64,7 @@ demo = "network_monitor_tds.plugins.builtin.demo.plugin:DemoPlugin"
 [tool.ruff]
 line-length = 100
 indent-width = 4
-target-version = "py314"
+target-version = "py315"
 src = ["src", "tests", "scripts"]
 extend-exclude = [".cookie-pyrate"]
 
@@ -111,7 +116,7 @@ skip-magic-trailing-comma = true
 
 
 [tool.mypy]
-python_version = "3.14"
+python_version = "3.15"
 files = ["src", "scripts", "tests"]
 warn_unused_configs = true
 warn_redundant_casts = true
@@ -135,7 +140,6 @@ addopts = "-ra -q --cov=src --cov-report=term-missing --cov-fail-under=80"
 timeout = 10
 python_files = "tests.py test_*.py *_test.py"
 pythonpath = "./src"
-env_override_existing_values = 1
 env_files = [".env.test"]
 
 

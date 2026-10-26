@@ -107,13 +107,29 @@ policies. The remote is private by default; to make it public:
 make repo REPO_ARGS=--public
 ```
 
-`main` is protected: pull requests need one approval including the code owner, all
-conversations resolved, the branch up to date with `main`, linear history, and the `qa`
-check green. Force pushes and branch deletion are rejected.
+To create it under an organization instead of your own account:
+
+```bash
+make repo REPO_ARGS="--owner my-org"
+```
+
+The README's badges link to your own account; for an organization, replace your username with
+the organization in those links.
+
+`main` is protected: changes land through pull requests, merged with a merge commit, once all
+review conversations are resolved, the branch is up to date with `main`, and the `qa / Run QA`
+check is green. No approval is required, except a code owner's when the project has a
+`CODEOWNERS` file; new pushes dismiss earlier approvals. Force pushes and branch deletion are
+rejected. Repository admins and the release deploy key can bypass these rules; the key is how
+the release workflow pushes its version bumps.
 
 Branch rulesets are a paid GitHub feature on private repositories. On a free plan the
 command says so, leaves `main` unprotected and finishes the rest; make the repository
 public or upgrade the plan, then re-run `make repo` to apply the policies.
+
+It also turns on Dependabot alerts and security updates: when a version pinned in `uv.lock`
+has a published advisory, Dependabot opens a pull request that moves it to a fixed version.
+Routine version updates stay off, since every merge to `main` cuts a release.
 
 The local steps need only git; the remote ones need the
 [GitHub CLI](https://cli.github.com) authenticated with `gh auth login`. Without it the
@@ -189,6 +205,89 @@ Then, in `.github/workflows/release.yml`, add `id-token: write` to `permissions`
 
 Without `id-token: write` the whole workflow fails to start, so add it in the same edit.
 
+#### Publishing a Docker image
+
+In `.github/workflows/release.yml`, add `packages: write` to `permissions` and enable
+`publish-docker-image`:
+
+```yaml
+    permissions:
+      contents: write
+      packages: write
+    with:
+      cookie-pyrate-ref: ...
+      publish-docker-image: true
+```
+
+Each release then pushes `ghcr.io/<owner>/network-monitor-tds`, tagged with the version
+and `latest`. Without `packages: write` the push is refused and the image job fails.
+
+New packages on the GitHub Container Registry are private. Make the package public in its
+settings on GitHub, or run `docker login ghcr.io` with a token that has the `read:packages`
+scope before pulling. Images are built for `linux/amd64`; set `docker-platforms` (for example
+`linux/amd64,linux/arm64`) to build for more.
+
+#### Extra release files
+
+Files the reusable release doesn't build (executables, wheels compiled per OS, PDFs, archives)
+come from jobs you add to `.github/workflows/release.yml`, after the `release` job. It hands them
+the released `version`, `tag` and `sha`, so they build exactly the released commit and attach to
+exactly that release:
+
+```yaml
+  windows-exe:
+    needs: release
+    runs-on: windows-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.release.outputs.sha }}
+      # ...build the files into dist/...
+      - uses: softprops/action-gh-release@v3
+        with:
+          tag_name: ${{ needs.release.outputs.tag }}
+          files: dist/*.exe
+```
+
+The release is already published when these jobs start, so its extra files appear a few
+minutes later.
+
+### Extra CI steps
+
+The reusable workflows take three optional inputs for what lint, types and tests don't cover.
+Add them under `with:` in `.github/workflows/qa.yml` (`setup-command` and `secret-env` also in
+`release.yml`):
+
+- `setup-command`: bash run before the dependencies are installed, for files the install needs,
+  such as the wheels of a private dependency. In releases it also runs before the distribution
+  and the Docker image are built.
+- `extra-checks`: bash run after the tests; a failure fails QA. For example import contracts
+  (`uv run lint-imports`) or a strict docs build.
+- `secret-env`: names of repository secrets to export as environment variables for those steps.
+  The job calling the reusable workflow needs `secrets: inherit`: `release.yml` already passes
+  it (that's how the release key reaches the release), `qa.yml` needs it added.
+  Dependabot's pull requests only get Dependabot secrets, so a secret QA needs must also be added
+  as a Dependabot secret (`gh secret set NAME --app dependabot`), or its security fixes fail QA.
+  In an organization, set it once as an organization secret for both Actions and Dependabot.
+
+```yaml
+jobs:
+  qa:
+    uses: gvieralopez/cookie-pyrate/.github/workflows/reusable-qa.yml@v1.0.0
+    secrets: inherit
+    with:
+      cookie-pyrate-ref: v1.0.0
+      python-version: "3.15"
+      secret-env: WHEELS_TOKEN
+      setup-command: uv run --no-project --with requests scripts/download_wheels.py
+      extra-checks: |
+        uv run lint-imports
+```
+
+Commands run with `bash -eo pipefail`, on Windows runners too, and stop at the first failure.
+
 ### Cleaning Up
 
 ```bash
@@ -204,7 +303,9 @@ Removes build artifacts, caches, and temporary files.
 make dockerimage
 ```
 
-Generates a Docker image with the package pre-installed and ready to use. To try it on the local
+Generates a Docker image with the package pre-installed and ready to use. The Dockerfile uses
+BuildKit features, so Docker needs the buildx plugin; without it the build stops with
+"the --mount option requires BuildKit". To try it on the local
 network, with its data in a named volume:
 
 ```bash

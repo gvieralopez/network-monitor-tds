@@ -9,7 +9,7 @@
 [![QA](https://img.shields.io/github/actions/workflow/status/gvieralopez/network-monitor-tds/qa.yml?branch=main&label=QA)](https://github.com/gvieralopez/network-monitor-tds/actions/workflows/qa.yml)
 [![Release](https://img.shields.io/github/v/release/gvieralopez/network-monitor-tds?label=release)](https://github.com/gvieralopez/network-monitor-tds/releases/latest)
 [![Docker image](https://img.shields.io/badge/docker-ghcr.io-2496ED?logo=docker&logoColor=white)](https://github.com/gvieralopez/network-monitor-tds/pkgs/container/network-monitor-tds)
-[![Python 3.14](https://img.shields.io/badge/python-3.14-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![Python 3.15](https://img.shields.io/badge/python-3.15-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/github/license/gvieralopez/network-monitor-tds)](LICENSE)
 <br>
 [![uv](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json)](https://github.com/astral-sh/uv)
@@ -61,7 +61,7 @@ Run `docker compose up -d` and open `http://<host>:8000`. Pin a version tag inst
 
 ### From source
 
-You need Linux, Python 3.14 and [uv](https://docs.astral.sh/uv/).
+You need Linux, Python 3.15 and [uv](https://docs.astral.sh/uv/).
 
 ```bash
 uv sync
@@ -107,3 +107,7 @@ See [DEVELOPMENT.md](DEVELOPMENT.md) for the full workflow and [AGENTS.md](AGENT
 ## License
 
 [MIT](LICENSE) © 2026 Gustavo Viera López
+
+---
+
+<sub>🚀 Project starter provided by [Cookie Pyrate v1.0.0](https://github.com/gvieralopez/cookie-pyrate/tree/v1.0.0)</sub>

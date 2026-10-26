@@ -38,7 +38,7 @@ Style, conventions and tooling for this project.
 1. Function-based pytest with `@pytest.mark.parametrize`. No test classes.
 2. The test tree mirrors the package tree: a module at `validation/rules.py` is tested by `tests/validation/test_rules.py`.
 3. Shared fixtures, env dicts and fixture-path constants live in `tests/conftest.py`. Test data under `tests/data/` or `tests/fixtures/`.
-4. `.env.test` holds the suite's baseline environment; `pytest-dotenv` loads it before collection. Override a single variable in a single test with `monkeypatch.setenv` / `monkeypatch.delenv` — never assign to `os.environ` directly, so nothing leaks between tests.
+4. `.env.test` holds the suite's baseline environment; `pytest-env` loads it before collection. Override a single variable in a single test with `monkeypatch.setenv` / `monkeypatch.delenv` — never assign to `os.environ` directly, so nothing leaks between tests.
 5. Don't lower the `--cov-fail-under` threshold configured in `pyproject.toml`; add tests instead.
 
 ## Tooling
