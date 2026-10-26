@@ -110,4 +110,4 @@ See [DEVELOPMENT.md](DEVELOPMENT.md) for the full workflow and [AGENTS.md](AGENT
 
 ---
 
-<sub>🚀 Project starter provided by [Cookie Pyrate v1.0.0](https://github.com/gvieralopez/cookie-pyrate/tree/v1.0.0)</sub>
+<sub>🚀 Project starter provided by [Cookie Pyrate v1.0.1](https://github.com/gvieralopez/cookie-pyrate/tree/v1.0.1)</sub>
