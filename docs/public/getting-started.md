@@ -4,7 +4,7 @@ Network Monitor TDS watches your home network and shows every device it finds: w
 
 ## Requirements
 
-- Linux, with Python 3.14 and [uv](https://docs.astral.sh/uv/).
+- Linux, with Python 3.15 and [uv](https://docs.astral.sh/uv/).
 - libpcap (installed on most desktops; `apt install libpcap0.8` on Debian).
 - Root, or the `CAP_NET_RAW` and `CAP_NET_ADMIN` capabilities, for the plugins that capture packets. See [Packet capture permissions](capture-permissions.md).
 

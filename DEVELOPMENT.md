@@ -279,7 +279,7 @@ jobs:
     secrets: inherit
     with:
       cookie-pyrate-ref: v1.0.0
-      python-version: "3.14"
+      python-version: "3.15"
       secret-env: WHEELS_TOKEN
       setup-command: uv run --no-project --with requests scripts/download_wheels.py
       extra-checks: |

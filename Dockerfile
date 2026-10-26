@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1.7
-FROM python:3.14-slim-trixie AS builder
+FROM python:3.15-slim-trixie AS builder
 
 # Pin uv; use a digest as well when your deployment requires immutable inputs.
 COPY --from=ghcr.io/astral-sh/uv:0.13.5 /uv /uvx /bin/
@@ -20,14 +20,14 @@ COPY . /app
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --locked --no-dev --no-editable
 
-FROM python:3.14-slim-trixie
+FROM python:3.15-slim-trixie
 
 # scapy compiles BPF filters through libpcap. The file capabilities let the non-root user capture
 # packets, but the kernel then refuses to start Python unless the container is given both
 # capabilities: run it with `--cap-add NET_RAW --cap-add NET_ADMIN`.
 RUN apt-get update \
     && apt-get install -y --no-install-recommends libpcap0.8t64 libcap2-bin \
-    && setcap cap_net_raw,cap_net_admin+eip "$(readlink -f /usr/local/bin/python3.14)" \
+    && setcap cap_net_raw,cap_net_admin+eip "$(readlink -f /usr/local/bin/python3.15)" \
     && apt-get purge -y libcap2-bin \
     && rm -rf /var/lib/apt/lists/*
 

@@ -3,7 +3,7 @@ name = "network_monitor_tds"
 version = "0.3.6-beta0"
 description = "A network monitor that doesn't sucks"
 readme = "README.md"
-requires-python = ">=3.14"
+requires-python = ">=3.15"
 authors = [
     { name = "Gustavo Viera López", email = "gvieralopez@gmail.com" },
     { name = "Jorge Morgado Vega", email = "jorge.morgadov@gmail.com" },
@@ -64,7 +64,7 @@ demo = "network_monitor_tds.plugins.builtin.demo.plugin:DemoPlugin"
 [tool.ruff]
 line-length = 100
 indent-width = 4
-target-version = "py314"
+target-version = "py315"
 src = ["src", "tests", "scripts"]
 extend-exclude = [".cookie-pyrate"]
 
@@ -116,7 +116,7 @@ skip-magic-trailing-comma = true
 
 
 [tool.mypy]
-python_version = "3.14"
+python_version = "3.15"
 files = ["src", "scripts", "tests"]
 warn_unused_configs = true
 warn_redundant_casts = true
