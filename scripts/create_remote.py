@@ -25,16 +25,20 @@ INSTALL_URLS = {"gh": GH_DOWNLOAD_URL, "git": GIT_DOWNLOAD_URL, "ssh-keygen": GI
 def main() -> None:
     parser = argparse.ArgumentParser(description="Create and configure this project's remote.")
     parser.add_argument("--public", action="store_true", help="make the remote repository public")
+    parser.add_argument(
+        "--owner", default="", help="create the repository under this organization instead"
+    )
     args = parser.parse_args()
-    create_remote("public" if args.public else "private")
+    create_remote("public" if args.public else "private", repository_name(args.owner))
 
 
-def create_remote(visibility: str) -> None:
+def create_remote(visibility: str, repository: str) -> None:
     check_github_access()
-    create_remote_repository(visibility)
+    create_remote_repository(visibility, repository)
     push_branch()
     generate_and_upload_release_key()
     try_protect_default_branch()
+    try_enable_security_updates()
     print(f"\nRepository ready on branch '{DEFAULT_BRANCH}'.")
 
 
@@ -43,21 +47,25 @@ def check_github_access() -> None:
         raise SystemExit("error: the GitHub CLI is not authenticated; run `gh auth login`")
 
 
-def create_remote_repository(visibility: str) -> None:
+def repository_name(owner: str) -> str:
+    return f"{owner}/{REPO_NAME}" if owner else REPO_NAME
+
+
+def create_remote_repository(visibility: str, repository: str) -> None:
     if _succeeds("git", "remote", "get-url", "origin"):
         print("· remote 'origin' already configured")
         return
 
-    if _succeeds("gh", "repo", "view", REPO_NAME):
-        url = _existing_remote_url()
+    if _succeeds("gh", "repo", "view", repository):
+        url = _existing_remote_url(repository)
         _output("git", "remote", "add", "origin", url)
         print(f"· linked the existing remote {url}")
         return
 
     description = tomllib.loads(PYPROJECT_FILE.read_text())["project"]["description"]
-    creation = ["repo", "create", REPO_NAME, f"--{visibility}", "--description", description]
+    creation = ["repo", "create", repository, f"--{visibility}", "--description", description]
     _output("gh", *creation, "--source", ".", "--remote", "origin")
-    print(f"· created the {visibility} repository {REPO_NAME}")
+    print(f"· created the {visibility} repository {repository}")
 
 
 def push_branch() -> None:
@@ -106,6 +114,22 @@ def try_protect_default_branch() -> None:
         _warn_unprotected(result)
         return
     print(f"· protected '{DEFAULT_BRANCH}'")
+
+
+def try_enable_security_updates() -> None:
+    repository = _get_repository_id()
+    # Security updates need the alerts first; both are idempotent.
+    for feature in ("vulnerability-alerts", "automated-security-fixes"):
+        result = _run("gh", "api", "--method", "PUT", f"repos/{repository}/{feature}")
+        if result.returncode != 0:
+            print(
+                "warning: left Dependabot security updates off. "
+                f"GitHub said: {_details(result)}\n"
+                "The repository is otherwise ready: resolve that and re-run `make repo`.",
+                file=sys.stderr,
+            )
+            return
+    print("· turned on Dependabot alerts and security updates")
 
 
 def _warn_unprotected(result: subprocess.CompletedProcess[str]) -> None:
@@ -169,10 +193,10 @@ def _get_repository_id() -> str:
     return _output("gh", "repo", "view", "--json", "nameWithOwner", "--jq", ".nameWithOwner")
 
 
-def _existing_remote_url() -> str:
+def _existing_remote_url(repository: str) -> str:
     if _output("gh", "config", "get", "git_protocol") == "ssh":
-        return _output("gh", "repo", "view", REPO_NAME, "--json", "sshUrl", "--jq", ".sshUrl")
-    return _output("gh", "repo", "view", REPO_NAME, "--json", "url", "--jq", ".url") + ".git"
+        return _output("gh", "repo", "view", repository, "--json", "sshUrl", "--jq", ".sshUrl")
+    return _output("gh", "repo", "view", repository, "--json", "url", "--jq", ".url") + ".git"
 
 
 def _executable(program: str) -> str:

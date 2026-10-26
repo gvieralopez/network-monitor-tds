@@ -1,7 +1,6 @@
 # Makefile for QA checks (lint, format, type-check, tests) and tasks (build, clean, run)
 
-.PHONY: qa lint format typecheck test clean run build version repo worktree  dockerimage
-.ONESHELL: version
+.PHONY: qa lint format typecheck test clean run build repo worktree  dockerimage
 
 # Default target
 qa: lint format typecheck test
