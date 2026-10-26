@@ -107,3 +107,7 @@ See [DEVELOPMENT.md](DEVELOPMENT.md) for the full workflow and [AGENTS.md](AGENT
 ## License
 
 [MIT](LICENSE) © 2026 Gustavo Viera López
+
+---
+
+<sub>🚀 Project starter provided by [Cookie Pyrate v1.0.0](https://github.com/gvieralopez/cookie-pyrate/tree/v1.0.0)</sub>
