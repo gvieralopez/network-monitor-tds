@@ -1,3 +1,5 @@
+import asyncio
+from dataclasses import replace
 from pathlib import Path
 
 import pytest
@@ -5,8 +7,13 @@ from alembic.script import ScriptDirectory
 from typer.testing import CliRunner
 
 from network_monitor_tds import __version__
+from network_monitor_tds.application.ingestion import ingest
+from network_monitor_tds.bootstrap import build_container
 from network_monitor_tds.cli.app import app
+from network_monitor_tds.domain.observations.models import Observation
 from network_monitor_tds.infrastructure.db.migrator import alembic_config
+from network_monitor_tds.settings import AppSettings
+from tests.conftest import DEMO_INFO
 
 runner = CliRunner()
 
@@ -51,10 +58,23 @@ def test_plugins_list_enable_and_disable() -> None:
     enabled = runner.invoke(app, ["plugins", "enable", "demo"])
     relisted = runner.invoke(app, ["plugins", "list"])
     disabled = runner.invoke(app, ["plugins", "disable", "demo"])
+    other = runner.invoke(app, ["plugins", "disable", "oui"])
 
     assert enabled.output.strip() == "demo is on"
     assert "on  demo" in relisted.output
     assert disabled.output.strip() == "demo is off"
+    assert other.output.strip() == "oui is off"
+
+
+@pytest.mark.usefixtures("data_dir")
+def test_disabling_the_demo_forgets_its_devices(observation: Observation) -> None:
+    runner.invoke(app, ["plugins", "enable", "demo"])
+    asyncio.run(_ingest(replace(observation, source=DEMO_INFO.plugin_id)))
+
+    disabled = runner.invoke(app, ["plugins", "disable", "demo"])
+
+    assert disabled.output.splitlines() == ["demo is off", "Forgot 1 simulated device"]
+    assert asyncio.run(_device_count()) == 0
 
 
 @pytest.mark.usefixtures("data_dir")
@@ -100,3 +120,17 @@ def test_no_arguments_shows_help() -> None:
     result = runner.invoke(app, [])
 
     assert "serve" in result.output
+
+
+async def _ingest(observation: Observation) -> None:
+    container = build_container(AppSettings())
+    await ingest(container.unit_of_work(), observation)
+    await container.engine.dispose()
+
+
+async def _device_count() -> int:
+    container = build_container(AppSettings())
+    async with container.unit_of_work() as uow:
+        devices = await uow.devices.list()
+    await container.engine.dispose()
+    return len(devices)

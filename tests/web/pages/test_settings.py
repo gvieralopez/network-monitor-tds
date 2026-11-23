@@ -7,6 +7,7 @@ from httpx import ASGITransport, AsyncClient
 from network_monitor_tds.application.models import PluginState, PluginStatus
 from network_monitor_tds.application.plugins import get_plugin_config, sync_plugin_configs
 from network_monitor_tds.application.preferences import load_presence_policy, load_retention_policy
+from network_monitor_tds.domain.network.models import MacAddress
 from network_monitor_tds.domain.plugins.models import PluginId
 from network_monitor_tds.domain.retention.models import DEFAULT_RETENTION, RetentionPolicy
 from network_monitor_tds.plugins.host.registry import plugin_defaults
@@ -95,6 +96,18 @@ async def test_toggle_plugin(client: AsyncClient, web_context: WebContext) -> No
     assert json.loads(disabled.headers["HX-Trigger"]) == {"toast": "Demo network is off"}
     assert control(web_context).reloaded == [DEMO, DEMO]
     assert not (await get_plugin_config(web_context.unit_of_work(), DEMO)).enabled
+
+
+async def test_turning_the_demo_off_forgets_its_devices(
+    client: AsyncClient, web_context: WebContext, seen_device: MacAddress
+) -> None:
+    await client.post("/settings/plugins/demo/enabled", data={"enabled": "true"})
+    disabled = await client.post("/settings/plugins/demo/enabled")
+
+    toast = "Demo network is off; forgot its 1 simulated device"
+    assert json.loads(disabled.headers["HX-Trigger"]) == {"toast": toast}
+    async with web_context.unit_of_work() as uow:
+        assert await uow.devices.get(seen_device) is None
 
 
 async def test_save_plugin_settings(client: AsyncClient, web_context: WebContext) -> None:

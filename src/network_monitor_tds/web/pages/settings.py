@@ -4,6 +4,7 @@ from typing import Annotated
 from fastapi import APIRouter, Form, HTTPException, Request, status
 from fastapi.responses import HTMLResponse
 
+from network_monitor_tds.application.devices import forget_devices_discovered_by
 from network_monitor_tds.application.errors import UnknownPluginError
 from network_monitor_tds.application.plugins import (
     get_plugin_config,
@@ -20,6 +21,7 @@ from network_monitor_tds.application.preferences import (
 from network_monitor_tds.domain.plugins.models import PluginConfig, PluginId
 from network_monitor_tds.domain.presence.policy import PresencePolicy
 from network_monitor_tds.plugins.host.registry import PluginClass
+from network_monitor_tds.plugins.sdk.models import PluginPurpose
 from network_monitor_tds.web.dependencies import ContextDep
 from network_monitor_tds.web.forms import DURATION_HINT, parse_duration, read_settings_form
 from network_monitor_tds.web.models import WebContext
@@ -91,7 +93,11 @@ async def toggle_plugin(
     )
     await context.control.reload(config.plugin_id)
     state = "on" if config.enabled else "off"
-    return _card(request, context, plugin, config, {}, f"{plugin.info.name} is {state}")
+    toast = f"{plugin.info.name} is {state}"
+    if not config.enabled and plugin.info.purpose is PluginPurpose.DEVELOPMENT:
+        forgotten = await forget_devices_discovered_by(context.unit_of_work(), config.plugin_id)
+        toast = _with_forgotten(toast, forgotten)
+    return _card(request, context, plugin, config, {}, toast)
 
 
 @router.post("/plugins/{plugin_id}", response_class=HTMLResponse)
@@ -163,6 +169,12 @@ def _plugin(context: WebContext, plugin_id: str) -> PluginClass:
     if plugin is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, str(UnknownPluginError(PluginId(plugin_id))))
     return plugin
+
+
+def _with_forgotten(toast: str, forgotten: int) -> str:
+    if not forgotten:
+        return toast
+    return f"{toast}; forgot its {forgotten} simulated device{'' if forgotten == 1 else 's'}"
 
 
 def _card(

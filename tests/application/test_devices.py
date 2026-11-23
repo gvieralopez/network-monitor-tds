@@ -9,6 +9,7 @@ from network_monitor_tds.application.devices import (
     describe_device,
     device_detail,
     forget_device,
+    forget_devices_discovered_by,
     list_devices,
     network_overview,
     relabel_device,
@@ -165,6 +166,22 @@ async def test_forgotten_device_comes_back_as_new(
     [summary] = await list_devices(database.unit_of_work(), NOW)
     assert summary.is_new
     assert summary.device.first_seen == NOW
+
+
+async def test_forget_devices_discovered_by_keeps_those_found_by_other_plugins(
+    database: Database, observation: Observation
+) -> None:
+    real = MacAddress.parse("70:85:c2:9e:04:11")
+    await ingest(database.unit_of_work(), replace(observation, source=ARP_SWEEP))
+    await ingest(database.unit_of_work(), replace(observation, mac=real))
+    await ingest(
+        database.unit_of_work(), replace(observation, mac=real, source=ARP_SWEEP, observed_at=NOW)
+    )
+
+    assert await forget_devices_discovered_by(database.unit_of_work(), ARP_SWEEP) == 1
+
+    [summary] = await list_devices(database.unit_of_work(), NOW)
+    assert summary.device.mac == real
 
 
 def test_retention_never_cuts_into_the_device_history() -> None:

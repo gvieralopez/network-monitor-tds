@@ -1,5 +1,6 @@
-from sqlalchemy import select
+from sqlalchemy import exists, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import aliased
 
 from network_monitor_tds.domain.network.models import MacAddress
 from network_monitor_tds.domain.observations.models import Detection
@@ -20,6 +21,18 @@ class SqlDetectionRepository:
         )
         detections = (detection_from_record(record) for record in records)
         return {detection.source: detection for detection in detections}
+
+    async def discovered_by(self, source: PluginId) -> list[MacAddress]:
+        earlier = aliased(DetectionRecord)
+        first_from_others = exists().where(
+            earlier.mac == DetectionRecord.mac, earlier.first_seen < DetectionRecord.first_seen
+        )
+        macs = await self._session.scalars(
+            select(DetectionRecord.mac)
+            .where(DetectionRecord.source == source, ~first_from_others)
+            .order_by(DetectionRecord.mac)
+        )
+        return list(macs)
 
     async def save(self, mac: MacAddress, detection: Detection) -> None:
         key = (mac, detection.source)
