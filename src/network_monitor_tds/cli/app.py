@@ -6,6 +6,7 @@ import typer
 from pydantic import ValidationError
 
 from network_monitor_tds import __version__
+from network_monitor_tds.application.devices import forget_devices_discovered_by
 from network_monitor_tds.application.errors import UnknownPluginError
 from network_monitor_tds.application.plugins import (
     get_plugin_config,
@@ -18,6 +19,7 @@ from network_monitor_tds.bootstrap import Container, build_container, serve
 from network_monitor_tds.domain.plugins.models import PluginConfig, PluginId
 from network_monitor_tds.infrastructure.db.migrator import current_revision, prepare_database
 from network_monitor_tds.plugins.host.registry import PluginClass, plugin_defaults
+from network_monitor_tds.plugins.sdk.models import PluginPurpose
 from network_monitor_tds.settings import AppSettings
 
 app = typer.Typer(
@@ -65,12 +67,15 @@ def plugins_list_command() -> None:
 
 @plugins_app.command("enable", help="Enable a plugin.")
 def plugins_enable_command(plugin_id: str) -> None:
-    _report(_update_plugin(PluginId(plugin_id), True))
+    _report(_enable_plugin(PluginId(plugin_id)))
 
 
 @plugins_app.command("disable", help="Disable a plugin.")
 def plugins_disable_command(plugin_id: str) -> None:
-    _report(_update_plugin(PluginId(plugin_id), False))
+    config, forgotten = _disable_plugin(PluginId(plugin_id))
+    _report(config)
+    if forgotten:
+        typer.echo(f"Forgot {forgotten} simulated device{'' if forgotten == 1 else 's'}")
 
 
 @plugins_app.command("show", help="Show a plugin's settings.")
@@ -154,12 +159,24 @@ def _parse_assignments(assignments: list[str]) -> dict[str, str]:
     return {key.strip(): value for key, _, value in pairs}
 
 
-def _update_plugin(plugin_id: PluginId, enabled: bool) -> PluginConfig:
+def _enable_plugin(plugin_id: PluginId) -> PluginConfig:
     async def update(container: Container) -> PluginConfig:
         now = container.clock.now()
-        return await set_plugin_enabled(container.unit_of_work(), plugin_id, enabled, now)
+        return await set_plugin_enabled(container.unit_of_work(), plugin_id, True, now)
 
     return _guarded(lambda: _with_prepared_database(update))
+
+
+def _disable_plugin(plugin_id: PluginId) -> tuple[PluginConfig, int]:
+    async def disable(container: Container) -> tuple[PluginConfig, int]:
+        now = container.clock.now()
+        config = await set_plugin_enabled(container.unit_of_work(), plugin_id, False, now)
+        plugin = container.plugins.get(config.plugin_id)
+        if plugin is None or plugin.info.purpose is not PluginPurpose.DEVELOPMENT:
+            return config, 0
+        return config, await forget_devices_discovered_by(container.unit_of_work(), plugin_id)
+
+    return _guarded(lambda: _with_prepared_database(disable))
 
 
 def _guarded[T](action: Callable[[], T]) -> T:

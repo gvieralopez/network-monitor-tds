@@ -54,4 +54,4 @@ Imports the hostnames from your Technitium DHCP server's leases, which are usual
 
 ## Demo network
 
-Simulates a home network for trying the interface without capture permissions. Turn it off before monitoring a real network, or its devices will mix with yours.
+Simulates a home network for trying the interface without capture permissions. Turn it off before monitoring a real network: turning it off forgets every device it discovered, along with their history, so none of them mix with yours. Devices another plugin found first are kept.

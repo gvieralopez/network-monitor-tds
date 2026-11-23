@@ -14,6 +14,7 @@ from network_monitor_tds.domain.devices.identity import resolve_category, resolv
 from network_monitor_tds.domain.devices.models import Device, DeviceLabels
 from network_monitor_tds.domain.network.models import MacAddress
 from network_monitor_tds.domain.observations.models import Fact, KnownField
+from network_monitor_tds.domain.plugins.models import PluginId
 from network_monitor_tds.domain.presence.models import Presence, PresenceInterval, PresenceState
 from network_monitor_tds.domain.presence.timeline import HOUR, hourly_presence, uptime_ratio
 
@@ -122,6 +123,15 @@ async def forget_device(uow: UnitOfWork, mac: MacAddress) -> str:
         await uow.devices.delete(mac)
         await uow.commit()
     return name
+
+
+async def forget_devices_discovered_by(uow: UnitOfWork, plugin_id: PluginId) -> int:
+    async with uow:
+        macs = await uow.detections.discovered_by(plugin_id)
+        for mac in macs:
+            await uow.devices.delete(mac)
+        await uow.commit()
+    return len(macs)
 
 
 def _hour_start(moment: datetime) -> datetime:
